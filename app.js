@@ -260,6 +260,19 @@
         🌐 萬家福品牌官網
       </a>
     `;
+
+    // Also render footer social links
+    const footerSocial = document.getElementById('footer-social-links');
+    if (footerSocial) {
+      footerSocial.innerHTML = `
+        <a href="${escapeHTML(links.mapUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="Google Maps">📍</a>
+        <a href="${escapeHTML(links.lineUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="LINE">💬</a>
+        <a href="${escapeHTML(links.fbUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="Facebook">📘</a>
+        <a href="${escapeHTML(links.igUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="Instagram">📷</a>
+        <a href="${escapeHTML(links.ytUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="YouTube">🎬</a>
+        <a href="${escapeHTML(links.siteUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="萬家福官網">🌐</a>
+      `;
+    }
   }
 
   window.openQuickLinksModal = function () {
@@ -555,24 +568,25 @@
     document.getElementById('view-list').classList.add('hidden');
     document.getElementById('view-admin').classList.add('hidden');
 
-    document.getElementById('nav-list').classList.remove('active');
-    document.getElementById('nav-admin').classList.remove('active');
-    document.getElementById('nav-list').setAttribute('aria-selected', 'false');
-    document.getElementById('nav-admin').setAttribute('aria-selected', 'false');
+    const navList = document.getElementById('nav-list');
+    const navAdmin = document.getElementById('nav-admin');
+    if (navList) { navList.classList.remove('active'); navList.setAttribute('aria-selected', 'false'); }
+    if (navAdmin) { navAdmin.classList.remove('active'); navAdmin.setAttribute('aria-selected', 'false'); }
 
     if (viewName === 'list') {
       document.getElementById('view-list').classList.remove('hidden');
-      document.getElementById('nav-list').classList.add('active');
-      document.getElementById('nav-list').setAttribute('aria-selected', 'true');
+      if (navList) { navList.classList.add('active'); navList.setAttribute('aria-selected', 'true'); }
       renderEventsGrid();
+      renderHeroSpotlight();
+      renderSidebarWidgets();
+      startCountdownTimers();
     } else if (viewName === 'admin') {
       if (!isAdminAuthenticated) {
         openModal('modal-admin-auth');
         return;
       }
       document.getElementById('view-admin').classList.remove('hidden');
-      document.getElementById('nav-admin').classList.add('active');
-      document.getElementById('nav-admin').setAttribute('aria-selected', 'true');
+      if (navAdmin) { navAdmin.classList.add('active'); navAdmin.setAttribute('aria-selected', 'true'); }
       renderAdminDashboard();
     }
   };
@@ -732,6 +746,7 @@
               </div>
             </div>
           </div>
+          <div class="card-countdown-bar" data-end="${ev.endDate || ''}"><span class="countdown-text">⏳ 計算中...</span></div>
         </article>
       `;
     }).join('');
@@ -1542,6 +1557,207 @@
     );
   }
 
+  // HERO SPOTLIGHT - Featured Event Banner
+  function renderHeroSpotlight() {
+    const container = document.getElementById('hero-spotlight');
+    if (!container) return;
+
+    const events = loadEventsData();
+    // Find the next upcoming event that's still open for registration
+    const now = Date.now();
+    const upcoming = events.filter(ev => {
+      const st = getStatus(ev.registrations ? ev.registrations.length : 0, ev.maxPeople, ev.startDate, ev.endDate);
+      return st.allowRegister;
+    }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const featured = upcoming[0] || events[0];
+    if (!featured) { container.classList.add('hidden'); return; }
+
+    const regCount = featured.registrations ? featured.registrations.length : 0;
+    const status = getStatus(regCount, featured.maxPeople, featured.startDate, featured.endDate);
+    const spotsLeft = featured.maxPeople - regCount;
+
+    container.innerHTML = `
+      <div class="hero-bg" style="background-image: url('${featured.image}')"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-badges">
+          <span class="sf-badge badge-status-${status.type}">${status.label}</span>
+          ${featured.customBadge ? `<span class="sf-badge badge-custom">${escapeHTML(featured.customBadge)}</span>` : ''}
+        </div>
+        <h2 class="hero-title">${escapeHTML(featured.name)}</h2>
+        <p class="hero-desc">${escapeHTML(featured.description || '')}</p>
+        <div class="hero-meta">
+          <span>📅 ${formatDate(featured.date)}</span>
+          <span>📍 ${escapeHTML(featured.location || '萬家福五甲店')}</span>
+          <span>💰 ${escapeHTML(featured.priceTier || '免費活動')}</span>
+          <span>👥 剩餘 ${spotsLeft} 個名額</span>
+        </div>
+        <div class="hero-countdown" id="hero-countdown" data-end="${featured.endDate || ''}">
+          <div class="countdown-unit"><span class="countdown-num" id="hero-days">--</span><span class="countdown-label">天</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="hero-hours">--</span><span class="countdown-label">時</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="hero-mins">--</span><span class="countdown-label">分</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="hero-secs">--</span><span class="countdown-label">秒</span></div>
+        </div>
+        <button class="btn-hero-cta" onclick="openEventDetail('${featured.id}')">
+          立即查看並報名 →
+        </button>
+      </div>
+    `;
+  }
+
+  // SIDEBAR WIDGETS
+  function renderSidebarWidgets() {
+    const container = document.getElementById('sidebar-widgets');
+    if (!container) return;
+
+    const events = loadEventsData();
+    const now = Date.now();
+    let totalRegs = 0;
+    let openCount = 0;
+    events.forEach(ev => {
+      totalRegs += ev.registrations ? ev.registrations.length : 0;
+      const st = getStatus(ev.registrations ? ev.registrations.length : 0, ev.maxPeople, ev.startDate, ev.endDate);
+      if (st.allowRegister) openCount++;
+    });
+
+    // Get next 4 upcoming events sorted by date
+    const upcoming = [...events].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 4);
+
+    container.innerHTML = `
+      <div class="sidebar-widget">
+        <h3 class="widget-title">📊 五甲店活動快報</h3>
+        <div class="store-stats-grid">
+          <div class="stat-item">
+            <span class="stat-num">${events.length}</span>
+            <span class="stat-label">活動總數</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">${openCount}</span>
+            <span class="stat-label">可報名</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">${totalRegs}</span>
+            <span class="stat-label">總報名人次</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-widget">
+        <h3 class="widget-title">📅 近期活動時程</h3>
+        <div class="upcoming-timeline">
+          ${upcoming.map(ev => {
+            const st = getStatus(ev.registrations ? ev.registrations.length : 0, ev.maxPeople, ev.startDate, ev.endDate);
+            const d = new Date(ev.date);
+            const month = d.getMonth() + 1;
+            const day = d.getDate();
+            return `
+              <div class="timeline-item" onclick="openEventDetail('${ev.id}')">
+                <div class="timeline-date-block">
+                  <span class="timeline-month">${month}月</span>
+                  <span class="timeline-day">${day}</span>
+                </div>
+                <div class="timeline-info">
+                  <div class="timeline-event-name">${escapeHTML(ev.name)}</div>
+                  <div class="timeline-event-meta">
+                    <span class="sf-badge badge-status-${st.type}" style="font-size:10px; padding:2px 6px;">${st.label}</span>
+                    <span>${ev.registrations ? ev.registrations.length : 0}/${ev.maxPeople}人</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="sidebar-widget">
+        <h3 class="widget-title">🏬 關於萬家福五甲店</h3>
+        <div class="store-about-text">
+          <p>萬家福五甲店位於高雄市鳳山區林森路，深耕在地超過 20 年，提供新鮮生鮮、進口食品、居家用品等一站式購物服務。</p>
+          <p style="margin-top:8px;">我們定期舉辦料理教室、試吃體驗、親子手作等社區活動，歡迎鄰里鄉親踴躍參加。</p>
+        </div>
+      </div>
+    `;
+  }
+
+  // LIVE COUNTDOWN TIMERS on cards
+  let countdownInterval = null;
+
+  function startCountdownTimers() {
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    function updateAllCountdowns() {
+      const now = Date.now();
+
+      // Update hero countdown
+      const heroEl = document.getElementById('hero-countdown');
+      if (heroEl) {
+        const endStr = heroEl.getAttribute('data-end');
+        if (endStr) {
+          const diff = new Date(endStr).getTime() - now;
+          if (diff > 0) {
+            const days = Math.floor(diff / 86400000);
+            const hours = Math.floor((diff % 86400000) / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            const dEl = document.getElementById('hero-days');
+            const hEl = document.getElementById('hero-hours');
+            const mEl = document.getElementById('hero-mins');
+            const sEl = document.getElementById('hero-secs');
+            if (dEl) dEl.textContent = String(days).padStart(2, '0');
+            if (hEl) hEl.textContent = String(hours).padStart(2, '0');
+            if (mEl) mEl.textContent = String(mins).padStart(2, '0');
+            if (sEl) sEl.textContent = String(secs).padStart(2, '0');
+          } else {
+            const dEl = document.getElementById('hero-days');
+            if (dEl) dEl.textContent = '00';
+          }
+        }
+      }
+
+      // Update card countdowns
+      document.querySelectorAll('.card-countdown-bar').forEach(bar => {
+        const endStr = bar.getAttribute('data-end');
+        if (!endStr) return;
+        const diff = new Date(endStr).getTime() - now;
+        const textEl = bar.querySelector('.countdown-text');
+        if (!textEl) return;
+        if (diff <= 0) {
+          textEl.textContent = '報名已截止';
+          bar.classList.add('expired');
+        } else {
+          const days = Math.floor(diff / 86400000);
+          const hours = Math.floor((diff % 86400000) / 3600000);
+          const mins = Math.floor((diff % 3600000) / 60000);
+          if (days > 0) {
+            textEl.textContent = `⏳ 剩餘 ${days} 天 ${hours} 時 ${mins} 分`;
+          } else {
+            textEl.textContent = `⏳ 剩餘 ${hours} 時 ${mins} 分`;
+          }
+        }
+      });
+    }
+
+    updateAllCountdowns();
+    countdownInterval = setInterval(updateAllCountdowns, 1000);
+  }
+
+  // FOOTER ADMIN LOGIN
+  window.handleFooterAdminClick = function () {
+    if (isAdminAuthenticated) {
+      switchView('admin');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      openModal('modal-admin-auth');
+    }
+  };
+
+  // FOOTER YEAR
+  function setFooterYear() {
+    const el = document.getElementById('footer-year');
+    if (el) el.textContent = new Date().getFullYear();
+  }
+
   // Initialize
   document.addEventListener('DOMContentLoaded', () => {
     checkAdminSession();
@@ -1549,6 +1765,10 @@
     renderQuickLinksUI();
     renderEventsGrid();
     renderQuestionnaireBuilder();
+    renderHeroSpotlight();
+    renderSidebarWidgets();
+    startCountdownTimers();
+    setFooterYear();
   });
 
 })();

@@ -3,9 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>萬家福五甲店 - 官方活動與數位服務中心</title>
-  <meta name="description" content="萬家福五甲店官方活動報名與會員服務中心 (高雄市鳳山區富榮里林森路291號)。">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <title>萬家福五甲店 - 官方活動報名與數位服務中心</title>
+  <meta name="description" content="萬家福五甲店官方活動報名平台，提供體驗試吃、親子手作、健康講座等門市專屬活動線上報名服務。地址：830高雄市鳳山區富榮里林森路291號。">
+  <meta name="keywords" content="萬家福,五甲店,活動報名,高雄鳳山,體驗試吃,親子手作,會員活動">
+  <meta property="og:title" content="萬家福五甲店 - 官方活動報名平台">
+  <meta property="og:description" content="萬家福五甲店門市專屬活動線上報名 — 體驗試吃、親子手作、健康講座，歡迎鄰里鄉親踴躍參加。">
+  <meta property="og:type" content="website">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://twwgapp.pages.dev">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <div class="app-viewport">
@@ -13,19 +19,7 @@
     <!-- Toast Capsule Notification -->
     <div id="toast" class="toast-capsule" role="alert"></div>
 
-    <!-- Apple Top Status Line (門市極簡資訊) -->
-    <div class="apple-status-bar">
-      <div class="status-left">
-        <span>📍 830高雄市鳳山區富榮里林森路291號</span>
-        <span class="dot-separator">•</span>
-        <span>⏰ 每日 09:00 - 23:00</span>
-      </div>
-      <div class="status-right">
-        <a href="tel:077138508" class="store-phone-link">📞 門市專線：(07) 7138508</a>
-      </div>
-    </div>
-
-    <!-- Apple Main Header Bar -->
+    <!-- Apple Main Header Bar (公開頁面只有品牌標題) -->
     <header class="navigation-bar">
       <div class="nav-top-row">
         <div class="app-title-group">
@@ -36,60 +30,55 @@
           </div>
         </div>
 
-        <!-- SwiftUI Segmented Controller -->
-        <nav class="segmented-control" role="tablist">
-          <button id="nav-list" class="segment-btn active" onclick="switchView('list')" role="tab" aria-selected="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-            五甲店活動
-          </button>
-          <button id="nav-admin" class="segment-btn" onclick="handleAdminTabClick()" role="tab" aria-selected="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            <span id="admin-nav-label">管理員後台</span>
-          </button>
-        </nav>
-      </div>
-
-      <!-- Public Quick Social & Location Links Card (一般顧客純瀏覽膠囊列) -->
-      <div class="quick-links-card">
-        <div class="quick-links-header">
-          <span class="quick-links-label">🌐 門市數位媒體與導航中心：</span>
-        </div>
-        <div id="quick-links-pills-container" class="pills-container">
+        <!-- Quick Social Links Pills (公開顧客用) -->
+        <div id="quick-links-pills-container" class="pills-container pills-inline">
           <!-- Dynamically rendered by app.js -->
         </div>
       </div>
     </header>
 
-    <!-- VIEW 1: PUBLIC EVENT LIST GRID -->
+    <!-- VIEW 1: PUBLIC EVENT LIST -->
     <main id="view-list">
-      <!-- Search & Category Filters -->
-      <section class="controls-stack">
-        <div class="search-input-wrapper">
-          <span class="search-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          </span>
-          <input type="text" id="search-input" class="search-input" placeholder="搜尋萬家福五甲店活動、週年慶、試吃、親子手作..." oninput="handleSearchInput(event)">
-        </div>
 
-        <!-- Dynamic Category Pills Filter Container -->
-        <div class="category-pills" id="category-pills">
-          <!-- Dynamically generated from events by app.js -->
-        </div>
+      <!-- HERO SPOTLIGHT: Featured Event with Live Countdown -->
+      <section id="hero-spotlight" class="hero-spotlight">
+        <!-- Dynamically rendered by app.js -->
       </section>
 
-      <!-- Section Stats & Grid -->
-      <div class="section-header">
-        <h2 class="section-header-title">萬家福五甲店 專屬熱門活動</h2>
-        <span class="section-header-meta" id="event-count-label">共 8 個活動</span>
-      </div>
+      <!-- Two-Column Desktop Layout -->
+      <div class="content-with-sidebar">
+        <!-- LEFT: Main Content Area -->
+        <div class="main-content">
+          <!-- Search & Category Filters -->
+          <section class="controls-stack">
+            <div class="search-input-wrapper">
+              <span class="search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              </span>
+              <input type="text" id="search-input" class="search-input" placeholder="搜尋萬家福五甲店活動、週年慶、試吃、親子手作..." oninput="handleSearchInput(event)">
+            </div>
 
-      <!-- 8 Events Side-by-Side Grid Wall -->
-      <div id="events-grid" class="event-grid"></div>
+            <div class="category-pills" id="category-pills"></div>
+          </section>
+
+          <!-- Section Stats & Grid -->
+          <div class="section-header">
+            <h2 class="section-header-title">所有門市活動</h2>
+            <span class="section-header-meta" id="event-count-label">共 8 個活動</span>
+          </div>
+
+          <div id="events-grid" class="event-grid"></div>
+        </div>
+
+        <!-- RIGHT: Sidebar (Desktop Only) -->
+        <aside id="sidebar-widgets" class="sidebar">
+          <!-- Dynamically rendered by app.js -->
+        </aside>
+      </div>
     </main>
 
-    <!-- VIEW 2: PROTECTED ADMIN DASHBOARD (僅受保護後台才有權限按鈕) -->
+    <!-- VIEW 2: PROTECTED ADMIN DASHBOARD (底部管理員登入後才看得到) -->
     <section id="view-admin" class="hidden">
-      <!-- Admin Bar Header -->
       <div class="admin-toolbar-card">
         <div class="admin-status-info">
           <span class="sf-badge badge-admin-unlocked">🔓 已認證管理員權限</span>
@@ -111,7 +100,6 @@
         </div>
       </div>
 
-      <!-- Admin Sub Navigation Tabs -->
       <div class="admin-sub-nav">
         <button id="admin-tab-manage" class="admin-tab-btn active" onclick="switchAdminSubView('manage')">名單與簽到</button>
         <button id="admin-tab-onsite" class="admin-tab-btn" onclick="switchAdminSubView('onsite')">⚡️ 五甲店現場報名</button>
@@ -128,30 +116,18 @@
             </div>
             <select id="admin-event-selector" class="sf-select" style="max-width:320px;" onchange="handleAdminSelectEvent(event)"></select>
           </div>
-
           <div id="manage-event-detail" style="margin-bottom:20px;"></div>
-
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
             <div style="display:flex; align-items:center; gap:10px;">
               <h3 style="font-size:16px; font-weight:600;">報名名單與簽到紀錄</h3>
               <span id="attendance-stat-badge" class="sf-badge badge-status-open">已報到 0 人</span>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn-system-secondary" style="border-color:var(--accent-blue); color:var(--accent-blue);" onclick="openEditEventModal()">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                ✏️ 編輯本活動設定
-              </button>
-              <button class="btn-system-secondary" onclick="exportRegistrationsCSV()">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                匯出 CSV 名單
-              </button>
-              <button class="btn-system-danger" onclick="deleteActiveEvent()">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                刪除本活動
-              </button>
+              <button class="btn-system-secondary" style="border-color:var(--accent-blue); color:var(--accent-blue);" onclick="openEditEventModal()">✏️ 編輯本活動設定</button>
+              <button class="btn-system-secondary" onclick="exportRegistrationsCSV()">匯出 CSV 名單</button>
+              <button class="btn-system-danger" onclick="deleteActiveEvent()">刪除本活動</button>
             </div>
           </div>
-
           <div id="manage-registrations-list"></div>
         </div>
       </div>
@@ -160,20 +136,18 @@
       <div id="admin-sub-onsite" class="hidden">
         <div class="form-card">
           <div class="section-header">
-            <h2 class="form-section-title">⚡️ 萬家福五甲店 現場快速報名（工作人員 / 老人現場專用）</h2>
+            <h2 class="form-section-title">⚡️ 萬家福五甲店 現場快速報名</h2>
           </div>
           <p class="field-help" style="margin-bottom:16px;">顧客於五甲店現場到場時，服務人員直接於平板/手機為顧客快速完成報名並自動標記為「已報到」。</p>
-
           <form id="onsite-registration-form" onsubmit="submitOnsiteRegistration(event)">
             <div class="form-grid">
               <div class="field-group">
                 <label class="field-label" for="onsite-event-selector">選擇報名活動 <span class="req">*</span></label>
                 <select id="onsite-event-selector" class="sf-select" required></select>
               </div>
-
               <div class="form-row-2">
                 <div class="field-group">
-                  <label class="field-label" for="onsite-name">參加顧客 / 長輩姓名 <span class="req">*</span></label>
+                  <label class="field-label" for="onsite-name">參加顧客姓名 <span class="req">*</span></label>
                   <input type="text" id="onsite-name" class="sf-input" required placeholder="請輸入顧客真實姓名">
                 </div>
                 <div class="field-group">
@@ -181,14 +155,12 @@
                   <input type="tel" id="onsite-phone" class="sf-input" required placeholder="09xx-xxx-xxx">
                 </div>
               </div>
-
               <div class="field-group">
                 <label class="checkbox-row">
                   <input type="checkbox" id="onsite-auto-checkin" checked>
                   <span>現場完成報名並同時直接標記「✓ 已完成報到」</span>
                 </label>
               </div>
-
               <button type="submit" class="btn-system-primary" style="margin-top:10px;">送出現場報名並完成簽到</button>
             </div>
           </form>
@@ -201,7 +173,6 @@
           <div class="section-header">
             <h2 class="form-section-title">發布萬家福五甲店 新活動</h2>
           </div>
-
           <form id="create-event-form" onsubmit="submitCreateEvent(event)">
             <div class="form-grid">
               <div class="inset-grouped-box">
@@ -211,11 +182,10 @@
                     <label class="field-label" for="event-name">活動名稱 <span class="req">*</span></label>
                     <input type="text" id="event-name" class="sf-input" required placeholder="例如：萬家福五甲店 會員感恩回饋節">
                   </div>
-
                   <div class="form-row-2">
                     <div class="field-group">
                       <label class="field-label" for="event-category">自訂活動分類名稱 <span class="req">*</span></label>
-                      <input type="text" id="event-category" class="sf-input" required placeholder="可自由填寫分類（如：體驗試吃、特賣會、長輩健康）" list="category-suggestions">
+                      <input type="text" id="event-category" class="sf-input" required placeholder="可自由填寫分類" list="category-suggestions">
                       <datalist id="category-suggestions">
                         <option value="體驗試吃"></option>
                         <option value="親子手作"></option>
@@ -230,31 +200,28 @@
                       <input type="date" id="event-date" class="sf-input" required>
                     </div>
                   </div>
-
                   <div class="form-row-2" style="background:var(--surface-primary); padding:12px; border-radius:var(--radius-s); border:1px solid var(--separator);">
                     <div class="field-group">
                       <label class="field-label" for="event-start-time">開放報名時間 (選填)</label>
                       <input type="datetime-local" id="event-start-time" class="sf-input">
                     </div>
                     <div class="field-group">
-                      <label class="field-label" for="event-end-time">報名截止時間 <span class="req">* (自動截止)</span></label>
+                      <label class="field-label" for="event-end-time">報名截止時間 <span class="req">*</span></label>
                       <input type="datetime-local" id="event-end-time" class="sf-input" required>
                     </div>
                   </div>
-
                   <div class="field-group">
                     <label class="field-label" for="event-desc">活動詳細說明</label>
-                    <textarea id="event-desc" class="sf-textarea" rows="3" placeholder="詳細流程說明、注意事項與萬家福五甲店交通指引..."></textarea>
+                    <textarea id="event-desc" class="sf-textarea" rows="3" placeholder="詳細流程說明、注意事項..."></textarea>
                   </div>
-
                   <div class="form-row-2">
                     <div class="field-group">
                       <label class="field-label" for="event-location">活動地點</label>
-                      <input type="text" id="event-location" class="sf-input" placeholder="例如：萬家福五甲店 1樓中央廣場">
+                      <input type="text" id="event-location" class="sf-input" placeholder="萬家福五甲店 1樓中央廣場">
                     </div>
                     <div class="field-group">
-                      <label class="field-label" for="event-price-tier">票價設定 / 價格標示</label>
-                      <input type="text" id="event-price-tier" class="sf-input" placeholder="例如：萬家福會員免費入場 或 憑發票參加">
+                      <label class="field-label" for="event-price-tier">票價設定</label>
+                      <input type="text" id="event-price-tier" class="sf-input" placeholder="萬家福會員免費入場">
                     </div>
                   </div>
                 </div>
@@ -264,50 +231,41 @@
                 <div class="inset-grouped-header">2. 封面標籤與視覺圖片</div>
                 <div class="form-grid">
                   <div class="field-group">
-                    <label class="field-label" for="event-custom-badge">自訂圖片特色標籤 <span class="opt">(可自訂修改)</span></label>
-                    <input type="text" id="event-custom-badge" class="sf-input" placeholder="例如：五甲店限定 / 憑卡免費 / 熱門推薦 (留空則不顯示)">
+                    <label class="field-label" for="event-custom-badge">自訂特色標籤 <span class="opt">(選填)</span></label>
+                    <input type="text" id="event-custom-badge" class="sf-input" placeholder="五甲店限定 / 憑卡免費">
                   </div>
-
                   <div class="field-group">
                     <label class="field-label">圖片上傳與來源</label>
                     <div class="upload-method-selector">
                       <button type="button" class="upload-tab active" id="tab-url" onclick="switchUploadMethod('url')">貼上圖片連結</button>
-                      <button type="button" class="upload-tab" id="tab-file" onclick="switchUploadMethod('file')">本地檔案選擇/Cloudflare R2</button>
+                      <button type="button" class="upload-tab" id="tab-file" onclick="switchUploadMethod('file')">本地檔案選擇</button>
                     </div>
-
                     <div id="upload-url-input-block">
                       <input type="url" id="event-img-url" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleImageUrlChange(event)">
                     </div>
-
                     <div id="upload-file-input-block" class="hidden">
                       <input type="file" id="event-img-file" accept="image/*" class="sf-input" onchange="handleFileSelect(event)">
                     </div>
-
                     <div id="image-preview" class="image-preview-box hidden" style="margin-top:10px;">
-                      <div class="image-preview-overlay">
-                        <span>封面預覽成功</span>
-                      </div>
+                      <div class="image-preview-overlay"><span>封面預覽成功</span></div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div class="inset-grouped-box">
-                <div class="inset-grouped-header">3. 報名表單欄位與強大自訂問卷</div>
+                <div class="inset-grouped-header">3. 報名表單欄位與自訂問卷</div>
                 <div class="form-grid">
                   <div class="field-group">
                     <label class="checkbox-row">
                       <input type="checkbox" id="field-phone-required" checked disabled>
-                      <span>「聯絡電話」預設為必填 (長輩報名與簡訊通知優先)</span>
+                      <span>「聯絡電話」預設為必填</span>
                     </label>
                   </div>
-
                   <div style="margin-top:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                      <label class="field-label" style="font-size:14px;">自訂問卷題目與動態欄位</label>
-                      <button type="button" class="btn-system-secondary" style="font-size:12px; padding:4px 10px;" onclick="addQuestionnaireField()">
-                        ＋ 新增題目 (文字/單選/多選)
-                      </button>
+                      <label class="field-label" style="font-size:14px;">自訂問卷題目</label>
+                      <button type="button" class="btn-system-secondary" style="font-size:12px; padding:4px 10px;" onclick="addQuestionnaireField()">＋ 新增題目</button>
                     </div>
                     <div id="questionnaire-builder-container"></div>
                   </div>
@@ -315,7 +273,7 @@
               </div>
 
               <div class="inset-grouped-box">
-                <div class="inset-grouped-header">4. 人數限制與活動開關</div>
+                <div class="inset-grouped-header">4. 人數限制</div>
                 <div class="form-row-2">
                   <div class="field-group">
                     <label class="field-label" for="event-max">人數上限 <span class="req">*</span></label>
@@ -323,7 +281,6 @@
                   </div>
                 </div>
               </div>
-
               <button type="submit" class="btn-system-primary" style="margin-top:8px;">確認發布新活動</button>
             </div>
           </form>
@@ -331,9 +288,70 @@
       </div>
     </section>
 
-  </div>
+  </div><!-- end .app-viewport -->
 
-  <!-- MODAL: EDIT QUICK LINKS URLS SHEET (僅後台有權限開啟) -->
+  <!-- ================================================================
+       SITE FOOTER: 法律宣告、門市資訊、社群連結、管理員入口
+       ================================================================ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+
+        <!-- Column 1: Store Info -->
+        <div class="footer-section">
+          <h4 class="footer-heading">🏬 萬家福五甲店</h4>
+          <ul class="footer-list">
+            <li>📍 830高雄市鳳山區富榮里林森路291號</li>
+            <li>⏰ 營業時間：每日 09:00 - 23:00</li>
+            <li>📞 門市專線：<a href="tel:077138508">(07) 7138508</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 2: Quick Navigation -->
+        <div class="footer-section">
+          <h4 class="footer-heading">🔗 快速連結</h4>
+          <ul class="footer-list">
+            <li><a href="javascript:void(0)" onclick="switchView('list'); window.scrollTo({top:0,behavior:'smooth'});">📋 瀏覽所有活動</a></li>
+            <li><a href="javascript:void(0)" onclick="filterByCategory('available'); window.scrollTo({top:0,behavior:'smooth'});">🔥 可報名活動</a></li>
+            <li><a href="javascript:void(0)" onclick="openPrivacyModal();">🔒 隱私權政策</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Legal & Compliance -->
+        <div class="footer-section">
+          <h4 class="footer-heading">📜 法律聲明</h4>
+          <ul class="footer-list">
+            <li>本平台遵循中華民國《個人資料保護法》進行個人資料之蒐集、處理及利用。</li>
+            <li>所有報名者個人資料僅供萬家福五甲店活動管理使用，不對外提供第三方。</li>
+            <li>全站採 TLS 1.3 / HTTPS 加密傳輸協定。</li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Social Media -->
+        <div class="footer-section">
+          <h4 class="footer-heading">🌐 社群媒體</h4>
+          <div class="footer-social-links" id="footer-social-links">
+            <!-- Dynamically rendered by app.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="footer-bottom-bar">
+        <p>© <span id="footer-year">2026</span> 萬家福五甲店 Prosperity Plaza Wujia Branch. All rights reserved.</p>
+        <p class="footer-disclaimer">本網站為萬家福五甲店門市專屬活動報名平台，所有活動內容以門市現場公告為準。</p>
+        <button class="footer-admin-link" onclick="handleFooterAdminClick()" title="門市管理員專用入口">
+          🔑 門市管理員後台
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================================================================
+       ALL MODALS (保留所有原有 Modal)
+       ================================================================ -->
+
+  <!-- MODAL: EDIT QUICK LINKS -->
   <div id="modal-edit-quicklinks" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-edit-quicklinks')">
     <div class="sf-sheet" style="max-width:580px;">
       <div class="sheet-handle"></div>
@@ -342,35 +360,15 @@
           <h3 class="sheet-title" style="font-size:19px;">🌐 設定數位媒體與導航網址</h3>
           <button class="btn-icon-circular" onclick="closeModal('modal-edit-quicklinks')">✕</button>
         </div>
-        <p class="sheet-description" style="font-size:13px; margin-bottom:16px;">自訂萬家福五甲店首頁頂部各膠囊連結對應的網址 (Google Maps, LINE, FB, IG, YT, 官網)</p>
-
+        <p class="sheet-description" style="font-size:13px; margin-bottom:16px;">自訂首頁膠囊連結對應的網址</p>
         <form id="edit-quicklinks-form" onsubmit="submitEditQuickLinks(event)">
           <div class="form-grid">
-            <div class="field-group">
-              <label class="field-label" for="link-map">📍 Google 地圖導航網址</label>
-              <input type="url" id="link-map" class="sf-input" required placeholder="https://www.google.com/maps/search/?api=1&query=高雄市鳳山區富榮里林森路291號">
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="link-line">💬 LINE 官方帳號網址</label>
-              <input type="url" id="link-line" class="sf-input" required placeholder="https://line.me/R/ti/p/@...">
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="link-fb">📘 Facebook 粉絲專頁網址</label>
-              <input type="url" id="link-fb" class="sf-input" required placeholder="https://facebook.com/wujia.store">
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="link-ig">📷 Instagram 官方帳號網址</label>
-              <input type="url" id="link-ig" class="sf-input" required placeholder="https://instagram.com/wujia.store">
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="link-yt">🎬 YouTube 影音頻道網址</label>
-              <input type="url" id="link-yt" class="sf-input" required placeholder="https://youtube.com/@wujia">
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="link-site">🌐 萬家福品牌官網網址</label>
-              <input type="url" id="link-site" class="sf-input" required placeholder="https://www.prosperity-plaza.com.tw">
-            </div>
-
+            <div class="field-group"><label class="field-label" for="link-map">📍 Google 地圖導航</label><input type="url" id="link-map" class="sf-input" required></div>
+            <div class="field-group"><label class="field-label" for="link-line">💬 LINE 官方帳號</label><input type="url" id="link-line" class="sf-input" required></div>
+            <div class="field-group"><label class="field-label" for="link-fb">📘 Facebook 粉絲專頁</label><input type="url" id="link-fb" class="sf-input" required></div>
+            <div class="field-group"><label class="field-label" for="link-ig">📷 Instagram 官方帳號</label><input type="url" id="link-ig" class="sf-input" required></div>
+            <div class="field-group"><label class="field-label" for="link-yt">🎬 YouTube 影音頻道</label><input type="url" id="link-yt" class="sf-input" required></div>
+            <div class="field-group"><label class="field-label" for="link-site">🌐 萬家福品牌官網</label><input type="url" id="link-site" class="sf-input" required></div>
             <div class="sheet-actions" style="margin-top:14px;">
               <button type="button" class="btn-system-secondary" onclick="closeModal('modal-edit-quicklinks')">取消</button>
               <button type="submit" class="btn-system-primary">儲存網址設定</button>
@@ -381,7 +379,7 @@
     </div>
   </div>
 
-  <!-- MODAL: EDIT PUBLISHED EVENT SHEET -->
+  <!-- MODAL: EDIT PUBLISHED EVENT -->
   <div id="modal-edit-event" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-edit-event')">
     <div class="sf-sheet" style="max-width:620px;">
       <div class="sheet-handle"></div>
@@ -390,72 +388,30 @@
           <h3 class="sheet-title" style="font-size:19px;">✏️ 編輯已發布活動設定</h3>
           <button class="btn-icon-circular" onclick="closeModal('modal-edit-event')">✕</button>
         </div>
-        <p class="sheet-description" style="font-size:13px; margin-bottom:16px;">隨時修正萬家福五甲店活動時間、地點、封面標籤、說明與人數上限</p>
-
         <form id="edit-event-form" onsubmit="submitEditEvent(event)">
           <div class="form-grid">
-            <div class="field-group">
-              <label class="field-label" for="edit-event-name">活動名稱 <span class="req">*</span></label>
-              <input type="text" id="edit-event-name" class="sf-input" required>
-            </div>
-
+            <div class="field-group"><label class="field-label" for="edit-event-name">活動名稱 <span class="req">*</span></label><input type="text" id="edit-event-name" class="sf-input" required></div>
             <div class="form-row-2">
-              <div class="field-group">
-                <label class="field-label" for="edit-event-category">自訂活動分類名稱 <span class="req">*</span></label>
-                <input type="text" id="edit-event-category" class="sf-input" required placeholder="可自由填寫分類（如：體驗試吃、特賣會、長輩健康）">
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="edit-event-date">活動舉辦日期 <span class="req">*</span></label>
-                <input type="date" id="edit-event-date" class="sf-input" required>
-              </div>
+              <div class="field-group"><label class="field-label" for="edit-event-category">自訂分類 <span class="req">*</span></label><input type="text" id="edit-event-category" class="sf-input" required></div>
+              <div class="field-group"><label class="field-label" for="edit-event-date">舉辦日期 <span class="req">*</span></label><input type="date" id="edit-event-date" class="sf-input" required></div>
             </div>
-
             <div class="form-row-2">
-              <div class="field-group">
-                <label class="field-label" for="edit-event-start-time">開放報名時間</label>
-                <input type="datetime-local" id="edit-event-start-time" class="sf-input">
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="edit-event-end-time">報名截止時間 <span class="req">*</span></label>
-                <input type="datetime-local" id="edit-event-end-time" class="sf-input" required>
-              </div>
+              <div class="field-group"><label class="field-label" for="edit-event-start-time">開放報名時間</label><input type="datetime-local" id="edit-event-start-time" class="sf-input"></div>
+              <div class="field-group"><label class="field-label" for="edit-event-end-time">報名截止 <span class="req">*</span></label><input type="datetime-local" id="edit-event-end-time" class="sf-input" required></div>
             </div>
-
-            <div class="field-group">
-              <label class="field-label" for="edit-event-desc">活動詳細說明</label>
-              <textarea id="edit-event-desc" class="sf-textarea" rows="3"></textarea>
-            </div>
-
+            <div class="field-group"><label class="field-label" for="edit-event-desc">活動說明</label><textarea id="edit-event-desc" class="sf-textarea" rows="3"></textarea></div>
             <div class="form-row-2">
-              <div class="field-group">
-                <label class="field-label" for="edit-event-location">活動地點</label>
-                <input type="text" id="edit-event-location" class="sf-input">
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="edit-event-price-tier">票價設定 / 價格標號</label>
-                <input type="text" id="edit-event-price-tier" class="sf-input">
-              </div>
+              <div class="field-group"><label class="field-label" for="edit-event-location">地點</label><input type="text" id="edit-event-location" class="sf-input"></div>
+              <div class="field-group"><label class="field-label" for="edit-event-price-tier">票價</label><input type="text" id="edit-event-price-tier" class="sf-input"></div>
             </div>
-
             <div class="form-row-2">
-              <div class="field-group">
-                <label class="field-label" for="edit-event-custom-badge">自訂圖片特色標籤</label>
-                <input type="text" id="edit-event-custom-badge" class="sf-input">
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="edit-event-max">人數上限 <span class="req">*</span></label>
-                <input type="number" id="edit-event-max" class="sf-input" required min="1" max="9999">
-              </div>
+              <div class="field-group"><label class="field-label" for="edit-event-custom-badge">特色標籤</label><input type="text" id="edit-event-custom-badge" class="sf-input"></div>
+              <div class="field-group"><label class="field-label" for="edit-event-max">人數上限 <span class="req">*</span></label><input type="number" id="edit-event-max" class="sf-input" required min="1" max="9999"></div>
             </div>
-
-            <div class="field-group">
-              <label class="field-label" for="edit-event-img-url">封面圖片網址 URL</label>
-              <input type="url" id="edit-event-img-url" class="sf-input">
-            </div>
-
+            <div class="field-group"><label class="field-label" for="edit-event-img-url">封面圖片 URL</label><input type="url" id="edit-event-img-url" class="sf-input"></div>
             <div class="sheet-actions" style="margin-top:14px;">
               <button type="button" class="btn-system-secondary" onclick="closeModal('modal-edit-event')">取消</button>
-              <button type="submit" class="btn-system-primary">儲存變更並更新活動</button>
+              <button type="submit" class="btn-system-primary">儲存變更</button>
             </div>
           </div>
         </form>
@@ -463,7 +419,7 @@
     </div>
   </div>
 
-  <!-- MODAL 0: ADMIN AUTHENTICATION SHEET -->
+  <!-- MODAL: ADMIN AUTH -->
   <div id="modal-admin-auth" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-admin-auth')">
     <div class="sf-sheet" style="max-width:400px;">
       <div class="sheet-handle"></div>
@@ -473,15 +429,13 @@
             <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           </div>
           <h3 class="sheet-title" style="font-size:18px;">管理員權限驗證</h3>
-          <p class="sheet-description" style="font-size:13px; margin-bottom:0;">請輸入萬家福五甲店管理金鑰解鎖後台</p>
+          <p class="sheet-description" style="font-size:13px; margin-bottom:0;">請輸入萬家福五甲店管理金鑰</p>
         </div>
-
         <form onsubmit="verifyAdminPasscode(event)">
           <div class="field-group" style="margin-bottom:16px;">
             <label class="field-label" for="admin-passcode-input">管理員密碼</label>
-            <input type="password" id="admin-passcode-input" class="sf-input" placeholder="請輸入密碼 (預設: admin888)" required autocomplete="current-password">
+            <input type="password" id="admin-passcode-input" class="sf-input" placeholder="請輸入密碼" required autocomplete="current-password">
           </div>
-
           <div class="sheet-actions">
             <button type="button" class="btn-system-secondary" onclick="closeModal('modal-admin-auth')">取消</button>
             <button type="submit" class="btn-system-primary">驗證並解鎖</button>
@@ -491,7 +445,7 @@
     </div>
   </div>
 
-  <!-- MODAL: CHANGE ADMIN PASSCODE -->
+  <!-- MODAL: CHANGE PASSCODE -->
   <div id="modal-change-passcode" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-change-passcode')">
     <div class="sf-sheet" style="max-width:400px;">
       <div class="sheet-handle"></div>
@@ -500,23 +454,11 @@
           <h3 class="sheet-title" style="font-size:18px;">修改管理員密碼</h3>
           <button class="btn-icon-circular" onclick="closeModal('modal-change-passcode')">✕</button>
         </div>
-        <p class="sheet-description" style="font-size:13px;">更新管理員登入金鑰密碼</p>
-
         <form onsubmit="submitChangeAdminPasscode(event)">
           <div class="form-grid">
-            <div class="field-group">
-              <label class="field-label" for="passcode-old">舊密碼 <span class="req">*</span></label>
-              <input type="password" id="passcode-old" class="sf-input" required placeholder="目前使用的密碼">
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="passcode-new">新密碼 <span class="req">*</span></label>
-              <input type="password" id="passcode-new" class="sf-input" required minlength="4" placeholder="請輸入新設定密碼">
-            </div>
-            <div class="field-group">
-              <label class="field-label" for="passcode-confirm">確認新密碼 <span class="req">*</span></label>
-              <input type="password" id="passcode-confirm" class="sf-input" required placeholder="再次輸入新密碼">
-            </div>
-
+            <div class="field-group"><label class="field-label" for="passcode-old">舊密碼 <span class="req">*</span></label><input type="password" id="passcode-old" class="sf-input" required></div>
+            <div class="field-group"><label class="field-label" for="passcode-new">新密碼 <span class="req">*</span></label><input type="password" id="passcode-new" class="sf-input" required minlength="4"></div>
+            <div class="field-group"><label class="field-label" for="passcode-confirm">確認新密碼 <span class="req">*</span></label><input type="password" id="passcode-confirm" class="sf-input" required></div>
             <div class="sheet-actions" style="margin-top:10px;">
               <button type="button" class="btn-system-secondary" onclick="closeModal('modal-change-passcode')">取消</button>
               <button type="submit" class="btn-system-primary">儲存新密碼</button>
@@ -527,7 +469,7 @@
     </div>
   </div>
 
-  <!-- MODAL 1: PUBLIC EVENT DETAIL & REGISTER SHEET -->
+  <!-- MODAL: EVENT DETAIL -->
   <div id="modal-detail" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-detail')">
     <div class="sf-sheet">
       <div class="sheet-handle"></div>
@@ -538,44 +480,24 @@
           <span id="sheet-status-badge" class="sf-badge"></span>
         </div>
         <p id="sheet-desc" class="sheet-description"></p>
-
         <div class="sheet-meta-grid">
-          <div class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span id="sheet-date"></span>
-          </div>
-          <div class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span id="sheet-deadline-text" style="color:var(--accent-orange); font-weight:600;"></span>
-          </div>
-          <div class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span id="sheet-location"></span>
-          </div>
-          <div class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-            <span id="sheet-price"></span>
-          </div>
-          <div class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            <span id="sheet-progress-text"></span>
-          </div>
+          <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="sheet-date"></span></div>
+          <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="sheet-deadline-text" style="color:var(--accent-orange); font-weight:600;"></span></div>
+          <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="sheet-location"></span></div>
+          <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><span id="sheet-price"></span></div>
+          <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span id="sheet-progress-text"></span></div>
         </div>
-
-        <div class="progress-track" style="height:6px; margin-bottom:20px;">
-          <div id="sheet-progress-bar" class="progress-fill"></div>
-        </div>
-
+        <div class="progress-track" style="height:6px; margin-bottom:20px;"><div id="sheet-progress-bar" class="progress-fill"></div></div>
         <div class="sheet-actions">
           <button class="btn-system-secondary" onclick="closeModal('modal-detail')">關閉</button>
-          <button class="btn-system-secondary" onclick="exportCurrentEventICS()">匯出行事曆 (.ics)</button>
+          <button class="btn-system-secondary" onclick="exportCurrentEventICS()">匯出行事曆</button>
           <button id="sheet-reg-btn" class="btn-system-primary" onclick="proceedToRegisterForm()">立即報名</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: PUBLIC REGISTRATION FORM -->
+  <!-- MODAL: REGISTRATION FORM -->
   <div id="modal-register-form" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-register-form')">
     <div class="sf-sheet">
       <div class="sheet-handle"></div>
@@ -585,7 +507,6 @@
           <button class="btn-icon-circular" onclick="closeModal('modal-register-form')">✕</button>
         </div>
         <p id="reg-form-event-name" class="sheet-description" style="font-weight:600; color:var(--accent-blue);"></p>
-
         <form id="active-registration-form" onsubmit="submitRegistration(event)">
           <div class="form-grid">
             <div class="field-group" style="background:var(--surface-secondary); padding:10px 12px; border-radius:var(--radius-s); border:1px solid var(--separator);">
@@ -594,43 +515,20 @@
                 <span style="font-weight:600; color:var(--accent-purple);">我是幫他人報名（子女幫長輩代報名）</span>
               </label>
             </div>
-
             <div id="proxy-fields-box" class="form-grid hidden" style="background:rgba(175, 82, 222, 0.08); padding:12px; border-radius:var(--radius-s); border:1px solid rgba(175, 82, 222, 0.25);">
-              <div class="field-group">
-                <label class="field-label" for="proxy-name">代報人姓名 (您的姓名) <span class="req">*</span></label>
-                <input type="text" id="proxy-name" class="sf-input" placeholder="請填寫代報人真實姓名">
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="proxy-email">代報人 Email (收確認信) <span class="req">*</span></label>
-                <input type="email" id="proxy-email" class="sf-input" placeholder="your@email.com">
-              </div>
+              <div class="field-group"><label class="field-label" for="proxy-name">代報人姓名 <span class="req">*</span></label><input type="text" id="proxy-name" class="sf-input" placeholder="代報人真實姓名"></div>
+              <div class="field-group"><label class="field-label" for="proxy-email">代報人 Email <span class="req">*</span></label><input type="email" id="proxy-email" class="sf-input" placeholder="your@email.com"></div>
             </div>
-
-            <div class="field-group">
-              <label class="field-label" id="attendee-name-label" for="reg-name">實際參加者姓名 <span class="req">*</span></label>
-              <input type="text" id="reg-name" class="sf-input" required placeholder="請填寫參加者真實姓名">
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="reg-phone">聯絡電話 <span class="req">*</span></label>
-              <input type="tel" id="reg-phone" class="sf-input" required placeholder="09xx-xxx-xxx">
-              <p class="field-help">作為身分核對與簡訊通知憑證</p>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="reg-email">電子郵件 <span class="opt">(選填，長輩沒有可留空)</span></label>
-              <input type="email" id="reg-email" class="sf-input" placeholder="有 Email 可填寫接收確認信 (可不填)">
-            </div>
-
+            <div class="field-group"><label class="field-label" id="attendee-name-label" for="reg-name">實際參加者姓名 <span class="req">*</span></label><input type="text" id="reg-name" class="sf-input" required placeholder="請填寫參加者真實姓名"></div>
+            <div class="field-group"><label class="field-label" for="reg-phone">聯絡電話 <span class="req">*</span></label><input type="tel" id="reg-phone" class="sf-input" required placeholder="09xx-xxx-xxx"><p class="field-help">作為身分核對與簡訊通知憑證</p></div>
+            <div class="field-group"><label class="field-label" for="reg-email">電子郵件 <span class="opt">(選填)</span></label><input type="email" id="reg-email" class="sf-input" placeholder="有 Email 可填寫 (可不填)"></div>
             <div id="dynamic-questions-form-container"></div>
-
             <div class="field-group" style="margin-top:6px;">
               <label class="checkbox-row">
                 <input type="checkbox" id="reg-privacy-check" required>
                 <span>我已閱讀並同意 <a href="javascript:void(0)" onclick="openPrivacyModal()">《個人資料保護條款》</a> <span class="req">*</span></span>
               </label>
             </div>
-
             <div class="sheet-actions" style="margin-top:16px;">
               <button type="button" class="btn-system-secondary" onclick="closeModal('modal-register-form')">取消</button>
               <button type="submit" id="reg-submit-btn" class="btn-system-primary">確認送出報名</button>
@@ -641,7 +539,7 @@
     </div>
   </div>
 
-  <!-- MODAL 3: PRIVACY POLICY -->
+  <!-- MODAL: PRIVACY POLICY -->
   <div id="modal-privacy" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-privacy')">
     <div class="sf-sheet">
       <div class="sheet-handle"></div>
@@ -650,31 +548,24 @@
           <h3 class="sheet-title">個人資料保護與隱私權政策</h3>
           <button class="btn-icon-circular" onclick="closeModal('modal-privacy')">✕</button>
         </div>
-
         <div class="privacy-document">
           <p>歡迎使用萬家福五甲店活動報名系統（以下簡稱本平台）。本平台重視您的個人資料與隱私權保護，為保障您的權益，謹依據中華民國《個人資料保護法》第 8 條規定，向您告知下列事項：</p>
-
           <h4>一、個人資料蒐集之目的與類別</h4>
           <p>本平台因辦理萬家福五甲店活動報名、身分核對、通知聯繫、保險投保（如適用）及活動品質統計之需要，將蒐集您的識別類個人資料（包括：姓名、電子郵件地址、聯絡電話及自訂問卷回答）。</p>
-
           <h4>二、個人資料利用之期間、地區、對象及方式</h4>
           <ul style="padding-left: 20px;">
-            <li><strong>利用期間：</strong>自您報名成功日起至活動結束後 30 日內（或依相關法令規定之保存期限）。</li>
-            <li><strong>利用地區：</strong>中華民國境內及本平台伺服器/雲端託管服務所在地（Cloudflare 全球節點）。</li>
+            <li><strong>利用期間：</strong>自您報名成功日起至活動結束後 30 日內。</li>
+            <li><strong>利用地區：</strong>中華民國境內及 Cloudflare 全球節點。</li>
             <li><strong>利用對象：</strong>僅限萬家福五甲店授權管理人員。</li>
-            <li><strong>利用方式：</strong>以數位檔案或紙本方式進行活動通知、簡訊/Email確認與名單核對。</li>
+            <li><strong>利用方式：</strong>以數位檔案進行活動通知、簡訊/Email確認與名單核對。</li>
           </ul>
-
           <h4>三、當事人得行使之權利</h4>
-          <p>您得隨時向主辦單位行使個資法第 3 條規定之權利：(1) 查詢或請求閱覽 (2) 請求製給複製本 (3) 請求補充或更正 (4) 請求停止蒐集、處理或利用 (5) 請求刪除。</p>
-
+          <p>您得隨時行使個資法第 3 條規定之權利：查詢、閱覽、複製、補充更正、停止蒐集處理利用、及請求刪除。</p>
           <h4>四、資料安全與加密傳輸</h4>
-          <p>本系統全站採用 TLS 1.3/HTTPS 加密傳輸協定，並託管於 Cloudflare 安全架構之下。未經授權驗證之公開使用者絕無法調閱任何參加者個人資料。</p>
-
+          <p>本系統全站採用 TLS 1.3/HTTPS 加密傳輸協定，託管於 Cloudflare 安全架構之下。</p>
           <h4>五、不提供個資對權益之影響</h4>
-          <p>您得自由選擇是否提供個人資料，惟若拒絕提供必填資料，主辦單位將無法完成您的報名程序與後續服務。</p>
+          <p>若拒絕提供必填資料，主辦單位將無法完成您的報名程序與後續服務。</p>
         </div>
-
         <div style="margin-top:20px;">
           <button class="btn-system-primary" onclick="closeModal('modal-privacy')">我瞭解並同意條款</button>
         </div>
@@ -682,7 +573,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: SUCCESS CONFIRMATION & SCREENSHOT VOUCHER SHEET -->
+  <!-- MODAL: SUCCESS VOUCHER -->
   <div id="modal-success" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-success')">
     <div class="sf-sheet" style="max-width:420px; text-align:center;">
       <div class="sheet-handle"></div>
@@ -691,28 +582,21 @@
           <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h3 class="sheet-title" style="margin-bottom:6px;">🎉 報名成功！</h3>
-        <p class="sheet-description" style="margin-bottom:16px;">我們已收到您的報名資料，萬家福五甲店期待活動當天與您見面。</p>
-
+        <p class="sheet-description" style="margin-bottom:16px;">萬家福五甲店期待活動當天與您見面。</p>
         <div class="voucher-card-box">
-          <div style="font-size:12px; font-weight:700; color:var(--accent-orange); margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;">
-            📸 萬家福五甲店 入場憑證 (請截圖保存)
-          </div>
+          <div style="font-size:12px; font-weight:700; color:var(--accent-orange); margin-bottom:6px;">📸 入場憑證 (請截圖保存)</div>
           <div id="voucher-event-name" style="font-size:15px; font-weight:700; color:var(--label-primary); margin-bottom:4px;"></div>
           <div id="voucher-attendee-info" style="font-size:13.5px; color:var(--label-secondary);"></div>
           <div id="voucher-date-location" style="font-size:12px; color:var(--label-tertiary); margin-top:6px;"></div>
         </div>
-
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:18px;">
-          <button class="btn-system-primary" onclick="exportCurrentEventICS()">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            加入 Apple / Google 行事曆
-          </button>
+          <button class="btn-system-primary" onclick="exportCurrentEventICS()">加入行事曆</button>
           <button class="btn-system-secondary" onclick="closeModal('modal-success'); switchView('list');">完成回到首頁</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
