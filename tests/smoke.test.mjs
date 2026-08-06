@@ -76,7 +76,12 @@ test('GET explicitly distinguishes public masks from complete admin registration
         bind() { return statement; },
         async all() {
           if (sql.startsWith('SELECT * FROM events')) return { results: [eventRow] };
-          if (sql.startsWith('SELECT key, value FROM settings')) return { results: [] };
+          if (sql.startsWith('SELECT key, value FROM settings')) {
+            return { results: [
+              { key: 'hero', value: '{}' },
+              { key: 'announcement', value: '{"text":"removed"}' }
+            ] };
+          }
           if (sql.includes('FROM registrations WHERE event_id')) return { results: [registrationRow] };
           return { results: [] };
         }
@@ -88,6 +93,7 @@ test('GET explicitly distinguishes public masks from complete admin registration
   const publicData = await (await onRequestGet({ request: new Request('https://example.test/api/events'), env })).json();
   assert.equal(publicData.viewer, 'public');
   assert.deepEqual(publicData.events[0].registrations, [{}]);
+  assert.deepEqual(Object.keys(publicData.settings), ['hero']);
 
   const loginData = await (await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env)).json();
   const adminData = await (await onRequestGet({

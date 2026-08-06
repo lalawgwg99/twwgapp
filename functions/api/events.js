@@ -171,9 +171,14 @@ export async function onRequestGet({ request, env }) {
   try {
     const [{ results = [] }, { results: settingRows = [] }] = await Promise.all([
       env.DB.prepare("SELECT * FROM events ORDER BY date ASC, created_at DESC").all(),
-      env.DB.prepare("SELECT key, value FROM settings").all()
+      env.DB.prepare("SELECT key, value FROM settings WHERE key IN ('hero', 'quickLinks')").all()
     ]);
-    const settings = Object.fromEntries(settingRows.map(row => [row.key, parseJson(row.value, {})]));
+    const allowedSettingKeys = new Set(["hero", "quickLinks"]);
+    const settings = Object.fromEntries(
+      settingRows
+        .filter(row => allowedSettingKeys.has(row.key))
+        .map(row => [row.key, parseJson(row.value, {})])
+    );
     const events = await Promise.all(results.map(async (row) => {
       const { results: registrations = [] } = await env.DB.prepare(
         `SELECT id, name, email, phone, is_proxy, proxy_name, proxy_email, answers,
