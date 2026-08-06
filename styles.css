@@ -193,6 +193,18 @@ html, body {
   gap: 14px;
 }
 
+.brand-home-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: var(--radius-s);
+  text-decoration: none;
+}
+
+.brand-home-link:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: 3px;
+}
+
 .brand-logo-img {
   height: 54px;
   width: auto;
@@ -388,14 +400,9 @@ html, body {
 .hero-poster-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   display: block;
-  transition: transform 400ms var(--ease-spring);
-}
-
-.hero-poster-box:hover .hero-poster-img {
-  transform: scale(1.012);
 }
 
 /* Action & Countdown Card below poster */
@@ -2548,7 +2555,7 @@ textarea:focus-visible,
   }
 
   .hero-poster-box {
-    aspect-ratio: 2 / 1;
+    aspect-ratio: 4 / 1;
   }
 
   .hero-action-card {

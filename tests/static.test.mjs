@@ -30,7 +30,7 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260806_pro3/);
+  assert.match(html, /styles\.css\?v=20260806_pro4/);
   assert.match(html, /app\.js\?v=20260806_pro3/);
 });
 
@@ -45,4 +45,10 @@ test('Hero scheduling and event image controls are complete', () => {
   assert.match(html, /id="hero-input-enddate"/);
   assert.match(html, /id="hero-input-countdown-enabled"/);
   assert.match(html, /id="edit-event-img-file"/);
+});
+
+test('Hero image is never cropped and the logo links home', () => {
+  assert.match(css, /\.hero-poster-img\s*\{[^}]*object-fit:\s*contain/s);
+  assert.doesNotMatch(css, /\.hero-poster-box\s*\{[^}]*aspect-ratio:\s*2\s*\/\s*1/s);
+  assert.match(html, /<a href="\/" class="brand-home-link"[^>]*aria-label="回到萬家福五甲店活動首頁"/);
 });
