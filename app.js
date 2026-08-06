@@ -1,12 +1,12 @@
 /**
  * Apple Native (SwiftUI Style) Event Registration & Management Platform
- * 萬家福五甲店 (Prosperity Plaza Wujia Branch) Official Store Portal & Dynamic Quick Links Engine
+ * 萬家福五甲店 (Prosperity Plaza Wujia Branch) Official Store Portal & Dynamic Custom Categories
  */
 
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'twwgapp_wujia_store_events_v9';
+  const STORAGE_KEY = 'twwgapp_wujia_store_events_v10';
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
   const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const QUICK_LINKS_KEY = 'twwgapp_quick_links_v2';
@@ -51,7 +51,7 @@
     {
       id: 'wujia-1',
       name: '萬家福五甲店 2026 會員週年慶尊榮驚喜抽獎會',
-      category: '體驗',
+      category: '體驗試吃',
       customBadge: '五甲店獨家 7折',
       priceTier: '憑會員卡免費參加',
       description: '萬家福五甲店深耕在地 20 週年！現場舉辦頂級食材試吃、好禮抽獎與五甲店限定滿額折扣送，邀請全家大小一同共襄盛舉。',
@@ -75,7 +75,7 @@
     {
       id: 'wujia-2',
       name: '萬家福五甲店 全球特選名酒與起司品鑑試飲會',
-      category: '體驗',
+      category: '體驗試吃',
       customBadge: '限時尊榮 VIP',
       priceTier: '會員價 NT$ 399',
       description: '由萬家福侍酒師帶領品鑑智利、法國頂級莊園紅酒與嚴選熟成起司，現場購買享五甲店獨家 85 折優惠。',
@@ -97,7 +97,7 @@
     {
       id: 'wujia-3',
       name: '有機小農產地直送試吃與夏日輕食料理教室',
-      category: '講座',
+      category: '健康講座',
       customBadge: '食材包全送',
       priceTier: '免費體驗',
       description: '邀請高雄在地有機農夫與知名廚師，指導如何挑選當季安心蔬菜，並現場實作低卡夏日沙拉與主廚特調醬汁。',
@@ -119,7 +119,7 @@
     {
       id: 'wujia-4',
       name: '五甲店 暑期親子彩繪與超輕黏土創意樂園',
-      category: '藝文',
+      category: '親子手作',
       customBadge: '親子好玩',
       priceTier: '材料費 NT$ 150',
       description: '專為爸爸媽媽與小朋友設計的夏日手作課程！老師現場教學捏塑水果公仔與海洋世界，成品可直接帶回家。',
@@ -141,7 +141,7 @@
     {
       id: 'wujia-5',
       name: '萬家福頂樓空中花園 晨間舒活瑜伽與元氣早餐會',
-      category: '運動',
+      category: '晨間瑜伽',
       customBadge: '附萬家福鮮採早餐',
       priceTier: '會員特惠 NT$ 200',
       description: '在萬家福五甲店空中花園享受清晨陽光，由專業瑜伽導師引導舒展肩頸，課後享用萬家福現烤麵包與有機鮮果汁。',
@@ -161,7 +161,7 @@
     {
       id: 'wujia-6',
       name: '萬家福精品咖啡豆 手沖風味與居家烘焙巡迴講座',
-      category: '講座',
+      category: '健康講座',
       customBadge: '送莊園咖啡豆小樣',
       priceTier: '免費入場',
       description: '國際 Q Grader 咖啡品評師現場講解 5 款產區莊園豆風味，學習沖煮金盃法則，參加者每位免費贈送 50g 嚴選豆。',
@@ -179,7 +179,7 @@
     {
       id: 'wujia-7',
       name: '五甲店 戶外露營裝備展示與快速搭帳實作體驗',
-      category: '戶外',
+      category: '戶外展示',
       customBadge: '露營迷必參加',
       priceTier: '免費參加',
       description: '萬家福五甲店戶外運動專區特展！現場展出 2026 最新款一秒速開帳篷、露營焚火台與行動廚房，專人實機教學。',
@@ -197,7 +197,7 @@
     {
       id: 'wujia-8',
       name: '萬家福五甲店 烘焙坊 法式水果塔與泡芙手作課',
-      category: '藝文',
+      category: '親子手作',
       customBadge: '烘焙師親授',
       priceTier: '材料費 NT$ 350',
       description: '萬家福金牌烘焙師手把手指導捏塔皮、煮卡士達醬與新鮮水果擺盤，打造屬於您獨一無二的五甲店法式精緻甜點。',
@@ -612,15 +612,37 @@
     }
   };
 
+  // DYNAMIC CATEGORIES RENDERER
+  function renderCategoryPills() {
+    const events = loadEventsData();
+    const pillsContainer = document.getElementById('category-pills');
+    if (!pillsContainer) return;
+
+    // Collect unique category names from events
+    const categoriesSet = new Set();
+    events.forEach(ev => {
+      if (ev.category && ev.category.trim()) {
+        categoriesSet.add(ev.category.trim());
+      }
+    });
+
+    const uniqueCategories = Array.from(categoriesSet);
+
+    pillsContainer.innerHTML = `
+      <button class="pill-btn ${selectedCategory === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">全部</button>
+      <button class="pill-btn ${selectedCategory === 'available' ? 'active' : ''}" onclick="filterByCategory('available')">🔥 可報名</button>
+      ${uniqueCategories.map(cat => `
+        <button class="pill-btn ${selectedCategory === cat ? 'active' : ''}" onclick="filterByCategory('${escapeHTML(cat)}')">
+          ${escapeHTML(cat)}
+        </button>
+      `).join('')}
+    `;
+  }
+
   // Filter & Search
   window.filterByCategory = function (category) {
     selectedCategory = category;
-    const pills = document.querySelectorAll('.category-pills .pill-btn');
-    pills.forEach(pill => pill.classList.remove('active'));
-
-    const btn = Array.from(pills).find(p => p.textContent.includes(category) || (category === 'all' && p.textContent === '全部'));
-    if (btn) btn.classList.add('active');
-
+    renderCategoryPills();
     renderEventsGrid();
   };
 
@@ -631,6 +653,8 @@
 
   // Render Events Grid Wall
   function renderEventsGrid() {
+    renderCategoryPills();
+
     const events = loadEventsData();
     const container = document.getElementById('events-grid');
     const countLabel = document.getElementById('event-count-label');
@@ -649,6 +673,7 @@
     if (searchQuery) {
       filtered = filtered.filter(ev =>
         ev.name.toLowerCase().includes(searchQuery) ||
+        (ev.category && ev.category.toLowerCase().includes(searchQuery)) ||
         (ev.description && ev.description.toLowerCase().includes(searchQuery)) ||
         (ev.customBadge && ev.customBadge.toLowerCase().includes(searchQuery)) ||
         (ev.location && ev.location.toLowerCase().includes(searchQuery))
@@ -685,7 +710,7 @@
               <span class="sf-badge badge-status-${status.type}">${status.label}</span>
               <div style="display:flex; gap:4px;">
                 ${customTag}
-                <span class="sf-badge badge-category">${categoryTag}</span>
+                <span class="sf-badge badge-category">${escapeHTML(categoryTag)}</span>
               </div>
             </div>
           </div>
@@ -741,7 +766,7 @@
     }
 
     document.getElementById('edit-event-name').value = ev.name || '';
-    document.getElementById('edit-event-category').value = ev.category || '音樂';
+    document.getElementById('edit-event-category').value = ev.category || '體驗試吃';
     document.getElementById('edit-event-date').value = ev.date || '';
     document.getElementById('edit-event-start-time').value = ev.startDate || '';
     document.getElementById('edit-event-end-time').value = ev.endDate || '';
@@ -767,7 +792,7 @@
     if (!ev) return;
 
     const name = document.getElementById('edit-event-name').value.trim();
-    const category = document.getElementById('edit-event-category').value;
+    const category = document.getElementById('edit-event-category').value.trim();
     const date = document.getElementById('edit-event-date').value;
     const startDate = document.getElementById('edit-event-start-time').value;
     const endDate = document.getElementById('edit-event-end-time').value;
@@ -778,8 +803,8 @@
     const maxPeople = parseInt(document.getElementById('edit-event-max').value, 10);
     const image = document.getElementById('edit-event-img-url').value.trim() || ev.image;
 
-    if (!name || !date || !endDate || !maxPeople || maxPeople < 1) {
-      showToast('請填寫完整必填欄位與報名截止時間', true);
+    if (!name || !category || !date || !endDate || !maxPeople || maxPeople < 1) {
+      showToast('請填寫完整必填欄位、自訂分類與報名截止時間', true);
       return;
     }
 
@@ -1252,7 +1277,7 @@
     }
 
     const name = document.getElementById('event-name').value.trim();
-    const category = document.getElementById('event-category').value;
+    const category = document.getElementById('event-category').value.trim();
     const date = document.getElementById('event-date').value;
     const startDate = document.getElementById('event-start-time').value;
     const endDate = document.getElementById('event-end-time').value;
@@ -1271,8 +1296,8 @@
       image = filePreviewDataUrl;
     }
 
-    if (!name || !date || !endDate || !maxPeople || maxPeople < 1) {
-      showToast('請填寫完整必填欄位與報名截止時間', true);
+    if (!name || !category || !date || !endDate || !maxPeople || maxPeople < 1) {
+      showToast('請填寫完整必填欄位、自訂分類與報名截止時間', true);
       return;
     }
 

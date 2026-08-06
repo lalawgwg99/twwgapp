@@ -68,15 +68,9 @@
           <input type="text" id="search-input" class="search-input" placeholder="搜尋萬家福五甲店活動、週年慶、試吃、親子手作..." oninput="handleSearchInput(event)">
         </div>
 
-        <!-- Category Pills Filter -->
+        <!-- Dynamic Category Pills Filter Container -->
         <div class="category-pills" id="category-pills">
-          <button class="pill-btn active" onclick="filterByCategory('all')">全部</button>
-          <button class="pill-btn" onclick="filterByCategory('available')">🔥 可報名</button>
-          <button class="pill-btn" onclick="filterByCategory('體驗')">☕️ 體驗試吃</button>
-          <button class="pill-btn" onclick="filterByCategory('藝文')">🎨 親子手作</button>
-          <button class="pill-btn" onclick="filterByCategory('講座')">💡 健康講座</button>
-          <button class="pill-btn" onclick="filterByCategory('戶外')">⛰️ 戶外展示</button>
-          <button class="pill-btn" onclick="filterByCategory('運動')">🧘 晨間瑜伽</button>
+          <!-- Dynamically generated from events by app.js -->
         </div>
       </section>
 
@@ -217,14 +211,16 @@
 
                   <div class="form-row-2">
                     <div class="field-group">
-                      <label class="field-label" for="event-category">活動分類</label>
-                      <select id="event-category" class="sf-select">
-                        <option value="體驗">☕️ 體驗試吃</option>
-                        <option value="藝文">🎨 親子手作</option>
-                        <option value="講座">💡 健康講座</option>
-                        <option value="戶外">⛰️ 戶外展示</option>
-                        <option value="運動">🧘 晨間瑜伽</option>
-                      </select>
+                      <label class="field-label" for="event-category">自訂活動分類名稱 <span class="req">*</span></label>
+                      <input type="text" id="event-category" class="sf-input" required placeholder="可自由填寫分類（如：體驗試吃、特賣會、長輩健康）" list="category-suggestions">
+                      <datalist id="category-suggestions">
+                        <option value="體驗試吃"></option>
+                        <option value="親子手作"></option>
+                        <option value="健康講座"></option>
+                        <option value="特賣折扣"></option>
+                        <option value="戶外展示"></option>
+                        <option value="晨間瑜伽"></option>
+                      </datalist>
                     </div>
                     <div class="field-group">
                       <label class="field-label" for="event-date">活動舉辦日期 <span class="req">*</span></label>
@@ -402,14 +398,8 @@
 
             <div class="form-row-2">
               <div class="field-group">
-                <label class="field-label" for="edit-event-category">活動分類</label>
-                <select id="edit-event-category" class="sf-select">
-                  <option value="體驗">☕️ 體驗試吃</option>
-                  <option value="藝文">🎨 親子手作</option>
-                  <option value="講座">💡 健康講座</option>
-                  <option value="戶外">⛰️ 戶外展示</option>
-                  <option value="運動">🧘 晨間瑜伽</option>
-                </select>
+                <label class="field-label" for="edit-event-category">自訂活動分類名稱 <span class="req">*</span></label>
+                <input type="text" id="edit-event-category" class="sf-input" required placeholder="可自由填寫分類（如：體驗試吃、特賣會、長輩健康）">
               </div>
               <div class="field-group">
                 <label class="field-label" for="edit-event-date">活動舉辦日期 <span class="req">*</span></label>
