@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>萬家福五甲店 - 官方活動與數位服務中心</title>
   <meta name="description" content="萬家福五甲店官方活動報名與會員服務中心 (高雄市鳳山區富榮里林森路291號)。">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
   <div class="app-viewport">
@@ -13,14 +13,26 @@
     <!-- Toast Capsule Notification -->
     <div id="toast" class="toast-capsule" role="alert"></div>
 
-    <!-- Apple Top Navigation Bar -->
+    <!-- Apple Top Status Line (門市極簡資訊) -->
+    <div class="apple-status-bar">
+      <div class="status-left">
+        <span>📍 830高雄市鳳山區富榮里林森路291號</span>
+        <span class="dot-separator">•</span>
+        <span>⏰ 每日 09:00 - 23:00</span>
+      </div>
+      <div class="status-right">
+        <a href="tel:077138508" class="store-phone-link">📞 門市專線：(07) 7138508</a>
+      </div>
+    </div>
+
+    <!-- Apple Main Header Bar -->
     <header class="navigation-bar">
       <div class="nav-top-row">
         <div class="app-title-group">
-          <img src="assets/logo.png" alt="萬家福五甲店 Logo" class="brand-logo-img">
+          <img src="assets/logo_v2.png?v=2" alt="萬家福五甲店 Logo" class="brand-logo-img">
           <div>
             <h1 class="large-title">萬家福五甲店</h1>
-            <p class="subtitle">門市專屬活動 ‧ 會員服務 ‧ 長輩友善</p>
+            <p class="subtitle">門市專屬活動 ‧ 會員服務 ‧ 長輩友善報名</p>
           </div>
         </div>
 
@@ -37,18 +49,12 @@
         </nav>
       </div>
 
-      <!-- Store Quick Info Banner -->
-      <div class="store-info-banner">
-        <span>📍 門市地址：830高雄市鳳山區富榮里林森路291號 ｜ ⏰ 營業時間：每日 09:00 - 23:00</span>
-        <a href="tel:077138508" class="store-phone-link">📞 門市專線：(07) 7138508</a>
-      </div>
-
-      <!-- Premium Apple Quick Social & Location Links Bar -->
-      <div class="quick-links-bar">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="quick-links-label">數位媒體快搜：</span>
+      <!-- Premium Apple Quick Social & Location Links Card (門市數位媒體中心) -->
+      <div class="quick-links-card">
+        <div class="quick-links-header">
+          <span class="quick-links-label">🌐 門市數位媒體與導航中心：</span>
           <button id="quick-link-edit-btn" class="quick-edit-icon-btn hidden" onclick="openQuickLinksModal()" title="編輯媒體網址">
-            ⚙️ 編輯連結網址
+            ⚙️ 編輯網址
           </button>
         </div>
         <div id="quick-links-pills-container" class="pills-container">
@@ -710,6 +716,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>
