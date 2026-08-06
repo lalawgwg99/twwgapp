@@ -1,6 +1,6 @@
 /**
  * Cloudflare Pages Functions: /api/events
- * Real Server-side Authentication & GAS Bridge Backend
+ * Real Server-side Authentication, Senior-Friendly Phone First & GAS Bridge Backend
  */
 
 const DEFAULT_PASSCODE = "admin888";
@@ -26,14 +26,25 @@ export async function onRequestPost(context) {
       }
     }
 
-    // 2. Public Registration Endpoint
+    // 2. Public Registration Endpoint (Elder Friendly: Phone First & Proxy Support)
     if (action === "register" && env.DB) {
-      const { eventId, name, email, phone, answers } = data;
-      await env.DB.prepare(
-        "INSERT INTO registrations (event_id, name, email, phone, answers, checked_in, registered_at) VALUES (?, ?, ?, ?, ?, 0, ?)"
-      ).bind(eventId, name, email, phone, JSON.stringify(answers || {}), Date.now()).run();
+      const { eventId, attendeeName, attendeePhone, attendeeEmail, isProxy, proxyName, proxyEmail, answers } = data;
 
-      return jsonResponse({ success: true });
+      await env.DB.prepare(
+        "INSERT INTO registrations (event_id, name, email, phone, is_proxy, proxy_name, proxy_email, answers, checked_in, registered_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)"
+      ).bind(
+        eventId,
+        attendeeName,
+        attendeeEmail || "",
+        attendeePhone,
+        isProxy ? 1 : 0,
+        proxyName || "",
+        proxyEmail || "",
+        JSON.stringify(answers || {}),
+        Date.now()
+      ).run();
+
+      return jsonResponse({ success: true, message: "報名成功" });
     }
 
     // 3. Protected Admin Endpoints
@@ -43,10 +54,10 @@ export async function onRequestPost(context) {
       }
 
       if (env.DB) {
-        const { id, name, category, customBadge, priceTier, date, description, maxPeople, location, image, phoneRequired, customQuestions } = data.event;
+        const { id, name, category, customBadge, priceTier, date, description, maxPeople, location, image, customQuestions } = data.event;
         await env.DB.prepare(
-          "INSERT INTO events (id, name, category, custom_badge, price_tier, date, description, max_people, location, image_url, phone_required, custom_questions, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        ).bind(id, name, category, customBadge, priceTier, date, description, maxPeople, location, image, phoneRequired ? 1 : 0, JSON.stringify(customQuestions || []), Date.now()).run();
+          "INSERT INTO events (id, name, category, custom_badge, price_tier, date, description, max_people, location, image_url, phone_required, custom_questions, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)"
+        ).bind(id, name, category, customBadge, priceTier, date, description, maxPeople, location, image, JSON.stringify(customQuestions || []), Date.now()).run();
       }
 
       return jsonResponse({ success: true });
@@ -72,7 +83,7 @@ export async function onRequestGet(context) {
 
       const events = await Promise.all(results.map(async (ev) => {
         const { results: regs } = await env.DB.prepare(
-          "SELECT name, email, phone, answers, checked_in, registered_at FROM registrations WHERE event_id = ?"
+          "SELECT name, email, phone, is_proxy, proxy_name, proxy_email, answers, checked_in, registered_at FROM registrations WHERE event_id = ?"
         ).bind(ev.id).all();
 
         return {
@@ -86,7 +97,7 @@ export async function onRequestGet(context) {
           maxPeople: ev.max_people,
           location: ev.location,
           image: ev.image_url,
-          phoneRequired: ev.phone_required === 1,
+          phoneRequired: true,
           customQuestions: ev.custom_questions ? JSON.parse(ev.custom_questions) : [],
           // SANITIZE IF NOT ADMIN ON SERVER
           registrations: isAdmin ? (regs || []) : (regs ? regs.map(() => ({})) : [])

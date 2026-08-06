@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Apple Native (SwiftUI Design System) CSS - Commercial Pro Edition
+   Apple Native (SwiftUI Design System) CSS - Senior Friendly & Commercial Pro
    Compliant with Apple Human Interface Guidelines (HIG)
    ========================================================================== */
 
@@ -16,8 +16,8 @@
   --separator-opaque: #C6C6C8;
 
   --label-primary: #000000;
-  --label-secondary: rgba(60, 60, 67, 0.60);
-  --label-tertiary: rgba(60, 60, 67, 0.30);
+  --label-secondary: rgba(60, 60, 67, 0.65);
+  --label-tertiary: rgba(60, 60, 67, 0.35);
   --label-quaternary: rgba(60, 60, 67, 0.18);
 
   /* Apple Accent Colors */
@@ -64,8 +64,8 @@
     --separator-opaque: #38383A;
 
     --label-primary: #FFFFFF;
-    --label-secondary: rgba(235, 235, 245, 0.60);
-    --label-tertiary: rgba(235, 235, 245, 0.30);
+    --label-secondary: rgba(235, 235, 245, 0.65);
+    --label-tertiary: rgba(235, 235, 245, 0.35);
     --label-quaternary: rgba(235, 235, 245, 0.16);
 
     --accent-blue: #0A84FF;
@@ -78,9 +78,7 @@
   }
 }
 
-/* ==========================================================================
-   Reset & Base Layout
-   ========================================================================== */
+/* Reset & Base Layout */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -93,8 +91,8 @@ html, body {
   background-color: var(--system-bg);
   color: var(--label-primary);
   font-family: var(--font-family);
-  font-size: 15px;
-  line-height: 1.47059;
+  font-size: 15.5px;
+  line-height: 1.5;
   font-weight: 400;
   letter-spacing: -0.015em;
   min-height: 100vh;
@@ -107,9 +105,7 @@ html, body {
   padding: 24px 20px 60px;
 }
 
-/* ==========================================================================
-   Apple Header & Navigation Bar
-   ========================================================================== */
+/* Navigation Bar */
 .navigation-bar {
   display: flex;
   flex-direction: column;
@@ -130,8 +126,8 @@ html, body {
 }
 
 .app-icon {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-xs);
   background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
   display: flex;
@@ -154,7 +150,7 @@ html, body {
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--label-secondary);
   font-weight: 400;
 }
@@ -173,9 +169,9 @@ html, body {
 .segment-btn {
   border: none;
   background: transparent;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 7px;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--label-secondary);
   cursor: pointer;
@@ -203,9 +199,7 @@ html, body {
   font-weight: 600;
 }
 
-/* ==========================================================================
-   Admin Toolbar & Sub Navigation
-   ========================================================================== */
+/* Admin Toolbar & Sub Navigation */
 .admin-toolbar-card {
   display: flex;
   justify-content: space-between;
@@ -270,9 +264,7 @@ html, body {
   font-weight: 600;
 }
 
-/* ==========================================================================
-   Filter Bar & Search Bar (SwiftUI Native Style)
-   ========================================================================== */
+/* Filter Bar & Search Bar */
 .controls-stack {
   display: flex;
   flex-direction: column;
@@ -303,12 +295,12 @@ html, body {
 
 .search-input {
   width: 100%;
-  padding: 9px 12px 9px 36px;
+  padding: 10px 12px 10px 36px;
   border-radius: var(--radius-s);
   border: 1px solid var(--separator);
   background: var(--surface-primary);
   color: var(--label-primary);
-  font-size: 14px;
+  font-size: 15px;
   font-family: inherit;
   outline: none;
   transition: border-color var(--t-fast) var(--ease-spring), box-shadow var(--t-fast) var(--ease-spring);
@@ -336,7 +328,7 @@ html, body {
   border: 1px solid var(--separator);
   background: var(--surface-primary);
   color: var(--label-secondary);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
   padding: 6px 14px;
   border-radius: var(--radius-full);
@@ -358,9 +350,7 @@ html, body {
   font-weight: 600;
 }
 
-/* ==========================================================================
-   Event Grid Layout & Custom Badges
-   ========================================================================== */
+/* Event Grid Layout */
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -430,7 +420,7 @@ html, body {
 .card-media {
   position: relative;
   width: 100%;
-  height: 140px;
+  height: 145px;
   background-size: cover;
   background-position: center;
   background-color: var(--surface-tertiary);
@@ -477,7 +467,7 @@ html, body {
 }
 
 .badge-custom {
-  background: rgba(0, 122, 255, 0.75);
+  background: rgba(0, 122, 255, 0.85);
   color: #FFFFFF;
 }
 
@@ -510,7 +500,7 @@ html, body {
 }
 
 .card-title {
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 600;
   color: var(--label-primary);
   line-height: 1.35;
@@ -533,7 +523,7 @@ html, body {
   flex: 1;
 }
 
-/* SwiftUI ProgressView System Indicator */
+/* Progress View */
 .progress-block {
   margin-top: auto;
 }
@@ -569,6 +559,16 @@ html, body {
   transition: width var(--t-medium) var(--ease-spring);
 }
 
+/* Senior Screenshot Voucher Box */
+.voucher-card-box {
+  background: var(--surface-secondary);
+  border: 2px dashed var(--accent-orange);
+  border-radius: var(--radius-m);
+  padding: 16px 14px;
+  margin: 12px 0;
+  text-align: center;
+}
+
 /* Empty State */
 .empty-state-view {
   grid-column: 1 / -1;
@@ -598,9 +598,7 @@ html, body {
   color: var(--label-secondary);
 }
 
-/* ==========================================================================
-   Forms & Inset Grouped Sections (Apple HIG Style)
-   ========================================================================== */
+/* Forms & Inset Grouped Sections */
 .form-card {
   background: var(--surface-primary);
   border-radius: var(--radius-m);
@@ -611,7 +609,7 @@ html, body {
 }
 
 .form-section-title {
-  font-size: 17px;
+  font-size: 17.5px;
   font-weight: 600;
   color: var(--label-primary);
 }
@@ -658,7 +656,7 @@ html, body {
 }
 
 .field-label {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--label-secondary);
   display: flex;
@@ -677,12 +675,12 @@ html, body {
 
 .sf-input, .sf-textarea, .sf-select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 11px 13px;
   border-radius: var(--radius-s);
   border: 1px solid var(--separator);
   background: var(--surface-primary);
   color: var(--label-primary);
-  font-size: 15px;
+  font-size: 15.5px;
   font-family: inherit;
   outline: none;
   transition: border-color var(--t-fast), box-shadow var(--t-fast);
@@ -694,11 +692,11 @@ html, body {
 }
 
 .field-help {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--label-tertiary);
 }
 
-/* Questionnaire Question Item Box */
+/* Question Item Card */
 .question-item-card {
   background: var(--surface-primary);
   border: 1px solid var(--separator);
@@ -716,7 +714,7 @@ html, body {
   align-items: center;
 }
 
-/* Image Upload Tabs Component */
+/* Upload Method Selector */
 .upload-method-selector {
   display: flex;
   gap: 6px;
@@ -724,7 +722,7 @@ html, body {
 }
 
 .upload-tab {
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: var(--radius-xs);
   font-size: 12px;
   font-weight: 500;
@@ -771,20 +769,20 @@ html, body {
   font-weight: 500;
 }
 
-/* Checkbox & Switch Style */
+/* Checkbox Style */
 .checkbox-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--label-secondary);
   cursor: pointer;
   user-select: none;
 }
 
 .checkbox-row input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 19px;
+  height: 19px;
   accent-color: var(--accent-blue);
   cursor: pointer;
 }
@@ -798,21 +796,19 @@ html, body {
   text-decoration: underline;
 }
 
-/* ==========================================================================
-   Buttons (Apple Native Touch Styles)
-   ========================================================================== */
+/* Buttons */
 .btn-system-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 12px 18px;
+  padding: 12.5px 18px;
   border-radius: var(--radius-s);
   border: none;
   background: var(--accent-blue);
   color: #FFFFFF;
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -839,7 +835,7 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 9px 16px;
+  padding: 9.5px 16px;
   border-radius: var(--radius-s);
   border: 1px solid var(--separator);
   background: var(--surface-secondary);
@@ -917,9 +913,7 @@ html, body {
   color: var(--label-primary);
 }
 
-/* ==========================================================================
-   Modals (iOS Sheet Style)
-   ========================================================================== */
+/* Modals */
 .sf-modal-backdrop {
   display: none;
   position: fixed;
@@ -1035,7 +1029,7 @@ html, body {
   flex: 1;
 }
 
-/* Privacy Policy Modal Content */
+/* Privacy Document */
 .privacy-document {
   font-size: 13px;
   color: var(--label-secondary);
@@ -1055,7 +1049,7 @@ html, body {
   margin-top: 4px;
 }
 
-/* Data Table for Management View */
+/* Data Table */
 .sf-table-wrapper {
   border-radius: var(--radius-s);
   border: 1px solid var(--separator);
@@ -1097,7 +1091,7 @@ html, body {
   color: var(--label-tertiary);
 }
 
-/* Toast Notifications (iOS Capsule Banner) */
+/* Toast Capsule Banner */
 .toast-capsule {
   position: fixed;
   top: 20px;

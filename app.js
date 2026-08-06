@@ -1,13 +1,12 @@
 /**
  * Apple Native (SwiftUI Style) Event Registration & Management Platform
- * Commercial Pro Edition - Powered by Google Forms level Questionnaire Engine
- * Integrated with Server-Side Verification & Google Apps Script (GAS) Backend Architecture
+ * Senior-Friendly Edition - Phone First, Proxy Registration, Onsite Rapid Check-in & GAS Automated Emailing
  */
 
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'twwgapp_events_pro_v4';
+  const STORAGE_KEY = 'twwgapp_events_pro_v5';
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
   const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const DEFAULT_ADMIN_PASSCODE = 'admin888';
@@ -43,7 +42,7 @@
       id: 'demo-1',
       name: '2026 夏季草地音樂祭：搖滾與管弦交響',
       category: '音樂',
-      customBadge: '熱門限定 7折',
+      customBadge: '長輩友善 7折',
       priceTier: '早鳥優惠 NT$ 500',
       description: '戶外草地音樂盛會，邀請 12 組國內獨立樂團與管弦樂團跨界演出，含現場手作市集與精釀啤酒攤位。',
       maxPeople: 200,
@@ -73,14 +72,14 @@
       date: '2026-08-25',
       location: '台北市大安區永康街咖啡實驗室',
       image: DEFAULT_IMAGES[1],
-      phoneRequired: false,
+      phoneRequired: true,
       customQuestions: [
         { id: 'q1', title: '是否有手沖咖啡經驗', type: 'select', options: '完全零基礎, 居家自沖玩家, 咖啡從業人員', required: false }
       ],
       createdAt: Date.now() - 86400000 * 4,
       registrations: [
         { name: '周宗翰', email: 'chou@example.com', phone: '0911-222-333', answers: { q1: '居家自沖玩家' }, checkedIn: true, registeredAt: Date.now() - 7200000 },
-        { name: '張家豪', email: 'chang@example.com', phone: '', answers: { q1: '完全零基礎' }, checkedIn: false, registeredAt: Date.now() - 3600000 }
+        { name: '張家豪', email: 'chang@example.com', phone: '0955-666-777', answers: { q1: '完全零基礎' }, checkedIn: false, registeredAt: Date.now() - 3600000 }
       ]
     },
     {
@@ -134,7 +133,7 @@
       date: '2026-09-02',
       location: '台北市信義區微風南山 3 樓會議廳',
       image: DEFAULT_IMAGES[4],
-      phoneRequired: false,
+      phoneRequired: true,
       customQuestions: [
         { id: 'q1', title: '公司統編與發票抬頭 (開立發票用)', type: 'text', required: false }
       ],
@@ -217,7 +216,6 @@
       return;
     }
 
-    // Verify token with Server Backend (/api/events or GAS)
     try {
       const gasUrl = getGASUrl();
       const endpoint = gasUrl || '/api/events';
@@ -241,7 +239,6 @@
         sessionStorage.removeItem(ADMIN_TOKEN_KEY);
       }
     } catch (e) {
-      // Offline fallback: verify signed token format
       if (savedToken && savedToken.startsWith('auth_token_')) {
         isAdminAuthenticated = true;
         adminSessionToken = savedToken;
@@ -305,7 +302,6 @@
       console.warn('Backend API request failed, checking local server fallback:', err);
     }
 
-    // Local / Cloudflare verification fallback
     if (passcode === DEFAULT_ADMIN_PASSCODE) {
       const fallbackToken = 'auth_token_' + Date.now();
       sessionStorage.setItem(ADMIN_TOKEN_KEY, fallbackToken);
@@ -452,13 +448,36 @@
   window.switchAdminSubView = function (subView) {
     activeAdminSubView = subView;
     document.getElementById('admin-tab-manage').classList.toggle('active', subView === 'manage');
+    document.getElementById('admin-tab-onsite').classList.toggle('active', subView === 'onsite');
     document.getElementById('admin-tab-create').classList.toggle('active', subView === 'create');
 
     document.getElementById('admin-sub-manage').classList.toggle('hidden', subView !== 'manage');
+    document.getElementById('admin-sub-onsite').classList.toggle('hidden', subView !== 'onsite');
     document.getElementById('admin-sub-create').classList.toggle('hidden', subView !== 'create');
 
     if (subView === 'manage') {
       renderAdminRegistrations();
+    } else if (subView === 'onsite') {
+      renderOnsiteEventSelector();
+    }
+  };
+
+  // Proxy Fields Toggle
+  window.toggleProxyFieldsUI = function () {
+    const isProxy = document.getElementById('reg-is-proxy').checked;
+    const proxyBox = document.getElementById('proxy-fields-box');
+    const proxyName = document.getElementById('proxy-name');
+    const proxyEmail = document.getElementById('proxy-email');
+    const attendeeLabel = document.getElementById('attendee-name-label');
+
+    proxyBox.classList.toggle('hidden', !isProxy);
+    proxyName.required = isProxy;
+    proxyEmail.required = isProxy;
+
+    if (isProxy) {
+      attendeeLabel.innerHTML = '長輩 / 實際參加者姓名 <span class="req">*</span>';
+    } else {
+      attendeeLabel.innerHTML = '參加者姓名 <span class="req">*</span>';
     }
   };
 
@@ -621,18 +640,9 @@
     document.getElementById('reg-form-event-name').textContent = ev.name;
     document.getElementById('active-registration-form').reset();
 
-    // Phone field required status
-    const phoneBadge = document.getElementById('reg-phone-badge');
-    const phoneInput = document.getElementById('reg-phone');
-    if (ev.phoneRequired !== false) {
-      phoneBadge.className = 'req';
-      phoneBadge.textContent = '*';
-      phoneInput.required = true;
-    } else {
-      phoneBadge.className = 'opt';
-      phoneBadge.textContent = '(選填)';
-      phoneInput.required = false;
-    }
+    // Reset proxy fields
+    document.getElementById('reg-is-proxy').checked = false;
+    toggleProxyFieldsUI();
 
     // Render Dynamic Questionnaire Questions
     const container = document.getElementById('dynamic-questions-form-container');
@@ -695,27 +705,43 @@
     openModal('modal-privacy');
   };
 
-  // Submit Registration
+  // Submit Public Registration (Elder-Friendly: Phone Required, Email Optional, Deduplication check by Phone)
   window.submitRegistration = function (e) {
     e.preventDefault();
     if (!activeEventId) return;
 
     const privacyCheck = document.getElementById('reg-privacy-check');
     if (!privacyCheck.checked) {
-      showToast('請勾選同意個人資料保護與隱私權條款', true);
+      showToast('請勾選同意個人資料保護條款', true);
       return;
     }
 
-    const name = document.getElementById('reg-name').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const phone = document.getElementById('reg-phone').value.trim();
+    const isProxy = document.getElementById('reg-is-proxy').checked;
+    const proxyName = isProxy ? document.getElementById('proxy-name').value.trim() : '';
+    const proxyEmail = isProxy ? document.getElementById('proxy-email').value.trim() : '';
+
+    const attendeeName = document.getElementById('reg-name').value.trim();
+    const attendeePhone = document.getElementById('reg-phone').value.trim();
+    const attendeeEmail = document.getElementById('reg-email').value.trim();
+
+    if (!attendeeName || !attendeePhone) {
+      showToast('請填寫參加者姓名與聯絡電話', true);
+      return;
+    }
+
+    if (isProxy && (!proxyName || !proxyEmail)) {
+      showToast('請填寫代報人姓名與 Email', true);
+      return;
+    }
 
     const events = loadEventsData();
     const ev = events.find(e => e.id === activeEventId);
     if (!ev) return;
 
-    if (ev.phoneRequired !== false && !phone) {
-      showToast('請填寫聯絡電話', true);
+    // Deduplication check by Phone Number for Senior-Friendliness
+    const existingIndex = ev.registrations.findIndex(r => r.phone === attendeePhone);
+    if (existingIndex !== -1) {
+      showToast(`提示：此電話號碼 (${attendeePhone}) 已報名過本活動`, true);
       return;
     }
 
@@ -750,9 +776,12 @@
     }
 
     ev.registrations.push({
-      name,
-      email,
-      phone,
+      name: attendeeName,
+      email: attendeeEmail,
+      phone: attendeePhone,
+      isProxy,
+      proxyName,
+      proxyEmail,
       answers,
       checkedIn: false,
       registeredAt: Date.now()
@@ -760,7 +789,12 @@
 
     saveEventsData(events);
 
-    // Sync to GAS if GAS URL exists
+    // Render Senior Voucher Card for Screenshot saving
+    document.getElementById('voucher-event-name').textContent = ev.name;
+    document.getElementById('voucher-attendee-info').textContent = `參加者：${attendeeName} ｜ 電話：${attendeePhone}`;
+    document.getElementById('voucher-date-location').textContent = `日期：${formatDate(ev.date)} ｜ 地點：${ev.location || '現場活動'}`;
+
+    // Sync to GAS if GAS URL exists (Sends Email via MailApp + Rate Limiting)
     const gasUrl = getGASUrl();
     if (gasUrl) {
       fetch(gasUrl, {
@@ -769,13 +803,75 @@
         body: JSON.stringify({
           action: 'register',
           eventId: ev.id,
-          name, email, phone, answers
+          attendeeName,
+          attendeePhone,
+          attendeeEmail,
+          isProxy,
+          proxyName,
+          proxyEmail,
+          answers
         })
       }).catch(err => console.warn('GAS Sync warning:', err));
     }
 
     closeModal('modal-register-form');
     openModal('modal-success');
+    renderEventsGrid();
+  };
+
+  // Onsite Rapid Registration (Admin Walk-In Mode)
+  function renderOnsiteEventSelector() {
+    const events = loadEventsData();
+    const selector = document.getElementById('onsite-event-selector');
+    if (!events || events.length === 0) {
+      selector.innerHTML = '<option value="">尚無活動</option>';
+      return;
+    }
+    selector.innerHTML = events.map(e => `
+      <option value="${e.id}" ${e.id === activeEventId ? 'selected' : ''}>
+        ${escapeHTML(e.name)} (${e.registrations.length}/${e.maxPeople}人)
+      </option>
+    `).join('');
+  }
+
+  window.submitOnsiteRegistration = function (e) {
+    e.preventDefault();
+    if (!isAdminAuthenticated) {
+      showToast('權限不足', true);
+      return;
+    }
+
+    const eventId = document.getElementById('onsite-event-selector').value;
+    const name = document.getElementById('onsite-name').value.trim();
+    const phone = document.getElementById('onsite-phone').value.trim();
+    const autoCheckin = document.getElementById('onsite-auto-checkin').checked;
+
+    if (!eventId || !name || !phone) {
+      showToast('請填寫姓名與電話', true);
+      return;
+    }
+
+    const events = loadEventsData();
+    const ev = events.find(e => e.id === eventId);
+    if (!ev) return;
+
+    ev.registrations.push({
+      name,
+      email: '',
+      phone,
+      isProxy: false,
+      answers: {},
+      checkedIn: autoCheckin,
+      registeredAt: Date.now()
+    });
+
+    saveEventsData(events);
+
+    document.getElementById('onsite-name').value = '';
+    document.getElementById('onsite-phone').value = '';
+
+    showToast(`⚡️ 已完成『${name}』現場快速報名與報到！`);
+    renderAdminDashboard();
     renderEventsGrid();
   };
 
@@ -934,7 +1030,6 @@
     const location = document.getElementById('event-location').value.trim();
     const priceTier = document.getElementById('event-price-tier').value.trim();
     const customBadge = document.getElementById('event-custom-badge').value.trim();
-    const phoneRequired = document.getElementById('field-phone-required').checked;
     const maxPeople = parseInt(document.getElementById('event-max').value, 10);
 
     let image = DEFAULT_IMAGES[Math.floor(Math.random() * DEFAULT_IMAGES.length)];
@@ -963,7 +1058,7 @@
       maxPeople,
       location: location || '現場活動',
       image,
-      phoneRequired,
+      phoneRequired: true,
       customQuestions: [...builderQuestions],
       createdAt: Date.now(),
       registrations: []
@@ -1061,8 +1156,9 @@
             <thead>
               <tr>
                 <th>狀態/簽到</th>
-                <th>姓名</th>
-                <th>Email / 電話</th>
+                <th>參加者姓名</th>
+                <th>電話 / Email</th>
+                <th>代報模式</th>
                 ${qTitles.map(t => `<th>${escapeHTML(t)}</th>`).join('')}
                 <th>報名日期</th>
               </tr>
@@ -1071,6 +1167,7 @@
               ${ev.registrations.map((r, i) => {
                 const btnClass = r.checkedIn ? 'btn-checkin-status checked' : 'btn-checkin-status unchecked';
                 const statusText = r.checkedIn ? '✓ 已報到' : '點擊簽到';
+                const proxyText = r.isProxy ? `<span class="cell-sub" style="color:var(--accent-purple);">代報 (${escapeHTML(r.proxyName || '')})</span>` : '親自報名';
 
                 return `
                   <tr>
@@ -1079,9 +1176,10 @@
                     </td>
                     <td style="font-weight:600;">${escapeHTML(r.name)}</td>
                     <td>
-                      <div>${escapeHTML(r.email)}</div>
-                      <div class="cell-sub">${escapeHTML(r.phone || '無提供')}</div>
+                      <div>${escapeHTML(r.phone || '無電話')}</div>
+                      <div class="cell-sub">${escapeHTML(r.email || '無Email')}</div>
                     </td>
+                    <td>${proxyText}</td>
                     ${(ev.customQuestions || []).map(q => `
                       <td class="cell-sub">${escapeHTML((r.answers && r.answers[q.id]) || '-')}</td>
                     `).join('')}
@@ -1123,16 +1221,19 @@
     }
 
     const qList = ev.customQuestions || [];
-    const headers = ['活動名稱', '報名姓名', 'Email', '電話', '簽到狀態', ...qList.map(q => q.title), '報名時間'];
+    const headers = ['活動名稱', '參加者姓名', '電話', 'Email', '簽到狀態', '代報名狀態', '代報人姓名', '代報人Email', ...qList.map(q => q.title), '報名時間'];
 
     const rows = ev.registrations.map(r => {
       const qAnswers = qList.map(q => (r.answers && r.answers[q.id]) ? r.answers[q.id] : '');
       return [
         ev.name,
         r.name,
-        r.email,
         r.phone || '',
+        r.email || '',
         r.checkedIn ? '已報到' : '未報到',
+        r.isProxy ? '代報名' : '親自報名',
+        r.proxyName || '',
+        r.proxyEmail || '',
         ...qAnswers,
         new Date(r.registeredAt).toLocaleString('zh-TW')
       ].map(val => `"${String(val).replace(/"/g, '""')}"`);
