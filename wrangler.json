@@ -2,18 +2,5 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "twwgapp",
   "pages_build_output_dir": "./",
-  "compatibility_date": "2026-08-06",
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "twwgapp-db",
-      "database_id": "your-d1-database-id"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "BUCKET",
-      "bucket_name": "twwgapp-images"
-    }
-  ]
+  "compatibility_date": "2026-08-06"
 }
