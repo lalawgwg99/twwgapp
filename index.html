@@ -9,12 +9,13 @@
   <meta property="og:title" content="萬家福五甲店 - 官方活動報名平台">
   <meta property="og:description" content="萬家福五甲店門市專屬活動線上報名 — 體驗試吃、親子手作、健康講座，歡迎鄰里鄉親踴躍參加。">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://wgapptw.pages.dev/">
   <meta name="robots" content="index, follow">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="canonical" href="https://twwgapp.pages.dev">
-  <link rel="stylesheet" href="styles.css?v=20260806_pro2">
+  <link rel="canonical" href="https://wgapptw.pages.dev/">
+  <link rel="stylesheet" href="styles.css?v=20260806_pro3">
 </head>
 <body>
   <div class="app-viewport">
@@ -101,9 +102,6 @@
           </button>
           <button class="btn-system-secondary" style="border-color:var(--accent-blue); color:var(--accent-blue); font-weight:600;" onclick="openQuickLinksModal()">
             🌐 設定媒體連結網址
-          </button>
-          <button class="btn-system-secondary" onclick="openGASSettingModal()">
-            🔗 串接 GAS 試算表
           </button>
           <button class="btn-system-secondary" onclick="lockAdminSession()">
             登出
@@ -253,9 +251,10 @@
                   </div>
                   <div class="field-group">
                     <label class="field-label">圖片上傳與來源</label>
+                    <p class="field-help">建議尺寸：1200 × 675 px（16:9），單檔上限 12 MB。系統會自動壓縮；其他比例可能置中裁切。</p>
                     <div class="upload-method-selector">
                       <button type="button" class="upload-tab active" id="tab-url" onclick="switchUploadMethod('url')">貼上圖片連結</button>
-                      <button type="button" class="upload-tab" id="tab-file" onclick="switchUploadMethod('file')">本地檔案選擇</button>
+                      <button type="button" class="upload-tab" id="tab-file" onclick="switchUploadMethod('file')">📁 選擇電腦/手機圖片</button>
                     </div>
                     <div id="upload-url-input-block">
                       <input type="url" id="event-img-url" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleImageUrlChange(event)">
@@ -400,9 +399,21 @@
                 <input type="text" id="hero-input-badge" class="sf-input" placeholder="例如：五甲店獨家 9折">
               </div>
               <div class="field-group">
-                <label class="field-label" for="hero-input-enddate">倒數截止時間 <span class="req">*</span></label>
+                <label class="field-label" for="hero-input-startdate">看板開始時間 <span class="req">*</span></label>
+                <input type="datetime-local" id="hero-input-startdate" class="sf-input" required>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="hero-input-enddate">看板截止時間 <span class="req">*</span></label>
                 <input type="datetime-local" id="hero-input-enddate" class="sf-input" required>
               </div>
+            </div>
+
+            <div class="field-group">
+              <label class="checkbox-row">
+                <input type="checkbox" id="hero-input-countdown-enabled" checked>
+                <span>在首頁顯示開始／截止倒數</span>
+              </label>
+              <p class="field-help">關閉後保留開始與截止設定，但首頁不顯示倒數計時器。</p>
             </div>
 
             <div class="form-row-2">
@@ -418,6 +429,7 @@
 
             <div class="field-group">
               <label class="field-label">背景宣傳圖片來源 (網址或選擇電腦照片)</label>
+              <p class="field-help">建議尺寸：1600 × 400 px（4:1），單檔上限 12 MB。重要文字或人物請置中，避免手機與不同螢幕裁切。</p>
               <div class="upload-method-selector">
                 <button type="button" class="upload-tab active" id="hero-tab-url" onclick="switchHeroUploadMethod('url')">貼上圖片連結</button>
                 <button type="button" class="upload-tab" id="hero-tab-file" onclick="switchHeroUploadMethod('file')">📁 選擇電腦/手機圖片</button>
@@ -511,7 +523,23 @@
               <div class="field-group"><label class="field-label" for="edit-event-custom-badge">特色標籤</label><input type="text" id="edit-event-custom-badge" class="sf-input"></div>
               <div class="field-group"><label class="field-label" for="edit-event-max">人數上限 <span class="req">*</span></label><input type="number" id="edit-event-max" class="sf-input" required min="1" max="9999"></div>
             </div>
-            <div class="field-group"><label class="field-label" for="edit-event-img-url">封面圖片 URL</label><input type="url" id="edit-event-img-url" class="sf-input"></div>
+            <div class="field-group">
+              <label class="field-label">活動封面圖片</label>
+              <p class="field-help">建議尺寸：1200 × 675 px（16:9），單檔上限 12 MB。系統會自動壓縮；其他比例可能置中裁切。</p>
+              <div class="upload-method-selector">
+                <button type="button" class="upload-tab active" id="edit-event-tab-url" onclick="switchEditEventUploadMethod('url')">貼上圖片連結</button>
+                <button type="button" class="upload-tab" id="edit-event-tab-file" onclick="switchEditEventUploadMethod('file')">📁 選擇電腦/手機圖片</button>
+              </div>
+              <div id="edit-event-upload-url-block">
+                <input type="url" id="edit-event-img-url" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleEditEventImageUrlChange(event)">
+              </div>
+              <div id="edit-event-upload-file-block" class="hidden">
+                <input type="file" id="edit-event-img-file" accept="image/*" class="sf-input" onchange="handleEditEventFileSelect(event)">
+              </div>
+              <div id="edit-event-image-preview" class="image-preview-box hidden" style="margin-top:10px;">
+                <div class="image-preview-overlay"><span>活動封面預覽成功</span></div>
+              </div>
+            </div>
             <div class="inset-grouped-box edit-questionnaire-box">
               <div class="questionnaire-heading-row">
                 <div><strong>報名問卷</strong><p class="field-help">修改題目不會變更既有報名答案。</p></div>
@@ -685,6 +713,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260806_pro2"></script>
+  <script src="app.js?v=20260806_pro3"></script>
 </body>
 </html>

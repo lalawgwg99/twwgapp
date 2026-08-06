@@ -25,6 +25,13 @@ test('admin login fails closed when no server secret is configured', async () =>
   assert.equal((await response.json()).success, false);
 });
 
+test('admin login fails closed when the signing secret is missing', async () => {
+  const env = { ADMIN_PASSCODE: 'private-passcode' };
+  const response = await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env);
+  assert.equal(response.status, 503);
+  assert.match((await response.json()).error, /權杖密鑰/);
+});
+
 test('admin tokens are signed and forged tokens are rejected', async () => {
   const env = { ADMIN_PASSCODE: 'a-long-private-passcode', ADMIN_TOKEN_SECRET: 'a-separate-token-secret' };
   const login = await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env);
@@ -64,8 +71,8 @@ test('registration rejects invalid phone numbers before storage', async () => {
   assert.match((await response.json()).error, /手機號碼/);
 });
 
-test('event timing is validated even in client fallback mode', async () => {
-  const env = { ADMIN_PASSCODE: 'private-passcode' };
+test('event timing is validated before database access', async () => {
+  const env = { ADMIN_PASSCODE: 'private-passcode', ADMIN_TOKEN_SECRET: 'token-secret' };
   const loginData = await (await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env)).json();
   const response = await onRequestPost({
     request: new Request('https://example.test/api/events', {
@@ -86,6 +93,7 @@ test('check-in keeps text registration ids intact', async () => {
   const boundValues = [];
   const env = {
     ADMIN_PASSCODE: 'private-passcode',
+    ADMIN_TOKEN_SECRET: 'token-secret',
     DB: {
       prepare() {
         return {
@@ -108,4 +116,67 @@ test('check-in keeps text registration ids intact', async () => {
   });
   assert.equal(response.status, 200);
   assert.deepEqual(boundValues, [1, 'reg-uuid', 'event-1']);
+});
+
+test('writes fail explicitly when D1 is unavailable', async () => {
+  const env = { ADMIN_PASSCODE: 'private-passcode', ADMIN_TOKEN_SECRET: 'token-secret' };
+  const loginData = await (await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env)).json();
+  const response = await onRequestPost({
+    request: new Request('https://example.test/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': loginData.token },
+      body: JSON.stringify({
+        action: 'create_event',
+        event: { id: 'e1', name: '活動', category: '分類', date: '2026-08-10', endDate: '2026-08-09T10:00', maxPeople: 10 }
+      })
+    }),
+    env
+  });
+  assert.equal(response.status, 503);
+  assert.match((await response.json()).error, /停止寫入/);
+});
+
+test('admin login is blocked after five failed attempts from one source', async () => {
+  const rows = new Map();
+  const DB = {
+    prepare(sql) {
+      let values = [];
+      const statement = {
+        bind(...args) {
+          values = args;
+          return statement;
+        },
+        async first() {
+          return rows.get(values[0]) || null;
+        },
+        async run() {
+          if (sql.startsWith('DELETE FROM admin_login_attempts WHERE updated_at')) {
+            for (const [key, row] of rows) if (row.updated_at < values[0]) rows.delete(key);
+          } else if (sql.startsWith('DELETE FROM admin_login_attempts WHERE key')) {
+            rows.delete(values[0]);
+          } else if (sql.startsWith('INSERT INTO admin_login_attempts')) {
+            rows.set(values[0], { attempts: values[1], blocked_until: values[2], updated_at: values[3] });
+          }
+          return { meta: { changes: 1 } };
+        }
+      };
+      return statement;
+    }
+  };
+  const env = { ADMIN_PASSCODE: 'correct-passcode', ADMIN_TOKEN_SECRET: 'token-secret', DB };
+  const login = passcode => onRequestPost({
+    request: new Request('https://example.test/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '203.0.113.8' },
+      body: JSON.stringify({ action: 'verify_admin', passcode })
+    }),
+    env
+  });
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    assert.equal((await login('wrong-passcode')).status, 401);
+  }
+  const blocked = await login('wrong-passcode');
+  assert.equal(blocked.status, 429);
+  assert.match((await blocked.json()).error, /15 分鐘/);
 });

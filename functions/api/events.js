@@ -3,12 +3,17 @@
  */
 
 const TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
+const LOGIN_BLOCK_MS = 15 * 60 * 1000;
+const LOGIN_ATTEMPT_LIMIT = 5;
 
 export async function onRequestPost({ request, env }) {
   let data;
   try {
     data = await request.json();
   } catch (_error) {
+    return jsonResponse({ success: false, error: "請求格式錯誤" }, 400);
+  }
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
     return jsonResponse({ success: false, error: "請求格式錯誤" }, 400);
   }
 
@@ -21,9 +26,18 @@ export async function onRequestPost({ request, env }) {
       if (!configuredPasscode) {
         return jsonResponse({ success: false, error: "管理密碼尚未在 Cloudflare 設定" }, 503);
       }
+      if (!env.ADMIN_TOKEN_SECRET) {
+        return jsonResponse({ success: false, error: "管理權杖密鑰尚未在 Cloudflare 設定" }, 503);
+      }
+      const throttle = await getLoginThrottle(request, env);
+      if (throttle.blocked) {
+        return jsonResponse({ success: false, error: "登入嘗試次數過多，請 15 分鐘後再試" }, 429);
+      }
       if (!constantTimeEqual(String(data.passcode || ""), configuredPasscode)) {
+        await recordFailedLogin(throttle, env);
         return jsonResponse({ success: false, error: "管理密碼不正確" }, 401);
       }
+      await clearLoginThrottle(throttle, env);
       return jsonResponse({
         success: true,
         isAdmin: true,
@@ -53,7 +67,7 @@ export async function onRequestPost({ request, env }) {
       const event = normalizeEvent(data.event);
       const error = validateEvent(event);
       if (error) return jsonResponse({ success: false, error }, 400);
-      if (!env.DB) return jsonResponse({ success: true, mode: "client_sync", event });
+      if (!env.DB) return databaseUnavailable();
 
       await env.DB.prepare(
         `INSERT INTO events
@@ -72,7 +86,7 @@ export async function onRequestPost({ request, env }) {
       const event = normalizeEvent(data.event);
       const error = validateEvent(event);
       if (error) return jsonResponse({ success: false, error }, 400);
-      if (!env.DB) return jsonResponse({ success: true, mode: "client_sync", event });
+      if (!env.DB) return databaseUnavailable();
 
       const result = await env.DB.prepare(
         `UPDATE events SET name = ?, category = ?, custom_badge = ?, price_tier = ?,
@@ -90,7 +104,7 @@ export async function onRequestPost({ request, env }) {
     if (action === "delete_event") {
       const eventId = String(data.eventId || "").trim();
       if (!eventId) return jsonResponse({ success: false, error: "缺少活動編號" }, 400);
-      if (!env.DB) return jsonResponse({ success: true, mode: "client_sync" });
+      if (!env.DB) return databaseUnavailable();
       await env.DB.batch([
         env.DB.prepare("DELETE FROM registrations WHERE event_id = ?").bind(eventId),
         env.DB.prepare("DELETE FROM events WHERE id = ?").bind(eventId)
@@ -99,7 +113,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     if (action === "set_checkin") {
-      if (!env.DB) return jsonResponse({ success: true, mode: "client_sync" });
+      if (!env.DB) return databaseUnavailable();
       const result = await env.DB.prepare(
         "UPDATE registrations SET checked_in = ? WHERE id = ? AND event_id = ?"
       ).bind(data.checkedIn ? 1 : 0, String(data.registrationId || ""), String(data.eventId || "")).run();
@@ -114,7 +128,7 @@ export async function onRequestPost({ request, env }) {
       }
       const serialized = JSON.stringify(data.value);
       if (serialized.length > 1500000) return jsonResponse({ success: false, error: "設定圖片檔案過大" }, 413);
-      if (!env.DB) return jsonResponse({ success: true, mode: "client_sync" });
+      if (!env.DB) return databaseUnavailable();
       await env.DB.prepare(
         `INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
          ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
@@ -191,6 +205,7 @@ async function registerAttendee(data, env) {
   const isProxy = Boolean(data.isProxy);
   const proxyName = String(data.proxyName || "").trim();
   const proxyEmail = String(data.proxyEmail || "").trim();
+  const serializedAnswers = JSON.stringify(data.answers || {});
 
   if (!eventId || !attendeeName || attendeeName.length > 80 || !/^09\d{8}$/.test(attendeePhone)) {
     return jsonResponse({ success: false, error: "請填寫有效的姓名與台灣手機號碼" }, 400);
@@ -198,10 +213,16 @@ async function registerAttendee(data, env) {
   if (attendeeEmail && !isEmail(attendeeEmail)) {
     return jsonResponse({ success: false, error: "Email 格式不正確" }, 400);
   }
+  if (attendeeEmail.length > 254 || proxyEmail.length > 254 || proxyName.length > 80) {
+    return jsonResponse({ success: false, error: "報名資料超過長度限制" }, 400);
+  }
+  if (serializedAnswers.length > 30000) {
+    return jsonResponse({ success: false, error: "問卷答案內容過長" }, 413);
+  }
   if (isProxy && (!proxyName || !isEmail(proxyEmail))) {
     return jsonResponse({ success: false, error: "請填寫代報人姓名與有效 Email" }, 400);
   }
-  if (!env.DB) return jsonResponse({ success: true, mode: "client_sync" });
+  if (!env.DB) return databaseUnavailable();
 
   const event = await env.DB.prepare(
     "SELECT id, start_date, end_date, max_people FROM events WHERE id = ?"
@@ -225,7 +246,7 @@ async function registerAttendee(data, env) {
      WHERE (SELECT COUNT(*) FROM registrations WHERE event_id = ?) < ?`
   ).bind(
     id, eventId, attendeeName, attendeeEmail, attendeePhone, isProxy ? 1 : 0,
-    proxyName, proxyEmail, JSON.stringify(data.answers || {}), now,
+    proxyName, proxyEmail, serializedAnswers, now,
     eventId, Number(event.max_people)
   ).run();
   if (!result.meta?.changes) return jsonResponse({ success: false, error: "活動名額已滿" }, 409);
@@ -253,10 +274,22 @@ function normalizeEvent(raw = {}) {
 
 function validateEvent(event) {
   if (!event.id || !event.name || !event.category || !event.date || !event.endDate) return "活動必填欄位不完整";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(event.date) ||
+      !Number.isFinite(parseTaipeiDateTime(`${event.date}T00:00`)) ||
+      !Number.isFinite(parseTaipeiDateTime(event.endDate))) return "活動日期格式不正確";
+  if (event.startDate && !Number.isFinite(parseTaipeiDateTime(event.startDate))) return "報名開放時間格式不正確";
   if (!Number.isInteger(event.maxPeople) || event.maxPeople < 1 || event.maxPeople > 9999) return "人數上限必須介於 1 到 9999";
   if (event.startDate && parseTaipeiDateTime(event.startDate) >= parseTaipeiDateTime(event.endDate)) return "報名截止時間必須晚於開放時間";
   if (parseTaipeiDateTime(event.endDate) >= parseTaipeiDateTime(`${event.date}T23:59:59`)) return "報名截止時間必須早於活動結束日";
-  if (event.name.length > 120 || event.category.length > 40 || event.description.length > 3000) return "活動文字內容超過長度限制";
+  if (event.id.length > 100 || event.name.length > 120 || event.category.length > 40 ||
+      event.customBadge.length > 60 || event.priceTier.length > 60 || event.location.length > 300 ||
+      event.description.length > 3000 || JSON.stringify(event.customQuestions).length > 30000) {
+    return "活動文字內容超過長度限制";
+  }
+  if (event.image.length > 1000000) return "活動圖片檔案過大";
+  if (event.image && !/^(?:https:\/\/|data:image\/(?:jpeg|png|webp);base64,|assets\/)/i.test(event.image)) {
+    return "活動圖片必須使用 HTTPS 網址或圖片檔案";
+  }
   return "";
 }
 
@@ -293,17 +326,64 @@ function parseJson(value, fallback) {
   try { return JSON.parse(value || ""); } catch (_error) { return fallback; }
 }
 
+async function getLoginThrottle(request, env) {
+  const clientIp = request.headers.get("CF-Connecting-IP") || "";
+  if (!clientIp || !env.DB) return { key: "", attempts: 0, blocked: false };
+
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS admin_login_attempts (
+      key TEXT PRIMARY KEY,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      blocked_until INTEGER NOT NULL DEFAULT 0,
+      updated_at INTEGER NOT NULL
+    )`
+  ).run();
+  const now = Date.now();
+  await env.DB.prepare("DELETE FROM admin_login_attempts WHERE updated_at < ?")
+    .bind(now - 24 * 60 * 60 * 1000).run();
+  const key = await sign(clientIp, env.ADMIN_TOKEN_SECRET);
+  const row = await env.DB.prepare(
+    "SELECT attempts, blocked_until FROM admin_login_attempts WHERE key = ?"
+  ).bind(key).first();
+
+  if (row?.blocked_until && Number(row.blocked_until) > now) {
+    return { key, attempts: Number(row.attempts) || 0, blocked: true };
+  }
+  if (row?.blocked_until) {
+    await env.DB.prepare("DELETE FROM admin_login_attempts WHERE key = ?").bind(key).run();
+    return { key, attempts: 0, blocked: false };
+  }
+  return { key, attempts: Number(row?.attempts) || 0, blocked: false };
+}
+
+async function recordFailedLogin(throttle, env) {
+  if (!throttle.key || !env.DB) return;
+  const attempts = throttle.attempts + 1;
+  const blockedUntil = attempts >= LOGIN_ATTEMPT_LIMIT ? Date.now() + LOGIN_BLOCK_MS : 0;
+  await env.DB.prepare(
+    `INSERT INTO admin_login_attempts (key, attempts, blocked_until, updated_at)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET attempts = excluded.attempts,
+       blocked_until = excluded.blocked_until, updated_at = excluded.updated_at`
+  ).bind(throttle.key, attempts, blockedUntil, Date.now()).run();
+}
+
+async function clearLoginThrottle(throttle, env) {
+  if (!throttle.key || !env.DB) return;
+  await env.DB.prepare("DELETE FROM admin_login_attempts WHERE key = ?").bind(throttle.key).run();
+}
+
 async function createAdminToken(env) {
   const expiresAt = Date.now() + TOKEN_TTL_MS;
-  const signature = await sign(String(expiresAt), env.ADMIN_TOKEN_SECRET || env.ADMIN_PASSCODE);
+  const signature = await sign(String(expiresAt), env.ADMIN_TOKEN_SECRET);
   return `${expiresAt}.${signature}`;
 }
 
 async function validateAdminToken(token, env) {
-  if (!env.ADMIN_PASSCODE || !token) return false;
+  if (!env.ADMIN_PASSCODE || !env.ADMIN_TOKEN_SECRET || !token || String(token).length > 512) return false;
   const [expiresAt, signature, extra] = String(token).split(".");
   if (extra || !/^\d+$/.test(expiresAt) || Number(expiresAt) < Date.now()) return false;
-  const expected = await sign(expiresAt, env.ADMIN_TOKEN_SECRET || env.ADMIN_PASSCODE);
+  const expected = await sign(expiresAt, env.ADMIN_TOKEN_SECRET);
   return constantTimeEqual(signature, expected);
 }
 
@@ -332,4 +412,8 @@ function jsonResponse(body, status = 200) {
       "X-Content-Type-Options": "nosniff"
     }
   });
+}
+
+function databaseUnavailable() {
+  return jsonResponse({ success: false, error: "資料庫尚未連線，為避免資料遺失已停止寫入" }, 503);
 }

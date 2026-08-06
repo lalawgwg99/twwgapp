@@ -70,7 +70,7 @@ npx wrangler d1 execute twwgapp-db --file=./schema.sql --remote
    - `ADMIN_TOKEN_SECRET`：另一組至少 32 字元的隨機秘密。
 4. 重新部署後確認 `GET /api/events` 回傳 `mode: "database"`。
 
-Google Apps Script 模式需在 Apps Script 的「指令碼屬性」新增 `ADMIN_PASSCODE`，不可將密碼寫入原始碼。
+正式網站固定使用 Cloudflare Pages Functions 與 D1。`google_apps_script/` 僅保留為未啟用的歷史備援程式，不與正式站連線，也不會接管管理員登入。
 
 ## 測試
 

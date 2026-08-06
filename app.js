@@ -9,7 +9,7 @@
   const STORAGE_KEY = 'twwgapp_wujia_store_events_v10';
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
   const ADMIN_DATA_KEY = 'twwgapp_admin_event_data';
-  const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
+  const LEGACY_GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const QUICK_LINKS_KEY = 'twwgapp_quick_links_v2';
   const HERO_CONFIG_KEY = 'twwgapp_hero_config_v1';
 
@@ -19,8 +19,10 @@
     badge: '五甲店獨家 9折',
     priceText: '全館憑卡 9 折',
     locationText: '萬家福五甲店 全館門市',
+    startDate: '2026-08-01T00:00',
     endDate: '2026-08-31T23:59',
-    bgImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1200&h=500&fit=crop',
+    countdownEnabled: true,
+    bgImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1600&h=400&fit=crop',
     buttonText: '瀏覽本月活動',
     buttonUrl: '#events-grid'
   };
@@ -32,6 +34,8 @@
   let activeEventId = null;
   let uploadMethod = 'url';
   let filePreviewDataUrl = null;
+  let editEventUploadMethod = 'url';
+  let editEventFilePreviewDataUrl = null;
   let editBuilderQuestions = [];
   let lastFocusedElement = null;
   let backendMode = 'client_sync';
@@ -324,24 +328,12 @@
     showToast('🌐 已成功更新萬家福五甲店 數位媒體與導航網址！');
   };
 
-  function getGASUrl() {
-    return localStorage.getItem(GAS_URL_KEY) || '';
-  }
-
-  function setGASUrl(url) {
-    localStorage.setItem(GAS_URL_KEY, url);
-  }
-
   async function requestBackend(action, payload = {}, requiresAdmin = false) {
-    const gasUrl = getGASUrl();
-    const endpoint = gasUrl || '/api/events';
     const headers = { 'Content-Type': 'application/json' };
-    if (requiresAdmin && adminSessionToken && !gasUrl) headers['X-Admin-Token'] = adminSessionToken;
+    if (requiresAdmin && adminSessionToken) headers['X-Admin-Token'] = adminSessionToken;
 
     const body = Object.assign({ action }, payload);
-    if (requiresAdmin && gasUrl) body.token = adminSessionToken;
-
-    const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
+    const response = await fetch('/api/events', { method: 'POST', headers, body: JSON.stringify(body) });
     const isJson = (response.headers.get('content-type') || '').includes('application/json');
     const result = isJson ? await response.json().catch(() => ({})) : {};
     if (!response.ok || result.success === false) {
@@ -352,18 +344,8 @@
 
   async function syncEventsFromBackend() {
     try {
-      const gasUrl = getGASUrl();
-      let response;
-      if (gasUrl) {
-        response = await fetch(gasUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'get_events', token: adminSessionToken || '' })
-        });
-      } else {
-        const headers = adminSessionToken ? { 'X-Admin-Token': adminSessionToken } : {};
-        response = await fetch('/api/events', { headers });
-      }
+      const headers = adminSessionToken ? { 'X-Admin-Token': adminSessionToken } : {};
+      const response = await fetch('/api/events', { headers });
       if (!(response.headers.get('content-type') || '').includes('application/json')) return;
       const data = await response.json();
       backendMode = data.mode || backendMode;
@@ -376,9 +358,11 @@
         renderHeroSpotlight();
         startCountdownTimers();
       }
-      if (response.ok && Array.isArray(data.events) && data.events.length > 0) {
+      if (response.ok && Array.isArray(data.events) && (data.mode === 'database' || data.events.length > 0)) {
         saveEventsData(data.events);
-        if (!activeEventId || !data.events.some(event => event.id === activeEventId)) activeEventId = data.events[0].id;
+        if (!activeEventId || !data.events.some(event => event.id === activeEventId)) {
+          activeEventId = data.events[0]?.id || null;
+        }
         renderEventsGrid();
         renderSidebarWidgets();
         if (isAdminAuthenticated) renderAdminDashboard();
@@ -465,18 +449,6 @@
     }
   };
 
-  window.openGASSettingModal = function () {
-    const input = prompt('請貼上您的 Google Apps Script (GAS) Web App 發布網址:\n(範例: https://script.google.com/macros/s/AKfy.../exec)', getGASUrl());
-    if (input !== null) {
-      setGASUrl(input.trim());
-      if (input.trim()) {
-        showToast('🔗 已成功串接 Google 試算表 (GAS) 後端！');
-      } else {
-        showToast('已切換回預設 Cloudflare / 本地端模式');
-      }
-    }
-  };
-
   window.lockAdminSession = function () {
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
     sessionStorage.removeItem(ADMIN_DATA_KEY);
@@ -500,15 +472,15 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed && Array.isArray(parsed.events) && parsed.events.length > 0) {
+        if (parsed && Array.isArray(parsed.events)) {
           return parsed.events;
         }
       }
     } catch (e) {
-      console.warn('LocalStorage access failed, using demo fallback:', e);
+      console.warn('LocalStorage access failed, using empty fallback:', e);
     }
-    saveEventsData(DEMO_EVENTS);
-    return DEMO_EVENTS;
+    saveEventsData([]);
+    return [];
   }
 
   function saveEventsData(events) {
@@ -749,13 +721,14 @@
     countLabel.textContent = `共 ${filtered.length} 個活動`;
 
     if (filtered.length === 0) {
+      const hasEvents = events.length > 0;
       container.innerHTML = `
         <div class="empty-state-view">
           <div class="empty-state-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           </div>
-          <h3 class="empty-state-title">找不到符合條件的五甲店活動</h3>
-          <p class="empty-state-subtitle">請嘗試搜尋其他關鍵字或變更分類標籤</p>
+          <h3 class="empty-state-title">${hasEvents ? '找不到符合條件的五甲店活動' : '目前尚無可報名活動'}</h3>
+          <p class="empty-state-subtitle">${hasEvents ? '請嘗試搜尋其他關鍵字或變更分類標籤' : '新活動上架後會立即顯示在這裡'}</p>
         </div>
       `;
       return;
@@ -851,6 +824,16 @@
     document.getElementById('edit-event-custom-badge').value = ev.customBadge || '';
     document.getElementById('edit-event-max').value = ev.maxPeople || 50;
     document.getElementById('edit-event-img-url').value = ev.image || '';
+    document.getElementById('edit-event-img-file').value = '';
+    editEventFilePreviewDataUrl = null;
+    switchEditEventUploadMethod('url');
+    const imagePreview = document.getElementById('edit-event-image-preview');
+    if (ev.image) {
+      imagePreview.style.backgroundImage = `url('${ev.image}')`;
+      imagePreview.classList.remove('hidden');
+    } else {
+      imagePreview.classList.add('hidden');
+    }
     editBuilderQuestions = JSON.parse(JSON.stringify(ev.customQuestions || []));
     renderEditQuestionnaireBuilder();
     updateEditDateFeedback();
@@ -879,7 +862,12 @@
     const priceTier = document.getElementById('edit-event-price-tier').value.trim();
     const customBadge = document.getElementById('edit-event-custom-badge').value.trim();
     const maxPeople = parseInt(document.getElementById('edit-event-max').value, 10);
-    const image = document.getElementById('edit-event-img-url').value.trim() || ev.image;
+    let image = ev.image;
+    if (editEventUploadMethod === 'file' && editEventFilePreviewDataUrl) {
+      image = editEventFilePreviewDataUrl;
+    } else if (editEventUploadMethod === 'url') {
+      image = document.getElementById('edit-event-img-url').value.trim() || ev.image;
+    }
 
     if (!name || !category || !date || !endDate || !maxPeople || maxPeople < 1) {
       showToast('請填寫完整必填欄位、自訂分類與報名截止時間', true);
@@ -1259,7 +1247,7 @@
       'VERSION:2.0',
       'PRODID:-//Apple Native SwiftUI Event System//TW',
       'BEGIN:VEVENT',
-      `UID:event-${ev.id}@twwgapp.pages.dev`,
+      `UID:event-${ev.id}@wgapptw.pages.dev`,
       `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`,
       `DTSTART;VALUE=DATE:${startStr}`,
       `DTEND;VALUE=DATE:${endStr}`,
@@ -1443,6 +1431,40 @@
     }
   };
 
+  window.switchEditEventUploadMethod = function (method) {
+    editEventUploadMethod = method;
+    document.getElementById('edit-event-tab-url').classList.toggle('active', method === 'url');
+    document.getElementById('edit-event-tab-file').classList.toggle('active', method === 'file');
+    document.getElementById('edit-event-upload-url-block').classList.toggle('hidden', method !== 'url');
+    document.getElementById('edit-event-upload-file-block').classList.toggle('hidden', method !== 'file');
+  };
+
+  window.handleEditEventImageUrlChange = function (e) {
+    const url = e.target.value.trim();
+    const preview = document.getElementById('edit-event-image-preview');
+    if (url) {
+      preview.style.backgroundImage = `url('${url}')`;
+      preview.classList.remove('hidden');
+    } else {
+      preview.classList.add('hidden');
+    }
+  };
+
+  window.handleEditEventFileSelect = async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      editEventFilePreviewDataUrl = await optimizeImageFile(file);
+      const preview = document.getElementById('edit-event-image-preview');
+      preview.style.backgroundImage = `url('${editEventFilePreviewDataUrl}')`;
+      preview.classList.remove('hidden');
+      showToast('圖片讀取成功，儲存後將更新活動封面');
+    } catch (error) {
+      showToast(error.message, true);
+      e.target.value = '';
+    }
+  };
+
   function optimizeImageFile(file) {
     if (!file.type.startsWith('image/')) return Promise.reject(new Error('請選擇圖片檔案'));
     if (file.size > 12 * 1024 * 1024) return Promise.reject(new Error('圖片不可超過 12 MB'));
@@ -1453,13 +1475,40 @@
         const image = new Image();
         image.onerror = () => reject(new Error('圖片格式無法使用'));
         image.onload = () => {
-          const maxWidth = 1600;
-          const scale = Math.min(1, maxWidth / image.naturalWidth);
-          const canvas = document.createElement('canvas');
+          const maxDimension = 1600;
+          const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+          let canvas = document.createElement('canvas');
           canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
           canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-          canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL('image/jpeg', 0.84));
+
+          const drawImage = (target, source) => {
+            const context = target.getContext('2d');
+            context.fillStyle = '#fff';
+            context.fillRect(0, 0, target.width, target.height);
+            context.drawImage(source, 0, 0, target.width, target.height);
+          };
+          drawImage(canvas, image);
+
+          const maxDataUrlLength = 950000;
+          let quality = 0.82;
+          let output = canvas.toDataURL('image/jpeg', quality);
+          while (output.length > maxDataUrlLength && quality > 0.5) {
+            quality -= 0.08;
+            output = canvas.toDataURL('image/jpeg', quality);
+          }
+          while (output.length > maxDataUrlLength && Math.max(canvas.width, canvas.height) > 720) {
+            const resized = document.createElement('canvas');
+            resized.width = Math.max(1, Math.round(canvas.width * 0.82));
+            resized.height = Math.max(1, Math.round(canvas.height * 0.82));
+            drawImage(resized, canvas);
+            canvas = resized;
+            output = canvas.toDataURL('image/jpeg', 0.68);
+          }
+          if (output.length > maxDataUrlLength) {
+            reject(new Error('圖片內容過於複雜，請改用較小的圖片'));
+            return;
+          }
+          resolve(output);
         };
         image.src = reader.result;
       };
@@ -1863,15 +1912,17 @@
           </div>
 
           <div class="hero-action-right">
-            <div class="hero-countdown-block">
-              <span class="countdown-label-top">⏱ 倒數截止</span>
-              <div class="hero-countdown" id="hero-countdown" data-end="${hero.endDate || ''}">
-                <div class="countdown-unit"><span class="countdown-num" id="hero-days">--</span><span class="countdown-label">天</span></div>
-                <div class="countdown-unit"><span class="countdown-num" id="hero-hours">--</span><span class="countdown-label">時</span></div>
-                <div class="countdown-unit"><span class="countdown-num" id="hero-mins">--</span><span class="countdown-label">分</span></div>
-                <div class="countdown-unit"><span class="countdown-num" id="hero-secs">--</span><span class="countdown-label">秒</span></div>
+            ${hero.countdownEnabled !== false ? `
+              <div class="hero-countdown-block">
+                <span class="countdown-label-top">計算活動時間</span>
+                <div class="hero-countdown" id="hero-countdown" data-start="${escapeHTML(hero.startDate || '')}" data-end="${escapeHTML(hero.endDate || '')}">
+                  <div class="countdown-unit"><span class="countdown-num" id="hero-days">--</span><span class="countdown-label">天</span></div>
+                  <div class="countdown-unit"><span class="countdown-num" id="hero-hours">--</span><span class="countdown-label">時</span></div>
+                  <div class="countdown-unit"><span class="countdown-num" id="hero-mins">--</span><span class="countdown-label">分</span></div>
+                  <div class="countdown-unit"><span class="countdown-num" id="hero-secs">--</span><span class="countdown-label">秒</span></div>
+                </div>
               </div>
-            </div>
+            ` : ''}
 
             <button class="btn-hero-cta" data-url="${escapeHTML(safeExternalUrl(hero.buttonUrl))}" onclick="openHeroLink(this.dataset.url)">
               ${escapeHTML(hero.buttonText || '查看五甲店活動詳情 →')}
@@ -1950,12 +2001,16 @@
     document.getElementById('hero-input-title').value = hero.title || '';
     document.getElementById('hero-input-desc').value = hero.description || '';
     document.getElementById('hero-input-badge').value = hero.badge || '';
+    document.getElementById('hero-input-startdate').value = hero.startDate || '';
     document.getElementById('hero-input-enddate').value = hero.endDate || '';
+    document.getElementById('hero-input-countdown-enabled').checked = hero.countdownEnabled !== false;
     document.getElementById('hero-input-price').value = hero.priceText || '';
     document.getElementById('hero-input-location').value = hero.locationText || '';
     document.getElementById('hero-input-bg').value = hero.bgImage || '';
     document.getElementById('hero-input-btn-text').value = hero.buttonText || '';
     document.getElementById('hero-input-btn-url').value = hero.buttonUrl || '';
+    document.getElementById('hero-input-file').value = '';
+    heroFilePreviewDataUrl = null;
 
     // Show preview if image exists
     const preview = document.getElementById('hero-image-preview');
@@ -1983,11 +2038,20 @@
       if (inputUrl) finalBgImage = inputUrl;
     }
 
+    const startDate = document.getElementById('hero-input-startdate').value;
+    const endDate = document.getElementById('hero-input-enddate').value;
+    if (!startDate || !endDate || new Date(startDate).getTime() >= new Date(endDate).getTime()) {
+      showToast('Hero 開始時間必須早於截止時間', true);
+      return;
+    }
+
     const newConfig = {
       title: document.getElementById('hero-input-title').value.trim(),
       description: document.getElementById('hero-input-desc').value.trim(),
       badge: document.getElementById('hero-input-badge').value.trim(),
-      endDate: document.getElementById('hero-input-enddate').value,
+      startDate,
+      endDate,
+      countdownEnabled: document.getElementById('hero-input-countdown-enabled').checked,
       priceText: document.getElementById('hero-input-price').value.trim(),
       locationText: document.getElementById('hero-input-location').value.trim(),
       bgImage: finalBgImage,
@@ -2094,9 +2158,16 @@
       // Update hero countdown
       const heroEl = document.getElementById('hero-countdown');
       if (heroEl) {
+        const startStr = heroEl.getAttribute('data-start');
         const endStr = heroEl.getAttribute('data-end');
         if (endStr) {
-          const diff = new Date(endStr).getTime() - now;
+          const startTime = startStr ? new Date(startStr).getTime() : 0;
+          const endTime = new Date(endStr).getTime();
+          const countdownTarget = startTime > now ? startTime : endTime;
+          const diff = countdownTarget - now;
+          const labelEl = heroEl.closest('.hero-countdown-block')?.querySelector('.countdown-label-top');
+          if (labelEl) labelEl.textContent = startTime > now ? '距離開始' : (endTime > now ? '倒數截止' : '活動已結束');
+          const valueIds = ['hero-days', 'hero-hours', 'hero-mins', 'hero-secs'];
           if (diff > 0) {
             const days = Math.floor(diff / 86400000);
             const hours = Math.floor((diff % 86400000) / 3600000);
@@ -2111,8 +2182,10 @@
             if (mEl) mEl.textContent = String(mins).padStart(2, '0');
             if (sEl) sEl.textContent = String(secs).padStart(2, '0');
           } else {
-            const dEl = document.getElementById('hero-days');
-            if (dEl) dEl.textContent = '00';
+            valueIds.forEach(id => {
+              const valueEl = document.getElementById(id);
+              if (valueEl) valueEl.textContent = '00';
+            });
           }
         }
       }
@@ -2162,6 +2235,7 @@
 
   // Initialize
   document.addEventListener('DOMContentLoaded', async () => {
+    localStorage.removeItem(LEGACY_GAS_URL_KEY);
     await checkAdminSession();
     loadEventsData();
     renderQuickLinksUI();

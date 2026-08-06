@@ -30,6 +30,19 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260806_pro2/);
-  assert.match(html, /app\.js\?v=20260806_pro2/);
+  assert.match(html, /styles\.css\?v=20260806_pro3/);
+  assert.match(html, /app\.js\?v=20260806_pro3/);
+});
+
+test('production frontend uses only the same-origin Cloudflare API', () => {
+  assert.match(script, /fetch\('\/api\/events'/);
+  assert.doesNotMatch(html, /openGASSettingModal|串接 GAS/);
+  assert.doesNotMatch(script, /script\.google\.com/);
+});
+
+test('Hero scheduling and event image controls are complete', () => {
+  assert.match(html, /id="hero-input-startdate"/);
+  assert.match(html, /id="hero-input-enddate"/);
+  assert.match(html, /id="hero-input-countdown-enabled"/);
+  assert.match(html, /id="edit-event-img-file"/);
 });
