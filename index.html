@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>活動報名與問卷系統 - 支援活動隨時編輯修改與自動截止</title>
-  <meta name="description" content="專業級活動問卷報名平台，支援已發布活動隨時編輯修改、報名截止時間自動關閉、長輩電話報名與 GAS 試算表同步。">
+  <title>萬家福五甲店 - 活動與會員服務中心</title>
+  <meta name="description" content="萬家福五甲店官方活動報名與問卷平台，提供即時活動資訊、LINE/FB/IG快速連結、現場報到與會員回饋。">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -17,18 +17,10 @@
     <header class="navigation-bar">
       <div class="nav-top-row">
         <div class="app-title-group">
-          <div class="app-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="4" ry="4"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
-            </svg>
-          </div>
+          <img src="assets/logo.png" alt="萬家福 Logo" class="brand-logo-img">
           <div>
-            <h1 class="large-title">本月活動一覽</h1>
-            <p class="subtitle">長輩友善 ‧ 活動隨時編輯修改 ‧ 自動截止</p>
+            <h1 class="large-title">萬家福五甲店</h1>
+            <p class="subtitle">活動報名 ‧ 會員服務 ‧ 長輩友善</p>
           </div>
         </div>
 
@@ -44,6 +36,26 @@
           </button>
         </nav>
       </div>
+
+      <!-- Quick Social & Location Links Bar -->
+      <div class="quick-links-bar">
+        <span class="quick-links-label">快速連結：</span>
+        <a href="https://www.google.com/search?q=%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2&rlz=1C5BAPC_enTW1196TW1196&oq=%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIKCAEQABiiBBiJBTIKCAIQABiABBiiBDIKCAMQABiABBiiBDIKCAQQABiABBiiBDIKCAUQABiABBiiBDIGCAYQRRg90gEINTM5OGowajeoAgCwAgA&sourceid=chrome&source=chrome.ob&ie=UTF-8" target="_blank" rel="noopener" class="quick-link-pill pill-map">
+          📍 Google 地圖導航
+        </a>
+        <a href="https://line.me" target="_blank" rel="noopener" class="quick-link-pill pill-line">
+          💬 LINE 官方帳號
+        </a>
+        <a href="https://facebook.com" target="_blank" rel="noopener" class="quick-link-pill pill-fb">
+          📘 FB 粉絲專頁
+        </a>
+        <a href="https://instagram.com" target="_blank" rel="noopener" class="quick-link-pill pill-ig">
+          📷 Instagram
+        </a>
+        <a href="https://www.prosperity-plaza.com.tw" target="_blank" rel="noopener" class="quick-link-pill pill-site">
+          🌐 萬家福官方網站
+        </a>
+      </div>
     </header>
 
     <!-- VIEW 1: PUBLIC EVENT LIST GRID -->
@@ -54,7 +66,7 @@
           <span class="search-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           </span>
-          <input type="text" id="search-input" class="search-input" placeholder="搜尋活動名稱、關鍵字、標籤或地點..." oninput="handleSearchInput(event)">
+          <input type="text" id="search-input" class="search-input" placeholder="搜尋萬家福五甲店活動名稱、商品特賣、講座..." oninput="handleSearchInput(event)">
         </div>
 
         <!-- Category Pills Filter -->
@@ -71,7 +83,7 @@
 
       <!-- Section Stats & Grid -->
       <div class="section-header">
-        <h2 class="section-header-title">所有活動列表</h2>
+        <h2 class="section-header-title">萬家福五甲店 專屬活動</h2>
         <span class="section-header-meta" id="event-count-label">共 8 個活動</span>
       </div>
 
@@ -85,7 +97,7 @@
       <div class="admin-toolbar-card">
         <div class="admin-status-info">
           <span class="sf-badge badge-admin-unlocked">🔓 已認證管理員權限</span>
-          <span class="admin-hint-text">通行驗證狀態：安全傳輸 (GAS+RateLimit)</span>
+          <span class="admin-hint-text">萬家福五甲店 後台系統</span>
         </div>
         <div class="admin-actions-group">
           <button class="btn-system-secondary" onclick="openGASSettingModal()">
@@ -103,7 +115,7 @@
       <!-- Admin Sub Navigation Tabs -->
       <div class="admin-sub-nav">
         <button id="admin-tab-manage" class="admin-tab-btn active" onclick="switchAdminSubView('manage')">名單與簽到</button>
-        <button id="admin-tab-onsite" class="admin-tab-btn" onclick="switchAdminSubView('onsite')">⚡️ 現場快速報名</button>
+        <button id="admin-tab-onsite" class="admin-tab-btn" onclick="switchAdminSubView('onsite')">⚡️ 五甲店現場報名</button>
         <button id="admin-tab-create" class="admin-tab-btn" onclick="switchAdminSubView('create')">發布新活動</button>
       </div>
 
@@ -149,9 +161,9 @@
       <div id="admin-sub-onsite" class="hidden">
         <div class="form-card">
           <div class="section-header">
-            <h2 class="form-section-title">⚡️ 現場快速報名（工作人員 / 老人現場專用）</h2>
+            <h2 class="form-section-title">⚡️ 萬家福五甲店 現場快速報名（工作人員 / 老人現場專用）</h2>
           </div>
-          <p class="field-help" style="margin-bottom:16px;">長輩現場到場時，工作人員直接於平板/手機為長輩快速完成報名並自動標記為「已報到」。</p>
+          <p class="field-help" style="margin-bottom:16px;">顧客於五甲店現場到場時，服務人員直接於平板/手機為顧客快速完成報名並自動標記為「已報到」。</p>
 
           <form id="onsite-registration-form" onsubmit="submitOnsiteRegistration(event)">
             <div class="form-grid">
@@ -162,8 +174,8 @@
 
               <div class="form-row-2">
                 <div class="field-group">
-                  <label class="field-label" for="onsite-name">參加長輩 / 參加者姓名 <span class="req">*</span></label>
-                  <input type="text" id="onsite-name" class="sf-input" required placeholder="請輸入長輩真實姓名">
+                  <label class="field-label" for="onsite-name">參加顧客 / 長輩姓名 <span class="req">*</span></label>
+                  <input type="text" id="onsite-name" class="sf-input" required placeholder="請輸入顧客真實姓名">
                 </div>
                 <div class="field-group">
                   <label class="field-label" for="onsite-phone">聯絡電話 <span class="req">*</span></label>
@@ -188,7 +200,7 @@
       <div id="admin-sub-create" class="hidden">
         <div class="form-card">
           <div class="section-header">
-            <h2 class="form-section-title">發布新活動</h2>
+            <h2 class="form-section-title">發布萬家福五甲店 新活動</h2>
           </div>
 
           <form id="create-event-form" onsubmit="submitCreateEvent(event)">
@@ -200,7 +212,7 @@
                 <div class="form-grid">
                   <div class="field-group">
                     <label class="field-label" for="event-name">活動名稱 <span class="req">*</span></label>
-                    <input type="text" id="event-name" class="sf-input" required placeholder="例如：2026 夏季草地音樂節">
+                    <input type="text" id="event-name" class="sf-input" required placeholder="例如：萬家福五甲店 會員感恩回饋節">
                   </div>
 
                   <div class="form-row-2">
@@ -235,17 +247,17 @@
 
                   <div class="field-group">
                     <label class="field-label" for="event-desc">活動詳細說明</label>
-                    <textarea id="event-desc" class="sf-textarea" rows="3" placeholder="詳細流程說明、注意事項與交通指引..."></textarea>
+                    <textarea id="event-desc" class="sf-textarea" rows="3" placeholder="詳細流程說明、注意事項與萬家福五甲店交通指引..."></textarea>
                   </div>
 
                   <div class="form-row-2">
                     <div class="field-group">
                       <label class="field-label" for="event-location">活動地點</label>
-                      <input type="text" id="event-location" class="sf-input" placeholder="例如：台北市大安森林公園">
+                      <input type="text" id="event-location" class="sf-input" placeholder="例如：萬家福五甲店 1樓中央廣場">
                     </div>
                     <div class="field-group">
                       <label class="field-label" for="event-price-tier">票價設定 / 價格標示</label>
-                      <input type="text" id="event-price-tier" class="sf-input" placeholder="例如：免費入場 或 早鳥票 NT$500">
+                      <input type="text" id="event-price-tier" class="sf-input" placeholder="例如：萬家福會員免費入場 或 憑發票參加">
                     </div>
                   </div>
                 </div>
@@ -257,7 +269,7 @@
                 <div class="form-grid">
                   <div class="field-group">
                     <label class="field-label" for="event-custom-badge">自訂圖片特色標籤 <span class="opt">(可自訂修改)</span></label>
-                    <input type="text" id="event-custom-badge" class="sf-input" placeholder="例如：限時7折 / 熱門推薦 / 戶外大草皮 (留空則不顯示)">
+                    <input type="text" id="event-custom-badge" class="sf-input" placeholder="例如：五甲店限定 / 憑卡免費 / 熱門推薦 (留空則不顯示)">
                   </div>
 
                   <div class="field-group">
@@ -336,7 +348,7 @@
           <h3 class="sheet-title" style="font-size:19px;">✏️ 編輯已發布活動設定</h3>
           <button class="btn-icon-circular" onclick="closeModal('modal-edit-event')">✕</button>
         </div>
-        <p class="sheet-description" style="font-size:13px; margin-bottom:16px;">隨時修正活動時間、地點、封面標籤、說明與人數上限</p>
+        <p class="sheet-description" style="font-size:13px; margin-bottom:16px;">隨時修正萬家福五甲店活動時間、地點、封面標籤、說明與人數上限</p>
 
         <form id="edit-event-form" onsubmit="submitEditEvent(event)">
           <div class="form-grid">
@@ -426,7 +438,7 @@
             <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           </div>
           <h3 class="sheet-title" style="font-size:18px;">管理員權限驗證</h3>
-          <p class="sheet-description" style="font-size:13px; margin-bottom:0;">請輸入管理金鑰通行碼解鎖後台個資</p>
+          <p class="sheet-description" style="font-size:13px; margin-bottom:0;">請輸入萬家福五甲店管理金鑰解鎖後台</p>
         </div>
 
         <form onsubmit="verifyAdminPasscode(event)">
@@ -605,16 +617,16 @@
         </div>
 
         <div class="privacy-document">
-          <p>歡迎使用本活動報名系統（以下簡稱本平台）。本平台重視您的個人資料與隱私權保護，為保障您的權益，謹依據中華民國《個人資料保護法》第 8 條規定，向您告知下列事項：</p>
+          <p>歡迎使用萬家福五甲店活動報名系統（以下簡稱本平台）。本平台重視您的個人資料與隱私權保護，為保障您的權益，謹依據中華民國《個人資料保護法》第 8 條規定，向您告知下列事項：</p>
 
           <h4>一、個人資料蒐集之目的與類別</h4>
-          <p>本平台因辦理活動報名、身分核對、通知聯繫、保險投保（如適用）及活動品質統計之需要，將蒐集您的識別類個人資料（包括：姓名、電子郵件地址、聯絡電話及自訂問卷回答）。</p>
+          <p>本平台因辦理萬家福五甲店活動報名、身分核對、通知聯繫、保險投保（如適用）及活動品質統計之需要，將蒐集您的識別類個人資料（包括：姓名、電子郵件地址、聯絡電話及自訂問卷回答）。</p>
 
           <h4>二、個人資料利用之期間、地區、對象及方式</h4>
           <ul style="padding-left: 20px;">
             <li><strong>利用期間：</strong>自您報名成功日起至活動結束後 30 日內（或依相關法令規定之保存期限）。</li>
             <li><strong>利用地區：</strong>中華民國境內及本平台伺服器/雲端託管服務所在地（Cloudflare 全球節點）。</li>
-            <li><strong>利用對象：</strong>僅限本活動主辦單位授權管理人員。</li>
+            <li><strong>利用對象：</strong>僅限萬家福五甲店授權管理人員。</li>
             <li><strong>利用方式：</strong>以數位檔案或紙本方式進行活動通知、簡訊/Email確認與名單核對。</li>
           </ul>
 
@@ -644,11 +656,11 @@
           <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <h3 class="sheet-title" style="margin-bottom:6px;">🎉 報名成功！</h3>
-        <p class="sheet-description" style="margin-bottom:16px;">我們已收到您的報名資料，期待活動當天見面。</p>
+        <p class="sheet-description" style="margin-bottom:16px;">我們已收到您的報名資料，萬家福五甲店期待活動當天與您見面。</p>
 
         <div class="voucher-card-box">
           <div style="font-size:12px; font-weight:700; color:var(--accent-orange); margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;">
-            📸 報名成功入場憑證 (請截圖保存)
+            📸 萬家福五甲店 入場憑證 (請截圖保存)
           </div>
           <div id="voucher-event-name" style="font-size:15px; font-weight:700; color:var(--label-primary); margin-bottom:4px;"></div>
           <div id="voucher-attendee-info" style="font-size:13.5px; color:var(--label-secondary);"></div>
