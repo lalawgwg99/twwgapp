@@ -43,9 +43,14 @@
         <a href="tel:07-7688888" class="store-phone-link">📞 門市專線：(07) 768-8888</a>
       </div>
 
-      <!-- Premium Apple Quick Social & Location Links Bar (Dynamically Rendered) -->
+      <!-- Premium Apple Quick Social & Location Links Bar -->
       <div class="quick-links-bar">
-        <span class="quick-links-label">數位媒體快搜：</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="quick-links-label">數位媒體快搜：</span>
+          <button id="quick-link-edit-btn" class="quick-edit-icon-btn hidden" onclick="openQuickLinksModal()" title="編輯媒體網址">
+            ⚙️ 編輯連結網址
+          </button>
+        </div>
         <div id="quick-links-pills-container" class="pills-container">
           <!-- Dynamically rendered by app.js -->
         </div>
@@ -94,7 +99,7 @@
           <span class="admin-hint-text">萬家福五甲店 後台管理系統</span>
         </div>
         <div class="admin-actions-group">
-          <button class="btn-system-secondary" onclick="openQuickLinksModal()">
+          <button class="btn-system-secondary" style="border-color:var(--accent-blue); color:var(--accent-blue); font-weight:600;" onclick="openQuickLinksModal()">
             🌐 設定媒體連結網址
           </button>
           <button class="btn-system-secondary" onclick="openGASSettingModal()">

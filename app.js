@@ -358,6 +358,10 @@
     if (label) {
       label.textContent = isAdminAuthenticated ? '🔓 五甲店後台' : '🔑 管理員驗證';
     }
+    const editBtn = document.getElementById('quick-link-edit-btn');
+    if (editBtn) {
+      editBtn.classList.toggle('hidden', !isAdminAuthenticated);
+    }
   }
 
   window.handleAdminTabClick = function () {
