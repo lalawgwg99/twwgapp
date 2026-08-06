@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>活動問卷與報名系統 - Apple Native</title>
+  <meta name="description" content="高品質活動問卷與報名平台，支援即時名額追蹤、行事曆匯出與隱私保護。">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-viewport">
+
+    <!-- Toast Capsule Notification -->
+    <div id="toast" class="toast-capsule" role="alert"></div>
+
+    <!-- Apple Top Navigation Bar -->
+    <header class="navigation-bar">
+      <div class="nav-top-row">
+        <div class="app-title-group">
+          <div class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="4" ry="4"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+              <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="large-title">本月活動一覽</h1>
+            <p class="subtitle">探索與參與精選活動</p>
+          </div>
+        </div>
+
+        <!-- SwiftUI Segmented Controller -->
+        <nav class="segmented-control" role="tablist">
+          <button id="nav-list" class="segment-btn active" onclick="switchView('list')" role="tab" aria-selected="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            活動列表
+          </button>
+          <button id="nav-create" class="segment-btn" onclick="switchView('create')" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            新增活動
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- VIEW: EVENT LIST GRID -->
+    <main id="view-list">
+      <!-- Search & Category Filters -->
+      <section class="controls-stack">
+        <div class="search-input-wrapper">
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </span>
+          <input type="text" id="search-input" class="search-input" placeholder="搜尋活動名稱、關鍵字..." oninput="handleSearchInput(event)">
+        </div>
+
+        <!-- Category Pills Filter -->
+        <div class="category-pills" id="category-pills">
+          <button class="pill-btn active" onclick="filterByCategory('all')">全部</button>
+          <button class="pill-btn" onclick="filterByCategory('available')">🔥 可報名</button>
+          <button class="pill-btn" onclick="filterByCategory('音樂')">🎵 音樂祭</button>
+          <button class="pill-btn" onclick="filterByCategory('體驗')">☕️ 體驗工作坊</button>
+          <button class="pill-btn" onclick="filterByCategory('戶外')">⛰️ 戶外運動</button>
+          <button class="pill-btn" onclick="filterByCategory('藝文')">🎨 藝文手作</button>
+          <button class="pill-btn" onclick="filterByCategory('講座')">💡 創業講座</button>
+        </div>
+      </section>
+
+      <!-- Section Stats & Grid -->
+      <div class="section-header">
+        <h2 class="section-header-title">所有活動列表</h2>
+        <span class="section-header-meta" id="event-count-label">共 8 個活動</span>
+      </div>
+
+      <!-- 8 Events Side-by-Side Grid Wall -->
+      <div id="events-grid" class="event-grid"></div>
+    </main>
+
+    <!-- VIEW: CREATE EVENT -->
+    <section id="view-create" class="hidden">
+      <div class="form-card">
+        <div class="section-header">
+          <h2 class="form-section-title">建立新活動</h2>
+          <button class="btn-system-secondary" onclick="switchView('list')">取消</button>
+        </div>
+
+        <form id="create-event-form" onsubmit="submitCreateEvent(event)">
+          <div class="form-grid">
+            <div class="field-group">
+              <label class="field-label" for="event-name">活動名稱 <span class="req">*</span></label>
+              <input type="text" id="event-name" class="sf-input" required placeholder="例如：2026 夏季草地音樂節">
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="event-category">活動分類</label>
+                <select id="event-category" class="sf-select">
+                  <option value="音樂">🎵 音樂祭</option>
+                  <option value="體驗">☕️ 體驗工作坊</option>
+                  <option value="戶外">⛰️ 戶外運動</option>
+                  <option value="藝文">🎨 藝文手作</option>
+                  <option value="講座">💡 創業講座</option>
+                  <option value="運動">🧘 健身瑜伽</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="event-date">活動日期 <span class="req">*</span></label>
+                <input type="date" id="event-date" class="sf-input" required>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="event-desc">活動詳情描述</label>
+              <textarea id="event-desc" class="sf-textarea" rows="3" placeholder="清楚說明活動流程、注意事項與集合地點..."></textarea>
+            </div>
+
+            <!-- Image Upload Architecture (R2 / URL / File Preview) -->
+            <div class="field-group">
+              <label class="field-label">活動主視覺圖片</label>
+              <div class="upload-method-selector">
+                <button type="button" class="upload-tab active" id="tab-url" onclick="switchUploadMethod('url')">貼上圖片連結</button>
+                <button type="button" class="upload-tab" id="tab-file" onclick="switchUploadMethod('file')">本地圖片選擇/Cloudflare R2</button>
+              </div>
+
+              <div id="upload-url-input-block">
+                <input type="url" id="event-img-url" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleImageUrlChange(event)">
+                <p class="field-help" style="margin-top:4px;">提供高解析度 Unsplash 或 Imgur 圖檔 URL</p>
+              </div>
+
+              <div id="upload-file-input-block" class="hidden">
+                <input type="file" id="event-img-file" accept="image/*" class="sf-input" onchange="handleFileSelect(event)">
+                <p class="field-help" style="margin-top:4px;">上傳至 Cloudflare R2 儲存桶或產生本地高畫質預覽</p>
+              </div>
+
+              <div id="image-preview" class="image-preview-box hidden" style="margin-top:10px;">
+                <div class="image-preview-overlay">
+                  <span>圖片預覽成功</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="event-max">名額人數上限 <span class="req">*</span></label>
+                <input type="number" id="event-max" class="sf-input" required min="1" max="9999" placeholder="50">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="event-location">活動地點</label>
+                <input type="text" id="event-location" class="sf-input" placeholder="例如：台北市信義區展演館">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-system-primary" style="margin-top:12px;">建立並發布活動</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW: EVENT MANAGEMENT (ADMIN) -->
+    <section id="view-manage" class="hidden">
+      <div class="form-card">
+        <div class="section-header">
+          <h2 class="form-section-title">活動與報名資料管理</h2>
+          <button class="btn-system-secondary" onclick="switchView('list')">返回列表</button>
+        </div>
+
+        <div id="manage-event-detail" style="margin-bottom:20px;"></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="font-size:16px; font-weight:600;">已報名人員名單</h3>
+          <button class="btn-system-danger" onclick="deleteActiveEvent()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            刪除本活動
+          </button>
+        </div>
+
+        <div id="manage-registrations-list"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MODAL 1: EVENT DETAIL & REGISTER SHEET -->
+  <div id="modal-detail" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-detail')">
+    <div class="sf-sheet">
+      <div class="sheet-handle"></div>
+      <div id="sheet-image-bg" class="sheet-image"></div>
+      <div class="sheet-body">
+        <div class="sheet-title-row">
+          <h3 id="sheet-title" class="sheet-title"></h3>
+          <span id="sheet-status-badge" class="sf-badge"></span>
+        </div>
+        <p id="sheet-desc" class="sheet-description"></p>
+
+        <div class="sheet-meta-grid">
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span id="sheet-date"></span>
+          </div>
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="sheet-location"></span>
+          </div>
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <span id="sheet-progress-text"></span>
+          </div>
+        </div>
+
+        <div class="progress-track" style="height:6px; margin-bottom:20px;">
+          <div id="sheet-progress-bar" class="progress-fill"></div>
+        </div>
+
+        <div class="sheet-actions">
+          <button class="btn-system-secondary" onclick="closeModal('modal-detail')">關閉</button>
+          <button class="btn-system-secondary" onclick="exportCurrentEventICS()">匯出行事曆 (.ics)</button>
+          <button id="sheet-reg-btn" class="btn-system-primary" onclick="proceedToRegisterForm()">立即報名</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: REGISTRATION FORM SHEET -->
+  <div id="modal-register-form" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-register-form')">
+    <div class="sf-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body">
+        <div class="sheet-title-row">
+          <h3 class="sheet-title">填寫報名資料</h3>
+          <button class="btn-icon-circular" onclick="closeModal('modal-register-form')">✕</button>
+        </div>
+        <p id="reg-form-event-name" class="sheet-description" style="font-weight:600; color:var(--accent-blue);"></p>
+
+        <form id="active-registration-form" onsubmit="submitRegistration(event)">
+          <div class="form-grid">
+            <div class="field-group">
+              <label class="field-label" for="reg-name">參加者姓名 <span class="req">*</span></label>
+              <input type="text" id="reg-name" class="sf-input" required placeholder="請填寫您的真實姓名">
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="reg-email">電子郵件 <span class="req">*</span></label>
+              <input type="email" id="reg-email" class="sf-input" required placeholder="name@example.com">
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="reg-phone">聯絡電話 <span class="req">*</span></label>
+              <input type="tel" id="reg-phone" class="sf-input" required placeholder="09xx-xxx-xxx">
+            </div>
+
+            <!-- Taiwan Personal Data Protection Act Mandatory Agreement -->
+            <div class="field-group" style="margin-top:6px;">
+              <label class="checkbox-row">
+                <input type="checkbox" id="reg-privacy-check" required>
+                <span>我已閱讀並同意 <a href="javascript:void(0)" onclick="openPrivacyModal()">《個人資料蒐集處理與隱私權條款》</a> <span class="req">*</span></span>
+              </label>
+            </div>
+
+            <div class="sheet-actions" style="margin-top:16px;">
+              <button type="button" class="btn-system-secondary" onclick="closeModal('modal-register-form')">取消</button>
+              <button type="submit" id="reg-submit-btn" class="btn-system-primary">確認送出報名</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: TAIWAN PERSONAL DATA PROTECTION ACT PRIVACY POLICY -->
+  <div id="modal-privacy" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-privacy')">
+    <div class="sf-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body">
+        <div class="sheet-title-row">
+          <h3 class="sheet-title">個人資料保護與隱私權政策</h3>
+          <button class="btn-icon-circular" onclick="closeModal('modal-privacy')">✕</button>
+        </div>
+
+        <div class="privacy-document">
+          <p>歡迎使用本活動報名系統（以下簡稱本平台）。本平台重視您的個人資料與隱私權保護，為保障您的權益，謹依據中華民國《個人資料保護法》第 8 條規定，向您告知下列事項：</p>
+
+          <h4>一、個人資料蒐集之目的與類別</h4>
+          <p>本平台因辦理活動報名、身分核對、通知聯繫、保險投保（如適用）及活動品質統計之需要，將蒐集您的識別類個人資料（包括：姓名、電子郵件地址、聯絡電話）。</p>
+
+          <h4>二、個人資料利用之期間、地區、對象及方式</h4>
+          <ul style="padding-left: 20px;">
+            <li><strong>利用期間：</strong>自您報名成功日起至活動結束後 30 日內（或依相關法令規定之保存期限）。</li>
+            <li><strong>利用地區：</strong>中華民國境內及本平台伺服器/雲端託管服務所在地（Cloudflare 全球節點）。</li>
+            <li><strong>利用對象：</strong>僅限本活動主辦單位及系統維運必要人員。</li>
+            <li><strong>利用方式：</strong>以數位檔案或紙本方式進行活動通知、簡訊/Email確認與名單核對。</li>
+          </ul>
+
+          <h4>三、當事人得行使之權利</h4>
+          <p>您得隨時向主辦單位行使個資法第 3 條規定之權利：(1) 查詢或請求閱覽 (2) 請求製給複製本 (3) 請求補充或更正 (4) 請求停止蒐集、處理或利用 (5) 請求刪除。</p>
+
+          <h4>四、資料安全與加密傳輸</h4>
+          <p>本系統全站採用 TLS 1.3/HTTPS 加密傳輸協定，並託管於 Cloudflare 安全架構之下。絕不會將您的個資出售、出租或提供給無關之第三方行銷機構。</p>
+
+          <h4>五、不提供個資對權益之影響</h4>
+          <p>您得自由選擇是否提供個人資料，惟若拒絕提供必填資料，主辦單位將無法完成您的報名程序與後續服務。</p>
+        </div>
+
+        <div style="margin-top:20px;">
+          <button class="btn-system-primary" onclick="closeModal('modal-privacy')">我瞭解並同意條款</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: SUCCESS CONFIRMATION & ICAL DOWNLOAD -->
+  <div id="modal-success" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-success')">
+    <div class="sf-sheet" style="max-width:380px; text-align:center;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body" style="padding:32px 24px;">
+        <div style="width:60px; height:60px; border-radius:50%; background:rgba(52, 199, 89, 0.12); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; color:var(--accent-green);">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 class="sheet-title" style="margin-bottom:8px;">報名完成！</h3>
+        <p class="sheet-description" style="margin-bottom:20px;">我們已收到您的報名資料，期待活動當天見面。</p>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button class="btn-system-primary" onclick="exportCurrentEventICS()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            加入 Apple / Google 行事曆
+          </button>
+          <button class="btn-system-secondary" onclick="closeModal('modal-success'); switchView('list');">完成回到首頁</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

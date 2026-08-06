@@ -1,0 +1,985 @@
+/* ==========================================================================
+   Apple Native (SwiftUI Design System) CSS
+   Compliant with Apple Human Interface Guidelines (HIG)
+   ========================================================================== */
+
+:root {
+  /* Apple iOS Dynamic Palette - Light Mode */
+  --system-bg: #F2F2F7;
+  --system-grouped-bg: #F2F2F7;
+  --surface-primary: #FFFFFF;
+  --surface-secondary: #F8F8FA;
+  --surface-tertiary: #EFEFF4;
+  --surface-translucent: rgba(255, 255, 255, 0.82);
+
+  --separator: rgba(60, 60, 67, 0.12);
+  --separator-opaque: #C6C6C8;
+
+  --label-primary: #000000;
+  --label-secondary: rgba(60, 60, 67, 0.60);
+  --label-tertiary: rgba(60, 60, 67, 0.30);
+  --label-quaternary: rgba(60, 60, 67, 0.18);
+
+  /* Apple Accent Colors */
+  --accent-blue: #007AFF;
+  --accent-blue-active: #0056B3;
+  --accent-green: #34C759;
+  --accent-orange: #FF9500;
+  --accent-red: #FF3B30;
+  --accent-gray: #8E8E93;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang TC", "Microsoft JhengHei", sans-serif;
+
+  /* SwiftUI Radii */
+  --radius-xs: 8px;
+  --radius-s: 10px;
+  --radius-m: 14px;
+  --radius-l: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.06);
+  --shadow-sheet: 0 12px 40px rgba(0, 0, 0, 0.18);
+
+  /* Apple Natural Transition Curves */
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --t-fast: 160ms;
+  --t-medium: 280ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --system-bg: #000000;
+    --system-grouped-bg: #1C1C1E;
+    --surface-primary: #1C1C1E;
+    --surface-secondary: #2C2C2E;
+    --surface-tertiary: #3A3A3C;
+    --surface-translucent: rgba(28, 28, 30, 0.82);
+
+    --separator: rgba(235, 235, 245, 0.15);
+    --separator-opaque: #38383A;
+
+    --label-primary: #FFFFFF;
+    --label-secondary: rgba(235, 235, 245, 0.60);
+    --label-tertiary: rgba(235, 235, 245, 0.30);
+    --label-quaternary: rgba(235, 235, 245, 0.16);
+
+    --accent-blue: #0A84FF;
+    --accent-green: #30D158;
+    --accent-orange: #FF9F0A;
+    --accent-red: #FF453A;
+    --accent-gray: #8E8E93;
+  }
+}
+
+/* ==========================================================================
+   Reset & Base Layout
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  background-color: var(--system-bg);
+  color: var(--label-primary);
+  font-family: var(--font-family);
+  font-size: 15px;
+  line-height: 1.47059;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  min-height: 100vh;
+}
+
+/* iOS Main Container */
+.app-viewport {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+/* ==========================================================================
+   Apple Header & Navigation Bar
+   ========================================================================== */
+.navigation-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.nav-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.25);
+}
+
+.app-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.large-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--label-primary);
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--label-secondary);
+  font-weight: 400;
+}
+
+/* SwiftUI Segmented Control */
+.segmented-control {
+  display: inline-flex;
+  background: var(--surface-secondary);
+  border-radius: var(--radius-s);
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--separator);
+  align-self: flex-start;
+}
+
+.segment-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--label-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--t-fast) var(--ease-spring);
+  font-family: inherit;
+  user-select: none;
+}
+
+.segment-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.segment-btn:hover {
+  color: var(--label-primary);
+}
+
+.segment-btn.active {
+  background: var(--surface-primary);
+  color: var(--label-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Filter Bar & Search Bar (SwiftUI Native Style)
+   ========================================================================== */
+.controls-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--label-tertiary);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--separator);
+  background: var(--surface-primary);
+  color: var(--label-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--t-fast) var(--ease-spring), box-shadow var(--t-fast) var(--ease-spring);
+}
+
+.search-input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+/* Category Filter Pills */
+.category-pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.category-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.pill-btn {
+  border: 1px solid var(--separator);
+  background: var(--surface-primary);
+  color: var(--label-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--t-fast) var(--ease-spring);
+  font-family: inherit;
+}
+
+.pill-btn:hover {
+  border-color: var(--label-tertiary);
+  color: var(--label-primary);
+}
+
+.pill-btn.active {
+  background: var(--label-primary);
+  color: var(--system-bg);
+  border-color: var(--label-primary);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Event Grid - 8 Events Layout
+   ========================================================================== */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.section-header-title {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.section-header-meta {
+  font-size: 13px;
+  color: var(--label-secondary);
+  font-weight: 500;
+}
+
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 992px) {
+  .event-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 728px) {
+  .event-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .event-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Apple Card View */
+.event-card {
+  background: var(--surface-primary);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--separator);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease-spring), box-shadow var(--t-fast) var(--ease-spring), border-color var(--t-fast);
+  box-shadow: var(--shadow-subtle);
+}
+
+.event-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+  border-color: var(--separator-opaque);
+}
+
+.event-card:active {
+  transform: scale(0.985);
+}
+
+.card-media {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface-tertiary);
+}
+
+.card-badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sf-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  letter-spacing: 0.01em;
+}
+
+.badge-status-open {
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+.badge-status-warning {
+  background: rgba(255, 149, 0, 0.15);
+  color: var(--accent-orange);
+  border: 1px solid rgba(255, 149, 0, 0.3);
+}
+
+.badge-status-full {
+  background: rgba(255, 59, 48, 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+}
+
+.badge-category {
+  background: rgba(0, 0, 0, 0.45);
+  color: #FFFFFF;
+}
+
+.card-content {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-blue);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--label-primary);
+  line-height: 1.35;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-description {
+  font-size: 13px;
+  color: var(--label-secondary);
+  line-height: 1.4;
+  margin-bottom: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* SwiftUI ProgressView System Indicator */
+.progress-block {
+  margin-top: auto;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.progress-label {
+  color: var(--label-secondary);
+}
+
+.progress-value {
+  color: var(--label-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--surface-tertiary);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width var(--t-medium) var(--ease-spring);
+}
+
+/* Empty State */
+.empty-state-view {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--surface-primary);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--separator);
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  color: var(--label-tertiary);
+}
+
+.empty-state-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--label-primary);
+  margin-bottom: 4px;
+}
+
+.empty-state-subtitle {
+  font-size: 14px;
+  color: var(--label-secondary);
+}
+
+/* ==========================================================================
+   Forms & Inputs (Apple HIG Grouped Style)
+   ========================================================================== */
+.form-card {
+  background: var(--surface-primary);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--separator);
+  padding: 20px;
+  box-shadow: var(--shadow-subtle);
+  margin-bottom: 24px;
+}
+
+.form-section-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--label-primary);
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.field-label .req {
+  color: var(--accent-red);
+}
+
+.sf-input, .sf-textarea, .sf-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--separator);
+  background: var(--surface-primary);
+  color: var(--label-primary);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.sf-input:focus, .sf-textarea:focus, .sf-select:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+.field-help {
+  font-size: 12px;
+  color: var(--label-tertiary);
+}
+
+/* Image Upload Tabs Component */
+.upload-method-selector {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.upload-tab {
+  padding: 5px 12px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--separator);
+  background: var(--surface-secondary);
+  color: var(--label-secondary);
+  cursor: pointer;
+}
+
+.upload-tab.active {
+  background: var(--accent-blue);
+  color: #FFFFFF;
+  border-color: var(--accent-blue);
+}
+
+.image-preview-box {
+  width: 100%;
+  height: 160px;
+  border-radius: var(--radius-s);
+  border: 2px dashed var(--separator-opaque);
+  background: var(--surface-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.image-preview-overlay {
+  background: rgba(0,0,0,0.4);
+  color: #FFFFFF;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Checkbox Style */
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--label-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-blue);
+  cursor: pointer;
+  margin-top: 1px;
+}
+
+.checkbox-row a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+
+.checkbox-row a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Buttons (Apple Native Touch Styles)
+   ========================================================================== */
+.btn-system-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: var(--radius-s);
+  border: none;
+  background: var(--accent-blue);
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity var(--t-fast), transform var(--t-fast) var(--ease-spring);
+}
+
+.btn-system-primary:hover {
+  opacity: 0.92;
+}
+
+.btn-system-primary:active {
+  transform: scale(0.985);
+}
+
+.btn-system-primary:disabled {
+  background: var(--surface-tertiary);
+  color: var(--label-tertiary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-system-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--separator);
+  background: var(--surface-secondary);
+  color: var(--label-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--t-fast);
+}
+
+.btn-system-secondary:hover {
+  background: var(--surface-tertiary);
+}
+
+.btn-system-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-s);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  background: rgba(255, 59, 48, 0.08);
+  color: var(--accent-red);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--t-fast);
+}
+
+.btn-system-danger:hover {
+  background: rgba(255, 59, 48, 0.16);
+}
+
+.btn-icon-circular {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--separator);
+  background: var(--surface-secondary);
+  color: var(--label-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.btn-icon-circular:hover {
+  background: var(--surface-tertiary);
+  color: var(--label-primary);
+}
+
+/* ==========================================================================
+   Modals (iOS Sheet Style)
+   ========================================================================== */
+.sf-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity var(--t-medium) var(--ease-spring);
+}
+
+.sf-modal-backdrop.active {
+  display: flex;
+  opacity: 1;
+}
+
+.sf-sheet {
+  background: var(--surface-primary);
+  border-radius: var(--radius-l);
+  max-width: 520px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-sheet);
+  border: 1px solid var(--separator);
+  transform: translateY(20px) scale(0.97);
+  transition: transform var(--t-medium) var(--ease-spring);
+  display: flex;
+  flex-direction: column;
+}
+
+.sf-modal-backdrop.active .sf-sheet {
+  transform: translateY(0) scale(1);
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--label-tertiary);
+  margin: 10px auto 4px;
+}
+
+.sheet-image {
+  width: 100%;
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.sheet-body {
+  padding: 20px;
+}
+
+.sheet-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sheet-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sheet-description {
+  font-size: 14px;
+  color: var(--label-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.sheet-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface-secondary);
+  border-radius: var(--radius-s);
+  padding: 12px;
+  margin-bottom: 18px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--label-secondary);
+}
+
+.meta-item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.sheet-actions button {
+  flex: 1;
+}
+
+/* Privacy Policy Modal Content */
+.privacy-document {
+  font-size: 13px;
+  color: var(--label-secondary);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.privacy-document h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--label-primary);
+  margin-top: 4px;
+}
+
+/* Data Table for Management View */
+.sf-table-wrapper {
+  border-radius: var(--radius-s);
+  border: 1px solid var(--separator);
+  overflow: hidden;
+  background: var(--surface-primary);
+}
+
+.sf-table-header {
+  display: grid;
+  grid-template-columns: 1.2fr 1.8fr 1.2fr;
+  padding: 10px 14px;
+  background: var(--surface-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--label-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.sf-table-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.8fr 1.2fr;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  border-top: 1px solid var(--separator);
+  align-items: center;
+}
+
+.sf-table-row:nth-child(even) {
+  background: var(--surface-secondary);
+}
+
+.cell-sub {
+  font-size: 12px;
+  color: var(--label-tertiary);
+}
+
+/* Toast Notifications (iOS Capsule Banner) */
+.toast-capsule {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30px);
+  background: var(--label-primary);
+  color: var(--system-bg);
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--t-medium) var(--ease-spring);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast-capsule.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-capsule.error {
+  background: var(--accent-red);
+  color: #FFFFFF;
+}
+
+.hidden {
+  display: none !important;
+}
