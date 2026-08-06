@@ -1,5 +1,5 @@
 /**
- * Google Apps Script (GAS) Backend - Automatic Datetime Cutoff & Senior Friendly Edition
+ * Google Apps Script (GAS) Backend - Event Editing, Automatic Cutoff & Senior Friendly Edition
  */
 
 const ADMIN_PASSCODE = "admin888";
@@ -63,7 +63,6 @@ function handleRequest(e) {
         return jsonResponse({ success: false, error: "長輩姓名與聯絡電話為必填欄位" });
       }
 
-      // Check Automatic Cutoff Date Time on Backend Server
       const evData = eventsSheet.getDataRange().getValues();
       let targetEvent = null;
       for (let i = 1; i < evData.length; i++) {
@@ -86,7 +85,6 @@ function handleRequest(e) {
         }
       }
 
-      // Deduplication Check by Phone
       const data = regSheet.getDataRange().getValues();
       for (let i = 1; i < data.length; i++) {
         if (data[i][1] === eventId && String(data[i][4]) === String(attendeePhone)) {
@@ -149,6 +147,33 @@ function handleRequest(e) {
       ]);
 
       return jsonResponse({ success: true, message: "新活動 (含截止時間) 已新增至 Google 試算表" });
+    }
+
+    // UPDATE PUBLISHED EVENT IN GOOGLE SHEETS
+    if (action === "update_event") {
+      if (!isAdmin) {
+        return jsonResponse({ success: false, error: "權限不足" }, 401);
+      }
+
+      const ev = params.event;
+      const evData = eventsSheet.getDataRange().getValues();
+      for (let i = 1; i < evData.length; i++) {
+        if (evData[i][0] === ev.id) {
+          eventsSheet.getRange(i + 1, 2).setValue(ev.name);
+          eventsSheet.getRange(i + 1, 3).setValue(ev.category);
+          eventsSheet.getRange(i + 1, 4).setValue(ev.customBadge || "");
+          eventsSheet.getRange(i + 1, 5).setValue(ev.priceTier || "");
+          eventsSheet.getRange(i + 1, 6).setValue(ev.date);
+          eventsSheet.getRange(i + 1, 7).setValue(ev.description || "");
+          eventsSheet.getRange(i + 1, 8).setValue(ev.maxPeople);
+          eventsSheet.getRange(i + 1, 9).setValue(ev.location || "");
+          eventsSheet.getRange(i + 1, 10).setValue(ev.image || "");
+          eventsSheet.getRange(i + 1, 14).setValue(ev.startDate || "");
+          eventsSheet.getRange(i + 1, 15).setValue(ev.endDate || "");
+          return jsonResponse({ success: true, message: "活動設定已成功更新至 Google 試算表" });
+        }
+      }
+      return jsonResponse({ success: false, error: "找不到該活動" });
     }
 
     return jsonResponse({ success: false, error: "未知指令" });

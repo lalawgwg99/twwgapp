@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>活動報名與問卷系統 - 支援自動截止與長輩友善版</title>
-  <meta name="description" content="專業級活動問卷報名平台，支援活動開始與截止時間自動防護、長輩電話報名、代報名與現場快速報到。">
+  <title>活動報名與問卷系統 - 支援活動隨時編輯修改與自動截止</title>
+  <meta name="description" content="專業級活動問卷報名平台，支援已發布活動隨時編輯修改、報名截止時間自動關閉、長輩電話報名與 GAS 試算表同步。">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
           </div>
           <div>
             <h1 class="large-title">本月活動一覽</h1>
-            <p class="subtitle">長輩友善 ‧ 時間自動截止 ‧ 現場快速報到</p>
+            <p class="subtitle">長輩友善 ‧ 活動隨時編輯修改 ‧ 自動截止</p>
           </div>
         </div>
 
@@ -104,7 +104,7 @@
       <div class="admin-sub-nav">
         <button id="admin-tab-manage" class="admin-tab-btn active" onclick="switchAdminSubView('manage')">名單與簽到</button>
         <button id="admin-tab-onsite" class="admin-tab-btn" onclick="switchAdminSubView('onsite')">⚡️ 現場快速報名</button>
-        <button id="admin-tab-create" class="admin-tab-btn" onclick="switchAdminSubView('create')">發布新活動（自動截止）</button>
+        <button id="admin-tab-create" class="admin-tab-btn" onclick="switchAdminSubView('create')">發布新活動</button>
       </div>
 
       <!-- SUB-VIEW A: REGISTRANTS & ATTENDANCE MANAGEMENT -->
@@ -113,7 +113,7 @@
           <div class="section-header" style="flex-wrap:wrap; gap:10px;">
             <div>
               <h2 class="form-section-title">選擇管理活動</h2>
-              <p class="field-help">檢視參加者個資、標記簽到與匯出 CSV 報表</p>
+              <p class="field-help">檢視參加者個資、標記簽到、修改活動內容與匯出 CSV 報表</p>
             </div>
             <select id="admin-event-selector" class="sf-select" style="max-width:320px;" onchange="handleAdminSelectEvent(event)"></select>
           </div>
@@ -125,7 +125,11 @@
               <h3 style="font-size:16px; font-weight:600;">報名名單與簽到紀錄</h3>
               <span id="attendance-stat-badge" class="sf-badge badge-status-open">已報到 0 人</span>
             </div>
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-system-secondary" style="border-color:var(--accent-blue); color:var(--accent-blue);" onclick="openEditEventModal()">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                ✏️ 編輯本活動設定
+              </button>
               <button class="btn-system-secondary" onclick="exportRegistrationsCSV()">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                 匯出 CSV 名單
@@ -180,11 +184,11 @@
         </div>
       </div>
 
-      <!-- SUB-VIEW C: CREATE NEW EVENT WITH AUTOMATIC START & CUTOFF DATE-TIME -->
+      <!-- SUB-VIEW C: CREATE NEW EVENT -->
       <div id="admin-sub-create" class="hidden">
         <div class="form-card">
           <div class="section-header">
-            <h2 class="form-section-title">發布新活動 (支援開始與截止時間自動關閉)</h2>
+            <h2 class="form-section-title">發布新活動</h2>
           </div>
 
           <form id="create-event-form" onsubmit="submitCreateEvent(event)">
@@ -222,12 +226,10 @@
                     <div class="field-group">
                       <label class="field-label" for="event-start-time">開放報名時間 (選填)</label>
                       <input type="datetime-local" id="event-start-time" class="sf-input">
-                      <p class="field-help">到達此時間前，按鈕顯示「尚未開放」</p>
                     </div>
                     <div class="field-group">
                       <label class="field-label" for="event-end-time">報名截止時間 <span class="req">* (自動截止)</span></label>
                       <input type="datetime-local" id="event-end-time" class="sf-input" required>
-                      <p class="field-help">到達此時間後，系統自動關閉顯示「已截止」</p>
                     </div>
                   </div>
 
@@ -256,7 +258,6 @@
                   <div class="field-group">
                     <label class="field-label" for="event-custom-badge">自訂圖片特色標籤 <span class="opt">(可自訂修改)</span></label>
                     <input type="text" id="event-custom-badge" class="sf-input" placeholder="例如：限時7折 / 熱門推薦 / 戶外大草皮 (留空則不顯示)">
-                    <p class="field-help">動態顯示於卡片封面右上角</p>
                   </div>
 
                   <div class="field-group">
@@ -283,7 +284,7 @@
                 </div>
               </div>
 
-              <!-- SECTION 3: FIELD REQUIREMENTS & QUESTIONNAIRE BUILDER -->
+              <!-- SECTION 3: QUESTIONNAIRE BUILDER -->
               <div class="inset-grouped-box">
                 <div class="inset-grouped-header">3. 報名表單欄位與強大自訂問卷</div>
                 <div class="form-grid">
@@ -294,7 +295,6 @@
                     </label>
                   </div>
 
-                  <!-- Dynamic Custom Questionnaire Builder -->
                   <div style="margin-top:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                       <label class="field-label" style="font-size:14px;">自訂問卷題目與動態欄位</label>
@@ -325,6 +325,95 @@
       </div>
     </section>
 
+  </div>
+
+  <!-- MODAL: EDIT PUBLISHED EVENT SHEET -->
+  <div id="modal-edit-event" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-edit-event')">
+    <div class="sf-sheet" style="max-width:620px;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body" style="padding:24px 20px;">
+        <div class="sheet-title-row">
+          <h3 class="sheet-title" style="font-size:19px;">✏️ 編輯已發布活動設定</h3>
+          <button class="btn-icon-circular" onclick="closeModal('modal-edit-event')">✕</button>
+        </div>
+        <p class="sheet-description" style="font-size:13px; margin-bottom:16px;">隨時修正活動時間、地點、封面標籤、說明與人數上限</p>
+
+        <form id="edit-event-form" onsubmit="submitEditEvent(event)">
+          <div class="form-grid">
+            <div class="field-group">
+              <label class="field-label" for="edit-event-name">活動名稱 <span class="req">*</span></label>
+              <input type="text" id="edit-event-name" class="sf-input" required>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="edit-event-category">活動分類</label>
+                <select id="edit-event-category" class="sf-select">
+                  <option value="音樂">🎵 音樂祭</option>
+                  <option value="體驗">☕️ 體驗工作坊</option>
+                  <option value="戶外">⛰️ 戶外運動</option>
+                  <option value="藝文">🎨 藝文手作</option>
+                  <option value="講座">💡 創業講座</option>
+                  <option value="運動">🧘 健身瑜伽</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="edit-event-date">活動舉辦日期 <span class="req">*</span></label>
+                <input type="date" id="edit-event-date" class="sf-input" required>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="edit-event-start-time">開放報名時間</label>
+                <input type="datetime-local" id="edit-event-start-time" class="sf-input">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="edit-event-end-time">報名截止時間 <span class="req">*</span></label>
+                <input type="datetime-local" id="edit-event-end-time" class="sf-input" required>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="edit-event-desc">活動詳細說明</label>
+              <textarea id="edit-event-desc" class="sf-textarea" rows="3"></textarea>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="edit-event-location">活動地點</label>
+                <input type="text" id="edit-event-location" class="sf-input">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="edit-event-price-tier">票價設定 / 價格標號</label>
+                <input type="text" id="edit-event-price-tier" class="sf-input">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="edit-event-custom-badge">自訂圖片特色標籤</label>
+                <input type="text" id="edit-event-custom-badge" class="sf-input">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="edit-event-max">人數上限 <span class="req">*</span></label>
+                <input type="number" id="edit-event-max" class="sf-input" required min="1" max="9999">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="edit-event-img-url">封面圖片網址 URL</label>
+              <input type="url" id="edit-event-img-url" class="sf-input">
+            </div>
+
+            <div class="sheet-actions" style="margin-top:14px;">
+              <button type="button" class="btn-system-secondary" onclick="closeModal('modal-edit-event')">取消</button>
+              <button type="submit" class="btn-system-primary">儲存變更並更新活動</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL 0: ADMIN AUTHENTICATION SHEET -->
@@ -439,7 +528,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: SENIOR FRIENDLY PUBLIC REGISTRATION FORM -->
+  <!-- MODAL 2: PUBLIC REGISTRATION FORM -->
   <div id="modal-register-form" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-register-form')">
     <div class="sf-sheet">
       <div class="sheet-handle"></div>
@@ -452,8 +541,6 @@
 
         <form id="active-registration-form" onsubmit="submitRegistration(event)">
           <div class="form-grid">
-
-            <!-- Proxy Registration Checkbox -->
             <div class="field-group" style="background:var(--surface-secondary); padding:10px 12px; border-radius:var(--radius-s); border:1px solid var(--separator);">
               <label class="checkbox-row">
                 <input type="checkbox" id="reg-is-proxy" onchange="toggleProxyFieldsUI()">
@@ -461,7 +548,6 @@
               </label>
             </div>
 
-            <!-- Proxy Fields -->
             <div id="proxy-fields-box" class="form-grid hidden" style="background:rgba(175, 82, 222, 0.08); padding:12px; border-radius:var(--radius-s); border:1px solid rgba(175, 82, 222, 0.25);">
               <div class="field-group">
                 <label class="field-label" for="proxy-name">代報人姓名 (您的姓名) <span class="req">*</span></label>
@@ -473,7 +559,6 @@
               </div>
             </div>
 
-            <!-- Attendee Fields -->
             <div class="field-group">
               <label class="field-label" id="attendee-name-label" for="reg-name">實際參加者姓名 <span class="req">*</span></label>
               <input type="text" id="reg-name" class="sf-input" required placeholder="請填寫參加者真實姓名">
@@ -490,10 +575,8 @@
               <input type="email" id="reg-email" class="sf-input" placeholder="有 Email 可填寫接收確認信 (可不填)">
             </div>
 
-            <!-- Dynamic Custom Questionnaire Fields Container -->
             <div id="dynamic-questions-form-container"></div>
 
-            <!-- Mandatory Privacy Agreement -->
             <div class="field-group" style="margin-top:6px;">
               <label class="checkbox-row">
                 <input type="checkbox" id="reg-privacy-check" required>
@@ -563,7 +646,6 @@
         <h3 class="sheet-title" style="margin-bottom:6px;">🎉 報名成功！</h3>
         <p class="sheet-description" style="margin-bottom:16px;">我們已收到您的報名資料，期待活動當天見面。</p>
 
-        <!-- Senior Screenshot Voucher Box -->
         <div class="voucher-card-box">
           <div style="font-size:12px; font-weight:700; color:var(--accent-orange); margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;">
             📸 報名成功入場憑證 (請截圖保存)

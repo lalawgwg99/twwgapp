@@ -1,12 +1,12 @@
 /**
  * Apple Native (SwiftUI Style) Event Registration & Management Platform
- * Automatic Registration Start & Cutoff Datetime Control Edition
+ * Edit Published Events, Automatic Cutoff & Senior Friendly Edition
  */
 
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'twwgapp_events_pro_v6';
+  const STORAGE_KEY = 'twwgapp_events_pro_v7';
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
   const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const DEFAULT_ADMIN_PASSCODE = 'admin888';
@@ -96,7 +96,7 @@
       maxPeople: 30,
       date: '2026-08-05',
       startDate: '2026-07-01T09:00',
-      endDate: '2026-08-04T23:59', // Past deadline -> Automatic Cutoff Demo
+      endDate: '2026-08-04T23:59',
       location: '陽明山小油坑遊客服務中心集合',
       image: DEFAULT_IMAGES[2],
       phoneRequired: true,
@@ -117,7 +117,7 @@
       description: '零基礎也能輕鬆上手！學習水彩渲染與層次堆疊技巧，繪製專屬多肉植物與花卉，材料道具全數提供。',
       maxPeople: 12,
       date: '2026-09-30',
-      startDate: '2026-09-01T09:00', // Future start date -> Pending Demo
+      startDate: '2026-09-01T09:00',
       endDate: '2026-09-29T23:59',
       location: '新北市板橋區藝文創客空間',
       image: DEFAULT_IMAGES[3],
@@ -325,7 +325,6 @@
   function getStatus(count, max, startDateStr, endDateStr) {
     const now = Date.now();
 
-    // Check Start Date
     if (startDateStr) {
       const startTime = new Date(startDateStr).getTime();
       if (!isNaN(startTime) && now < startTime) {
@@ -333,7 +332,6 @@
       }
     }
 
-    // Check End Date Cutoff
     if (endDateStr) {
       const endTime = new Date(endDateStr).getTime();
       if (!isNaN(endTime) && now > endTime) {
@@ -341,7 +339,6 @@
       }
     }
 
-    // Check Capacity Limit
     if (count >= max) {
       return { label: '已額滿', type: 'full', color: 'var(--accent-red)', allowRegister: false };
     }
@@ -455,7 +452,7 @@
     renderEventsGrid();
   };
 
-  // Render Events Grid Wall with Automatic Cutoff Check
+  // Render Events Grid Wall
   function renderEventsGrid() {
     const events = loadEventsData();
     const container = document.getElementById('events-grid');
@@ -552,6 +549,97 @@
     }
   };
 
+  // EDIT PUBLISHED EVENT LOGIC
+  window.openEditEventModal = function () {
+    if (!isAdminAuthenticated) {
+      showToast('權限不足', true);
+      return;
+    }
+
+    const events = loadEventsData();
+    const ev = events.find(e => e.id === activeEventId);
+    if (!ev) {
+      showToast('請先選擇要編輯的活動', true);
+      return;
+    }
+
+    document.getElementById('edit-event-name').value = ev.name || '';
+    document.getElementById('edit-event-category').value = ev.category || '音樂';
+    document.getElementById('edit-event-date').value = ev.date || '';
+    document.getElementById('edit-event-start-time').value = ev.startDate || '';
+    document.getElementById('edit-event-end-time').value = ev.endDate || '';
+    document.getElementById('edit-event-desc').value = ev.description || '';
+    document.getElementById('edit-event-location').value = ev.location || '';
+    document.getElementById('edit-event-price-tier').value = ev.priceTier || '';
+    document.getElementById('edit-event-custom-badge').value = ev.customBadge || '';
+    document.getElementById('edit-event-max').value = ev.maxPeople || 50;
+    document.getElementById('edit-event-img-url').value = ev.image || '';
+
+    openModal('modal-edit-event');
+  };
+
+  window.submitEditEvent = function (e) {
+    e.preventDefault();
+    if (!isAdminAuthenticated) {
+      showToast('權限不足', true);
+      return;
+    }
+
+    const events = loadEventsData();
+    const ev = events.find(e => e.id === activeEventId);
+    if (!ev) return;
+
+    const name = document.getElementById('edit-event-name').value.trim();
+    const category = document.getElementById('edit-event-category').value;
+    const date = document.getElementById('edit-event-date').value;
+    const startDate = document.getElementById('edit-event-start-time').value;
+    const endDate = document.getElementById('edit-event-end-time').value;
+    const desc = document.getElementById('edit-event-desc').value.trim();
+    const location = document.getElementById('edit-event-location').value.trim();
+    const priceTier = document.getElementById('edit-event-price-tier').value.trim();
+    const customBadge = document.getElementById('edit-event-custom-badge').value.trim();
+    const maxPeople = parseInt(document.getElementById('edit-event-max').value, 10);
+    const image = document.getElementById('edit-event-img-url').value.trim() || ev.image;
+
+    if (!name || !date || !endDate || !maxPeople || maxPeople < 1) {
+      showToast('請填寫完整必填欄位與報名截止時間', true);
+      return;
+    }
+
+    ev.name = name;
+    ev.category = category;
+    ev.date = date;
+    ev.startDate = startDate;
+    ev.endDate = endDate;
+    ev.description = desc;
+    ev.location = location;
+    ev.priceTier = priceTier;
+    ev.customBadge = customBadge;
+    ev.maxPeople = maxPeople;
+    ev.image = image;
+
+    saveEventsData(events);
+
+    // Sync to GAS if URL configured
+    const gasUrl = getGASUrl();
+    if (gasUrl) {
+      fetch(gasUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_event',
+          passcode: DEFAULT_ADMIN_PASSCODE,
+          event: ev
+        })
+      }).catch(err => console.warn('GAS Sync warning:', err));
+    }
+
+    closeModal('modal-edit-event');
+    showToast(`✏️ 已成功更新『${name}』活動設定！`);
+    renderAdminDashboard();
+    renderEventsGrid();
+  };
+
   window.openEventDetail = function (eventId) {
     const events = loadEventsData();
     const ev = events.find(e => e.id === eventId);
@@ -591,7 +679,7 @@
     openModal('modal-detail');
   };
 
-  // Dynamic Questionnaire Form Rendering for Public User
+  // Dynamic Questionnaire Form Rendering
   window.proceedToRegisterForm = function () {
     const events = loadEventsData();
     const ev = events.find(e => e.id === activeEventId);
@@ -783,7 +871,7 @@
     renderEventsGrid();
   };
 
-  // Onsite Rapid Registration (Admin Walk-In Mode)
+  // Onsite Rapid Registration
   function renderOnsiteEventSelector() {
     const events = loadEventsData();
     const selector = document.getElementById('onsite-event-selector');
@@ -875,7 +963,7 @@
     showToast('已匯出 iCal 行事曆檔案！');
   };
 
-  // Google Forms Questionnaire Builder Logic in Admin View
+  // Google Forms Questionnaire Builder Logic
   window.addQuestionnaireField = function () {
     const qId = 'q_' + Date.now().toString(36);
     builderQuestions.push({
@@ -979,7 +1067,7 @@
     reader.readAsDataURL(file);
   };
 
-  // Create New Event with Datetime Cutoff
+  // Create New Event
   window.submitCreateEvent = function (e) {
     e.preventDefault();
     if (!isAdminAuthenticated) {
