@@ -31,7 +31,7 @@ test('CSS delimiters remain balanced', () => {
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
   assert.match(html, /styles\.css\?v=20260806_pro4/);
-  assert.match(html, /app\.js\?v=20260806_pro3/);
+  assert.match(html, /app\.js\?v=20260806_pro4/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -51,4 +51,10 @@ test('Hero image is never cropped and the logo links home', () => {
   assert.match(css, /\.hero-poster-img\s*\{[^}]*object-fit:\s*contain/s);
   assert.doesNotMatch(css, /\.hero-poster-box\s*\{[^}]*aspect-ratio:\s*2\s*\/\s*1/s);
   assert.match(html, /<a href="\/" class="brand-home-link"[^>]*aria-label="回到萬家福五甲店活動首頁"/);
+});
+
+test('admin login refreshes private registration data before opening the dashboard', () => {
+  assert.match(script, /adminSessionToken = token;[\s\S]*?await syncEventsFromBackend\(\);[\s\S]*?switchView\('admin'\)/);
+  assert.match(html, /onclick="refreshAdminData\(event\)"/);
+  assert.match(script, /完整名單尚未載入/);
 });

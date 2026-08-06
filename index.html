@@ -134,6 +134,7 @@
               <span id="attendance-stat-badge" class="sf-badge badge-status-open">已報到 0 人</span>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-system-secondary" onclick="refreshAdminData(event)">↻ 重新整理名單</button>
               <button class="btn-system-secondary" style="border-color:var(--accent-blue); color:var(--accent-blue);" onclick="openEditEventModal()">✏️ 編輯本活動設定</button>
               <button class="btn-system-secondary" onclick="exportRegistrationsCSV()">匯出 CSV 名單</button>
               <button class="btn-system-danger" onclick="deleteActiveEvent()">刪除本活動</button>
@@ -715,6 +716,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260806_pro3"></script>
+  <script src="app.js?v=20260806_pro4"></script>
 </body>
 </html>

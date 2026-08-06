@@ -60,6 +60,45 @@ test('admin tokens are signed and forged tokens are rejected', async () => {
   assert.equal(forged.status, 401);
 });
 
+test('GET explicitly distinguishes public masks from complete admin registration data', async () => {
+  const eventRow = {
+    id: 'event-1', name: '活動', category: '分類', custom_badge: '', price_tier: '',
+    date: '2026-08-10', start_date: '', end_date: '2026-08-09T10:00',
+    description: '', max_people: 10, location: '', image_url: '', custom_questions: '[]', created_at: 1
+  };
+  const registrationRow = {
+    id: 'reg-1', name: '王小明', email: '', phone: '0912345678', is_proxy: 0,
+    proxy_name: '', proxy_email: '', answers: '{}', checked_in: 0, registered_at: 1
+  };
+  const DB = {
+    prepare(sql) {
+      const statement = {
+        bind() { return statement; },
+        async all() {
+          if (sql.startsWith('SELECT * FROM events')) return { results: [eventRow] };
+          if (sql.startsWith('SELECT key, value FROM settings')) return { results: [] };
+          if (sql.includes('FROM registrations WHERE event_id')) return { results: [registrationRow] };
+          return { results: [] };
+        }
+      };
+      return statement;
+    }
+  };
+  const env = { ADMIN_PASSCODE: 'private-passcode', ADMIN_TOKEN_SECRET: 'token-secret', DB };
+  const publicData = await (await onRequestGet({ request: new Request('https://example.test/api/events'), env })).json();
+  assert.equal(publicData.viewer, 'public');
+  assert.deepEqual(publicData.events[0].registrations, [{}]);
+
+  const loginData = await (await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env)).json();
+  const adminData = await (await onRequestGet({
+    request: new Request('https://example.test/api/events', { headers: { 'X-Admin-Token': loginData.token } }),
+    env
+  })).json();
+  assert.equal(adminData.viewer, 'admin');
+  assert.equal(adminData.events[0].registrations[0].name, registrationRow.name);
+  assert.equal(adminData.events[0].registrations[0].phone, registrationRow.phone);
+});
+
 test('registration rejects invalid phone numbers before storage', async () => {
   const response = await post({
     action: 'register',

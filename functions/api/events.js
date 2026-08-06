@@ -187,7 +187,7 @@ export async function onRequestGet({ request, env }) {
           : registrations.map(() => ({}))
       };
     }));
-    return jsonResponse({ success: true, mode: "database", events, settings });
+    return jsonResponse({ success: true, mode: "database", viewer: isAdmin ? "admin" : "public", events, settings });
   } catch (error) {
     console.error("D1 fetch error:", error);
     return jsonResponse({ success: false, error: "活動資料讀取失敗" }, 500);

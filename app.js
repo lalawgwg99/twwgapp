@@ -346,9 +346,17 @@
     try {
       const headers = adminSessionToken ? { 'X-Admin-Token': adminSessionToken } : {};
       const response = await fetch('/api/events', { headers });
-      if (!(response.headers.get('content-type') || '').includes('application/json')) return;
+      if (!(response.headers.get('content-type') || '').includes('application/json')) return false;
       const data = await response.json();
       backendMode = data.mode || backendMode;
+      if (isAdminAuthenticated && adminSessionToken && data.mode === 'database' && data.viewer !== 'admin') {
+        sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+        sessionStorage.removeItem(ADMIN_DATA_KEY);
+        isAdminAuthenticated = false;
+        adminSessionToken = null;
+        updateAdminNavUI();
+        throw new Error('管理工作階段已失效');
+      }
       if (data.settings?.quickLinks) {
         saveQuickLinks(Object.assign({}, DEFAULT_QUICK_LINKS, data.settings.quickLinks));
         renderQuickLinksUI();
@@ -366,9 +374,12 @@
         renderEventsGrid();
         renderSidebarWidgets();
         if (isAdminAuthenticated) renderAdminDashboard();
+        return true;
       }
+      return false;
     } catch (error) {
       console.warn('Remote event sync unavailable:', error);
+      return false;
     }
   }
 
@@ -415,9 +426,24 @@
     }
   }
 
+  async function openAdminDashboard() {
+    if (!isAdminAuthenticated) {
+      openModal('modal-admin-auth');
+      return;
+    }
+    const synced = await syncEventsFromBackend();
+    if (!synced) {
+      showToast('完整報名名單載入失敗，請確認網路後重試', true);
+      if (!isAdminAuthenticated) openModal('modal-admin-auth');
+      return;
+    }
+    switchView('admin');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   window.handleAdminTabClick = function () {
     if (isAdminAuthenticated) {
-      switchView('admin');
+      openAdminDashboard();
     } else {
       openModal('modal-admin-auth');
     }
@@ -427,6 +453,8 @@
   window.verifyAdminPasscode = async function (e) {
     e.preventDefault();
     const passcode = document.getElementById('admin-passcode-input').value.trim();
+    const submitButton = e.submitter;
+    if (submitButton) submitButton.disabled = true;
 
     try {
       const data = await requestBackend('verify_admin', { passcode });
@@ -434,18 +462,24 @@
       if (data.success || data.token) {
         const token = data.token;
         sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+        sessionStorage.removeItem(ADMIN_DATA_KEY);
         adminSessionToken = token;
         isAdminAuthenticated = true;
+        updateAdminNavUI();
+
+        const synced = await syncEventsFromBackend();
+        if (!synced) throw new Error('登入成功，但完整報名名單載入失敗，請重試');
 
         closeModal('modal-admin-auth');
         document.getElementById('admin-passcode-input').value = '';
         showToast('管理員登入成功');
-        updateAdminNavUI();
         switchView('admin');
         return;
       }
     } catch (err) {
       showToast(err.message || '管理密碼不正確', true);
+    } finally {
+      if (submitButton) submitButton.disabled = false;
     }
   };
 
@@ -1688,6 +1722,19 @@
       return;
     }
 
+    if (ev.registrations.some(registration => !registration?.id || !registration?.name || !registration?.phone)) {
+      detailContainer.innerHTML = '<p>活動資料已載入，正在等待完整報名名單。</p>';
+      regContainer.innerHTML = `
+        <div class="empty-state-view">
+          <h3 class="empty-state-title">完整名單尚未載入</h3>
+          <p class="empty-state-subtitle">系統不會以空白欄位取代姓名與電話，請重新同步資料。</p>
+          <button class="btn-system-primary" onclick="refreshAdminData(event)">↻ 重新整理完整名單</button>
+        </div>
+      `;
+      if (statBadge) statBadge.textContent = `報名 ${ev.registrations.length} 人`;
+      return;
+    }
+
     const checkedInCount = ev.registrations.filter(r => r.checkedIn).length;
     if (statBadge) {
       statBadge.textContent = `已報到 ${checkedInCount} / ${ev.registrations.length} 人`;
@@ -1794,6 +1841,10 @@
     const ev = events.find(e => e.id === activeEventId);
     if (!ev || !ev.registrations || ev.registrations.length === 0) {
       showToast('尚無報名資料可導出', true);
+      return;
+    }
+    if (ev.registrations.some(registration => !registration?.id || !registration?.name || !registration?.phone)) {
+      showToast('完整名單尚未載入，請先重新整理名單', true);
       return;
     }
 
@@ -2218,10 +2269,17 @@
   }
 
   // FOOTER ADMIN LOGIN
+  window.refreshAdminData = async function (event) {
+    const button = event?.currentTarget;
+    if (button) button.disabled = true;
+    const synced = await syncEventsFromBackend();
+    if (button) button.disabled = false;
+    showToast(synced ? '完整報名名單已更新' : '名單更新失敗，請確認網路後重試', !synced);
+  };
+
   window.handleFooterAdminClick = function () {
     if (isAdminAuthenticated) {
-      switchView('admin');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      openAdminDashboard();
     } else {
       openModal('modal-admin-auth');
     }
