@@ -10,7 +10,20 @@
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
   const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const QUICK_LINKS_KEY = 'twwgapp_quick_links_v2';
+  const HERO_CONFIG_KEY = 'twwgapp_hero_config_v1';
   const DEFAULT_ADMIN_PASSCODE = 'admin888';
+
+  const DEFAULT_HERO_CONFIG = {
+    title: '萬家福五甲店 每月會員 9 折專屬感恩慶',
+    description: '全館生鮮、乾貨、進口零食憑萬家福會員卡即享 9 折限時折扣！數量有限，倒數截止搶購中。',
+    badge: '五甲店獨家 9折',
+    priceText: '全館憑卡 9 折',
+    locationText: '萬家福五甲店 全館門市',
+    endDate: '2026-08-31T23:59',
+    bgImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1200&h=500&fit=crop',
+    buttonText: '查看五甲店 9折活動詳情 →',
+    buttonUrl: 'https://line.me'
+  };
 
   let activeView = 'list';
   let activeAdminSubView = 'manage';
@@ -1557,54 +1570,107 @@
     );
   }
 
-  // HERO SPOTLIGHT - Featured Event Banner
+  // HERO SPOTLIGHT - Standalone Banner (獨立促銷/活動看板，可由管理員自訂編輯)
+  function loadHeroConfig() {
+    try {
+      const stored = localStorage.getItem(HERO_CONFIG_KEY);
+      if (stored) {
+        return Object.assign({}, DEFAULT_HERO_CONFIG, JSON.parse(stored));
+      }
+    } catch (e) {
+      console.warn('LocalStorage Hero Config read failed:', e);
+    }
+    return DEFAULT_HERO_CONFIG;
+  }
+
+  function saveHeroConfig(config) {
+    try {
+      localStorage.setItem(HERO_CONFIG_KEY, JSON.stringify(config));
+    } catch (e) {
+      console.error('Failed to save Hero Config:', e);
+    }
+  }
+
   function renderHeroSpotlight() {
     const container = document.getElementById('hero-spotlight');
     if (!container) return;
 
-    const events = loadEventsData();
-    // Find the next upcoming event that's still open for registration
-    const now = Date.now();
-    const upcoming = events.filter(ev => {
-      const st = getStatus(ev.registrations ? ev.registrations.length : 0, ev.maxPeople, ev.startDate, ev.endDate);
-      return st.allowRegister;
-    }).sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    const featured = upcoming[0] || events[0];
-    if (!featured) { container.classList.add('hidden'); return; }
-
-    const regCount = featured.registrations ? featured.registrations.length : 0;
-    const status = getStatus(regCount, featured.maxPeople, featured.startDate, featured.endDate);
-    const spotsLeft = featured.maxPeople - regCount;
+    const hero = loadHeroConfig();
+    const btnAction = hero.buttonUrl ? `window.open('${escapeHTML(hero.buttonUrl)}', '_blank')` : 'void(0)';
 
     container.innerHTML = `
-      <div class="hero-bg" style="background-image: url('${featured.image}')"></div>
+      <div class="hero-bg" style="background-image: url('${escapeHTML(hero.bgImage)}')"></div>
       <div class="hero-overlay"></div>
       <div class="hero-content">
         <div class="hero-badges">
-          <span class="sf-badge badge-status-${status.type}">${status.label}</span>
-          ${featured.customBadge ? `<span class="sf-badge badge-custom">${escapeHTML(featured.customBadge)}</span>` : ''}
+          <span class="sf-badge badge-status-open">🔥 熱門推薦</span>
+          ${hero.badge ? `<span class="sf-badge badge-custom">${escapeHTML(hero.badge)}</span>` : ''}
         </div>
-        <h2 class="hero-title">${escapeHTML(featured.name)}</h2>
-        <p class="hero-desc">${escapeHTML(featured.description || '')}</p>
+        <h2 class="hero-title">${escapeHTML(hero.title)}</h2>
+        <p class="hero-desc">${escapeHTML(hero.description || '')}</p>
         <div class="hero-meta">
-          <span>📅 ${formatDate(featured.date)}</span>
-          <span>📍 ${escapeHTML(featured.location || '萬家福五甲店')}</span>
-          <span>💰 ${escapeHTML(featured.priceTier || '免費活動')}</span>
-          <span>👥 剩餘 ${spotsLeft} 個名額</span>
+          <span>📍 ${escapeHTML(hero.locationText || '萬家福五甲店')}</span>
+          <span>🏷️ ${escapeHTML(hero.priceText || '門市優惠')}</span>
         </div>
-        <div class="hero-countdown" id="hero-countdown" data-end="${featured.endDate || ''}">
+        <div class="hero-countdown" id="hero-countdown" data-end="${hero.endDate || ''}">
           <div class="countdown-unit"><span class="countdown-num" id="hero-days">--</span><span class="countdown-label">天</span></div>
           <div class="countdown-unit"><span class="countdown-num" id="hero-hours">--</span><span class="countdown-label">時</span></div>
           <div class="countdown-unit"><span class="countdown-num" id="hero-mins">--</span><span class="countdown-label">分</span></div>
           <div class="countdown-unit"><span class="countdown-num" id="hero-secs">--</span><span class="countdown-label">秒</span></div>
         </div>
-        <button class="btn-hero-cta" onclick="openEventDetail('${featured.id}')">
-          立即查看並報名 →
+        <button class="btn-hero-cta" onclick="${btnAction}">
+          ${escapeHTML(hero.buttonText || '查看五甲店活動詳情 →')}
         </button>
       </div>
     `;
   }
+
+  window.openHeroConfigModal = function () {
+    if (!isAdminAuthenticated) {
+      openModal('modal-admin-auth');
+      showToast('🔒 請先輸入管理員密碼解鎖後台權限！', true);
+      return;
+    }
+
+    const hero = loadHeroConfig();
+    document.getElementById('hero-input-title').value = hero.title || '';
+    document.getElementById('hero-input-desc').value = hero.description || '';
+    document.getElementById('hero-input-badge').value = hero.badge || '';
+    document.getElementById('hero-input-enddate').value = hero.endDate || '';
+    document.getElementById('hero-input-price').value = hero.priceText || '';
+    document.getElementById('hero-input-location').value = hero.locationText || '';
+    document.getElementById('hero-input-bg').value = hero.bgImage || '';
+    document.getElementById('hero-input-btn-text').value = hero.buttonText || '';
+    document.getElementById('hero-input-btn-url').value = hero.buttonUrl || '';
+
+    openModal('modal-edit-hero');
+  };
+
+  window.submitEditHeroConfig = function (e) {
+    e.preventDefault();
+    if (!isAdminAuthenticated) {
+      showToast('權限不足', true);
+      return;
+    }
+
+    const newConfig = {
+      title: document.getElementById('hero-input-title').value.trim(),
+      description: document.getElementById('hero-input-desc').value.trim(),
+      badge: document.getElementById('hero-input-badge').value.trim(),
+      endDate: document.getElementById('hero-input-enddate').value,
+      priceText: document.getElementById('hero-input-price').value.trim(),
+      locationText: document.getElementById('hero-input-location').value.trim(),
+      bgImage: document.getElementById('hero-input-bg').value.trim() || DEFAULT_HERO_CONFIG.bgImage,
+      buttonText: document.getElementById('hero-input-btn-text').value.trim(),
+      buttonUrl: document.getElementById('hero-input-btn-url').value.trim()
+    };
+
+    saveHeroConfig(newConfig);
+    renderHeroSpotlight();
+    startCountdownTimers();
+    closeModal('modal-edit-hero');
+    showToast('🌟 已成功更新 Hero 頂部焦點看板！');
+  };
 
   // SIDEBAR WIDGETS
   function renderSidebarWidgets() {

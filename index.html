@@ -88,6 +88,9 @@
           <span class="admin-hint-text">萬家福五甲店 後台管理系統</span>
         </div>
         <div class="admin-actions-group">
+          <button class="btn-system-secondary" style="border-color:var(--accent-orange); color:var(--accent-orange); font-weight:600;" onclick="openHeroConfigModal()">
+            🌟 編輯 Hero 頂部看板
+          </button>
           <button class="btn-system-secondary" style="border-color:var(--accent-blue); color:var(--accent-blue); font-weight:600;" onclick="openQuickLinksModal()">
             🌐 設定媒體連結網址
           </button>
@@ -353,6 +356,77 @@
   <!-- ================================================================
        ALL MODALS (保留所有原有 Modal)
        ================================================================ -->
+
+  <!-- MODAL: EDIT HERO SPOTLIGHT BANNER SHEET -->
+  <div id="modal-edit-hero" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-edit-hero')">
+    <div class="sf-sheet" style="max-width:600px;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body" style="padding:24px 20px;">
+        <div class="sheet-title-row">
+          <h3 class="sheet-title" style="font-size:19px;">🌟 編輯 Hero 頂部焦點看板</h3>
+          <button class="btn-icon-circular" onclick="closeModal('modal-edit-hero')">✕</button>
+        </div>
+        <p class="sheet-description" style="font-size:13px; margin-bottom:16px;">單獨編輯首頁頂部焦點活動/促銷看板（如：每月9折活動、週年慶全館滿額折等）</p>
+
+        <form id="edit-hero-form" onsubmit="submitEditHeroConfig(event)">
+          <div class="form-grid">
+            <div class="field-group">
+              <label class="field-label" for="hero-input-title">看板大標題 <span class="req">*</span></label>
+              <input type="text" id="hero-input-title" class="sf-input" required placeholder="例如：萬家福五甲店 每月會員9折專屬感恩慶">
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="hero-input-desc">看板說明文字</label>
+              <textarea id="hero-input-desc" class="sf-textarea" rows="2" placeholder="詳細活動/促銷內容描述..."></textarea>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="hero-input-badge">特色標籤</label>
+                <input type="text" id="hero-input-badge" class="sf-input" placeholder="例如：五甲店獨家 9折">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="hero-input-enddate">倒數截止時間 <span class="req">*</span></label>
+                <input type="datetime-local" id="hero-input-enddate" class="sf-input" required>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="hero-input-price">優惠/票價標籤</label>
+                <input type="text" id="hero-input-price" class="sf-input" placeholder="例如：全館憑卡 9 折">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="hero-input-location">舉辦地點說明</label>
+                <input type="text" id="hero-input-location" class="sf-input" placeholder="例如：萬家福五甲店 全館門市">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="hero-input-bg">背景大圖網址 URL</label>
+              <input type="url" id="hero-input-bg" class="sf-input" placeholder="https://images.unsplash.com/photo-...">
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="hero-input-btn-text">按鈕顯示文字 <span class="req">*</span></label>
+                <input type="text" id="hero-input-btn-text" class="sf-input" required placeholder="例如：查看五甲店 9折活動詳情 →">
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="hero-input-btn-url">按鈕點擊跳轉網址/連結</label>
+                <input type="url" id="hero-input-btn-url" class="sf-input" placeholder="https://line.me 或 外部優惠連結">
+              </div>
+            </div>
+
+            <div class="sheet-actions" style="margin-top:14px;">
+              <button type="button" class="btn-system-secondary" onclick="closeModal('modal-edit-hero')">取消</button>
+              <button type="submit" class="btn-system-primary">儲存看板設定</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL: EDIT QUICK LINKS -->
   <div id="modal-edit-quicklinks" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-edit-quicklinks')">
