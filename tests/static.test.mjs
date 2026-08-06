@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const [html, script, css] = await Promise.all([
+  readFile(new URL('../index.html', import.meta.url), 'utf8'),
+  readFile(new URL('../app.js', import.meta.url), 'utf8'),
+  readFile(new URL('../styles.css', import.meta.url), 'utf8')
+]);
+
+test('HTML ids are unique', () => {
+  const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(ids.filter((id, index) => ids.indexOf(id) !== index), []);
+});
+
+test('every inline event handler references an implemented function', () => {
+  const browserBuiltIns = new Set(['close', 'confirm', 'open', 'scrollTo']);
+  const handlers = [...html.matchAll(/on(?:click|submit|change|input)="([^"]+)"/g)]
+    .flatMap(match => [...match[1].matchAll(/\b([A-Za-z_$][\w$]*)\s*\(/g)].map(call => call[1]))
+    .filter(name => name !== 'if' && !browserBuiltIns.has(name));
+  const missing = [...new Set(handlers)].filter(name => (
+    !script.includes(`window.${name} =`) && !script.includes(`function ${name}(`)
+  ));
+  assert.deepEqual(missing, []);
+});
+
+test('CSS delimiters remain balanced', () => {
+  assert.equal((css.match(/{/g) || []).length, (css.match(/}/g) || []).length);
+});
+
+test('the public page permits browser zoom and uses versioned assets', () => {
+  assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
+  assert.match(html, /styles\.css\?v=20260806_pro2/);
+  assert.match(html, /app\.js\?v=20260806_pro2/);
+});

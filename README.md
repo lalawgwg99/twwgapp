@@ -1,30 +1,25 @@
-# 活動問卷與報名系統 (Apple Native SwiftUI Style)
+# 萬家福五甲店活動服務平台
 
-本專案為遵循 **Apple Human Interface Guidelines (HIG)** 與 **SwiftUI 原生設計邏輯** 的極緻活動問卷與報名 Web 系統。可直接部署於 **Cloudflare Pages / Workers**，並支援 Cloudflare D1 資料庫與 Cloudflare R2 雲端圖片上傳。
+專為門市活動營運設計的響應式報名與管理平台，可部署於 **Cloudflare Pages**，並以 **Cloudflare D1** 作為跨裝置共用資料庫。包含活動刊登、報名期間與名額控管、自訂問卷、代理報名、現場報名、簽到與 CSV 匯出。
 
 ---
 
 ## 🌟 核心特色
 
-### 1. 🎨 Apple 原生視覺體驗 (SwiftUI Aesthetic)
-- **iOS 系統標準配色與字體**：採用 SF Pro 字體，搭配 Apple System Blue (`#007AFF`)、Green (`#34C759`)、Orange (`#FF9500`)、Red (`#FF3B30`)。
-- **SwiftUI 原生元件**：
-  - **Navigation Bar & Large Title**：經典 iOS 大標題與滑動視覺。
-  - **Segmented Control (分段控制器)**：原生膠囊切換與流暢觸感回饋。
-  - **Grouped Event Cards (8活動並排牆)**：響應式 4 欄 / 3 欄 / 2 欄 / 1 欄多裝置自適應。
-  - **iOS Bottom Sheet Modal**：毛玻璃背景與動態高度彈窗。
-  - **Search & Category Pills**：內嵌式搜尋列與類別篩選標籤（音樂、體驗、戶外、藝文、講座、運動）。
+### 1. 專業門市活動介面
+- 清楚呈現日期、地點、票價、名額和報名狀態。
+- 桌機三欄活動牆與營運資訊側欄，手機改為單欄與底部表單。
+- 支援鍵盤操作、焦點管理、縮放與 reduced-motion。
 
 ### 2. 🛡️ 台灣《個人資料保護法》合規隱私權條款
 - 報名表單強制整合**個資蒐集告知事項與同意條款** Modal。
 - 完整規範資料利用期間、地區、當事人權利與 Cloudflare 安全傳輸保護。
 
-### 3. 🖼️ 活動圖片上傳架構 (Cloudflare R2)
-- 支援 **Unsplash / Imgur 外部圖片網址** 貼上。
+### 3. 活動圖片設定
+- 支援 HTTPS 外部圖片網址。
 - 支援 **本地圖片選擇與即時預覽**。
-- 內建 **Cloudflare R2 Object Storage** 上傳 API 整合介面。
 
-### 4. 📅 行事曆匯出 (.ics iCal)
+### 4. 行事曆匯出 (.ics iCal)
 - 報名成功後可一鍵下載 `.ics` 檔案，無縫加入 **Apple Calendar**、**Google Calendar** 或 **Outlook**。
 
 ---
@@ -36,7 +31,7 @@
 
 ```bash
 git add .
-git commit -m "feat: Apple Native SwiftUI Event App with Cloudflare & iCal support"
+git commit -m "feat: launch production event management portal"
 git branch -M main
 git push -u origin main
 ```
@@ -53,42 +48,34 @@ git push -u origin main
 
 ---
 
-## 🗄️ 雲端擴充：Cloudflare D1 (SQL) 與 R2 (圖片儲存)
-
-如果希望將 LocalStorage 提升為雲端持久化 SQL 資料庫：
-
-### 1. 建立 D1 資料庫
-```bash
-npx wrangler d1 create twwgapp-db
-```
-於 `wrangler.json` 更新 `database_id`。
-
-### 2. 建立資料表結構
-```sql
-CREATE TABLE events (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  category TEXT,
-  date TEXT,
-  description TEXT,
-  max_people INTEGER,
-  location TEXT,
-  image_url TEXT,
-  created_at INTEGER
-);
-
-CREATE TABLE registrations (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  event_id TEXT,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  phone TEXT,
-  registered_at INTEGER,
-  FOREIGN KEY (event_id) REFERENCES events(id)
-);
-```
+## 📄 授權條款
+MIT License.
 
 ---
 
-## 📄 授權條款
-MIT License.
+## 正式環境必要設定
+
+公開販售或正式營運前，請完成以下設定。未綁定 D1 時，系統會進入 `client_sync` 展示模式，資料只保留在單一瀏覽器，不適合正式收件。
+
+1. 建立 D1 資料庫並執行 schema：
+
+```bash
+npx wrangler d1 create twwgapp-db
+npx wrangler d1 execute twwgapp-db --file=./schema.sql --remote
+```
+
+2. 在 Cloudflare Pages 專案綁定 D1，變數名稱必須為 `DB`。
+3. 在 Pages 的 Settings > Variables and Secrets 設定：
+   - `ADMIN_PASSCODE`：至少 12 字元、不可使用公開預設值。
+   - `ADMIN_TOKEN_SECRET`：另一組至少 32 字元的隨機秘密。
+4. 重新部署後確認 `GET /api/events` 回傳 `mode: "database"`。
+
+Google Apps Script 模式需在 Apps Script 的「指令碼屬性」新增 `ADMIN_PASSCODE`，不可將密碼寫入原始碼。
+
+## 測試
+
+```bash
+node --test tests/*.test.mjs
+node --check app.js
+node --check functions/api/events.js
+```

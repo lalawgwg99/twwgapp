@@ -8,10 +8,10 @@
 
   const STORAGE_KEY = 'twwgapp_wujia_store_events_v10';
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
+  const ADMIN_DATA_KEY = 'twwgapp_admin_event_data';
   const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const QUICK_LINKS_KEY = 'twwgapp_quick_links_v2';
   const HERO_CONFIG_KEY = 'twwgapp_hero_config_v1';
-  const DEFAULT_ADMIN_PASSCODE = 'admin888';
 
   const DEFAULT_HERO_CONFIG = {
     title: '萬家福五甲店 每月會員 9 折專屬感恩慶',
@@ -21,8 +21,8 @@
     locationText: '萬家福五甲店 全館門市',
     endDate: '2026-08-31T23:59',
     bgImage: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1200&h=500&fit=crop',
-    buttonText: '查看五甲店 9折活動詳情 →',
-    buttonUrl: 'https://line.me'
+    buttonText: '瀏覽本月活動',
+    buttonUrl: '#events-grid'
   };
 
   let activeView = 'list';
@@ -32,6 +32,9 @@
   let activeEventId = null;
   let uploadMethod = 'url';
   let filePreviewDataUrl = null;
+  let editBuilderQuestions = [];
+  let lastFocusedElement = null;
+  let backendMode = 'client_sync';
 
   // Real Server Authentication State
   let adminSessionToken = null;
@@ -42,10 +45,10 @@
 
   const DEFAULT_QUICK_LINKS = {
     mapUrl: 'https://www.google.com/maps/search/?api=1&query=830%E9%AB%98%E9%9B%84%E5%B8%82%E9%B3%B6%E5%B1%B1%E5%8D%80%E5%AF%8C%E6%A6%AE%E9%87%8C%E6%9E%97%E6%A3%AE%E8%B7%AF291%E8%99%9F+%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2%E5%BA%97',
-    lineUrl: 'https://line.me',
-    fbUrl: 'https://facebook.com',
-    igUrl: 'https://instagram.com',
-    ytUrl: 'https://youtube.com',
+    lineUrl: '',
+    fbUrl: '',
+    igUrl: '',
+    ytUrl: '',
     siteUrl: 'https://www.prosperity-plaza.com.tw'
   };
 
@@ -253,38 +256,25 @@
     const container = document.getElementById('quick-links-pills-container');
     if (!container) return;
 
-    container.innerHTML = `
-      <a href="${escapeHTML(links.mapUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-map">
-        📍 Google 地圖導航
-      </a>
-      <a href="${escapeHTML(links.lineUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-line">
-        💬 LINE 官方帳號
-      </a>
-      <a href="${escapeHTML(links.fbUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-fb">
-        📘 FB 粉絲專頁
-      </a>
-      <a href="${escapeHTML(links.igUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-ig">
-        📷 Instagram
-      </a>
-      <a href="${escapeHTML(links.ytUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-yt">
-        🎬 YouTube 影音
-      </a>
-      <a href="${escapeHTML(links.siteUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-site">
-        🌐 萬家福品牌官網
-      </a>
-    `;
+    const linkDefinitions = [
+      { key: 'mapUrl', label: '📍 Google 地圖導航', shortLabel: '📍', css: 'pill-map', title: 'Google Maps' },
+      { key: 'lineUrl', label: '💬 LINE 官方帳號', shortLabel: '💬', css: 'pill-line', title: 'LINE' },
+      { key: 'fbUrl', label: '📘 FB 粉絲專頁', shortLabel: '📘', css: 'pill-fb', title: 'Facebook' },
+      { key: 'igUrl', label: '📷 Instagram', shortLabel: '📷', css: 'pill-ig', title: 'Instagram' },
+      { key: 'ytUrl', label: '🎬 YouTube 影音', shortLabel: '🎬', css: 'pill-yt', title: 'YouTube' },
+      { key: 'siteUrl', label: '🌐 萬家福品牌官網', shortLabel: '🌐', css: 'pill-site', title: '萬家福官網' }
+    ].filter(item => safeExternalUrl(links[item.key]) !== '#');
+
+    container.innerHTML = linkDefinitions.map(item => `
+      <a href="${escapeHTML(safeExternalUrl(links[item.key]))}" target="_blank" rel="noopener" class="quick-link-pill ${item.css}">${item.label}</a>
+    `).join('');
 
     // Also render footer social links
     const footerSocial = document.getElementById('footer-social-links');
     if (footerSocial) {
-      footerSocial.innerHTML = `
-        <a href="${escapeHTML(links.mapUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="Google Maps">📍</a>
-        <a href="${escapeHTML(links.lineUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="LINE">💬</a>
-        <a href="${escapeHTML(links.fbUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="Facebook">📘</a>
-        <a href="${escapeHTML(links.igUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="Instagram">📷</a>
-        <a href="${escapeHTML(links.ytUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="YouTube">🎬</a>
-        <a href="${escapeHTML(links.siteUrl)}" target="_blank" rel="noopener" class="footer-social-icon" title="萬家福官網">🌐</a>
-      `;
+      footerSocial.innerHTML = linkDefinitions.map(item => `
+        <a href="${escapeHTML(safeExternalUrl(links[item.key]))}" target="_blank" rel="noopener" class="footer-social-icon" title="${item.title}">${item.shortLabel}</a>
+      `).join('');
     }
   }
 
@@ -306,7 +296,7 @@
     openModal('modal-edit-quicklinks');
   };
 
-  window.submitEditQuickLinks = function (e) {
+  window.submitEditQuickLinks = async function (e) {
     e.preventDefault();
     if (!isAdminAuthenticated) {
       showToast('權限不足', true);
@@ -322,7 +312,13 @@
       siteUrl: document.getElementById('link-site').value.trim()
     };
 
-    saveQuickLinks(newLinks);
+    try {
+      await requestBackend('update_setting', { key: 'quickLinks', value: newLinks }, true);
+      saveQuickLinks(newLinks);
+    } catch (error) {
+      showToast(error.message, true);
+      return;
+    }
     renderQuickLinksUI();
     closeModal('modal-edit-quicklinks');
     showToast('🌐 已成功更新萬家福五甲店 數位媒體與導航網址！');
@@ -336,30 +332,76 @@
     localStorage.setItem(GAS_URL_KEY, url);
   }
 
+  async function requestBackend(action, payload = {}, requiresAdmin = false) {
+    const gasUrl = getGASUrl();
+    const endpoint = gasUrl || '/api/events';
+    const headers = { 'Content-Type': 'application/json' };
+    if (requiresAdmin && adminSessionToken && !gasUrl) headers['X-Admin-Token'] = adminSessionToken;
+
+    const body = Object.assign({ action }, payload);
+    if (requiresAdmin && gasUrl) body.token = adminSessionToken;
+
+    const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
+    const isJson = (response.headers.get('content-type') || '').includes('application/json');
+    const result = isJson ? await response.json().catch(() => ({})) : {};
+    if (!response.ok || result.success === false) {
+      throw new Error(result.error || '伺服器暫時無法處理');
+    }
+    return result;
+  }
+
+  async function syncEventsFromBackend() {
+    try {
+      const gasUrl = getGASUrl();
+      let response;
+      if (gasUrl) {
+        response = await fetch(gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'get_events', token: adminSessionToken || '' })
+        });
+      } else {
+        const headers = adminSessionToken ? { 'X-Admin-Token': adminSessionToken } : {};
+        response = await fetch('/api/events', { headers });
+      }
+      if (!(response.headers.get('content-type') || '').includes('application/json')) return;
+      const data = await response.json();
+      backendMode = data.mode || backendMode;
+      if (data.settings?.quickLinks) {
+        saveQuickLinks(Object.assign({}, DEFAULT_QUICK_LINKS, data.settings.quickLinks));
+        renderQuickLinksUI();
+      }
+      if (data.settings?.hero) {
+        saveHeroConfig(Object.assign({}, DEFAULT_HERO_CONFIG, data.settings.hero));
+        renderHeroSpotlight();
+        startCountdownTimers();
+      }
+      if (response.ok && Array.isArray(data.events) && data.events.length > 0) {
+        saveEventsData(data.events);
+        if (!activeEventId || !data.events.some(event => event.id === activeEventId)) activeEventId = data.events[0].id;
+        renderEventsGrid();
+        renderSidebarWidgets();
+        if (isAdminAuthenticated) renderAdminDashboard();
+      }
+    } catch (error) {
+      console.warn('Remote event sync unavailable:', error);
+    }
+  }
+
   // REAL SERVER-SIDE AUTHENTICATION CHALLENGE
   async function checkAdminSession() {
     const savedToken = sessionStorage.getItem(ADMIN_TOKEN_KEY);
     if (!savedToken) {
       isAdminAuthenticated = false;
       adminSessionToken = null;
+      sessionStorage.removeItem(ADMIN_DATA_KEY);
       updateAdminNavUI();
       return;
     }
 
     try {
-      const gasUrl = getGASUrl();
-      const endpoint = gasUrl || '/api/events';
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Passcode': savedToken
-        },
-        body: JSON.stringify({ action: 'verify_token', token: savedToken })
-      });
-
-      const data = await res.json();
+      adminSessionToken = savedToken;
+      const data = await requestBackend('verify_token', {}, true);
       if (data.success || data.isAdmin) {
         isAdminAuthenticated = true;
         adminSessionToken = savedToken;
@@ -369,12 +411,10 @@
         sessionStorage.removeItem(ADMIN_TOKEN_KEY);
       }
     } catch (e) {
-      if (savedToken && savedToken.startsWith('auth_token_')) {
-        isAdminAuthenticated = true;
-        adminSessionToken = savedToken;
-      } else {
-        isAdminAuthenticated = false;
-      }
+      isAdminAuthenticated = false;
+      adminSessionToken = null;
+      sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      sessionStorage.removeItem(ADMIN_DATA_KEY);
     }
 
     updateAdminNavUI();
@@ -404,79 +444,25 @@
     e.preventDefault();
     const passcode = document.getElementById('admin-passcode-input').value.trim();
 
-    const gasUrl = getGASUrl();
-    const endpoint = gasUrl || '/api/events';
-
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Passcode': passcode
-        },
-        body: JSON.stringify({ action: 'verify_admin', passcode: passcode })
-      });
-
-      const data = await res.json();
+      const data = await requestBackend('verify_admin', { passcode });
 
       if (data.success || data.token) {
-        const token = data.token || ('auth_token_' + Date.now());
+        const token = data.token;
         sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
         adminSessionToken = token;
         isAdminAuthenticated = true;
 
         closeModal('modal-admin-auth');
         document.getElementById('admin-passcode-input').value = '';
-        showToast('🔓 萬家福五甲店 後端驗證成功！');
+        showToast('管理員登入成功');
         updateAdminNavUI();
         switchView('admin');
         return;
       }
     } catch (err) {
-      console.warn('Backend API request failed, checking local server fallback:', err);
+      showToast(err.message || '管理密碼不正確', true);
     }
-
-    if (passcode === DEFAULT_ADMIN_PASSCODE) {
-      const fallbackToken = 'auth_token_' + Date.now();
-      sessionStorage.setItem(ADMIN_TOKEN_KEY, fallbackToken);
-      adminSessionToken = fallbackToken;
-      isAdminAuthenticated = true;
-
-      closeModal('modal-admin-auth');
-      document.getElementById('admin-passcode-input').value = '';
-      showToast('🔓 萬家福五甲店 後端驗證成功！');
-      updateAdminNavUI();
-      switchView('admin');
-    } else {
-      showToast('❌ 後端拒絕：管理密碼不正確！', true);
-    }
-  };
-
-  window.openChangePasscodeModal = function () {
-    openModal('modal-change-passcode');
-  };
-
-  window.submitChangeAdminPasscode = function (e) {
-    e.preventDefault();
-    const oldPass = document.getElementById('passcode-old').value.trim();
-    const newPass = document.getElementById('passcode-new').value.trim();
-    const confirmPass = document.getElementById('passcode-confirm').value.trim();
-
-    if (newPass !== confirmPass) {
-      showToast('新密碼兩次輸入不一致！', true);
-      return;
-    }
-
-    if (newPass.length < 4) {
-      showToast('新密碼至少需 4 個字元', true);
-      return;
-    }
-
-    closeModal('modal-change-passcode');
-    document.getElementById('passcode-old').value = '';
-    document.getElementById('passcode-new').value = '';
-    document.getElementById('passcode-confirm').value = '';
-    showToast('🔑 管理員密碼已送出變更！');
   };
 
   window.openGASSettingModal = function () {
@@ -493,6 +479,7 @@
 
   window.lockAdminSession = function () {
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+    sessionStorage.removeItem(ADMIN_DATA_KEY);
     isAdminAuthenticated = false;
     adminSessionToken = null;
     updateAdminNavUI();
@@ -503,6 +490,13 @@
   // Helper Data Storage
   function loadEventsData() {
     try {
+      if (isAdminAuthenticated) {
+        const adminStored = sessionStorage.getItem(ADMIN_DATA_KEY);
+        if (adminStored) {
+          const adminParsed = JSON.parse(adminStored);
+          if (Array.isArray(adminParsed.events)) return adminParsed.events;
+        }
+      }
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
@@ -519,7 +513,15 @@
 
   function saveEventsData(events) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ events }));
+      if (backendMode === 'database') {
+        if (isAdminAuthenticated) sessionStorage.setItem(ADMIN_DATA_KEY, JSON.stringify({ events }));
+        const sanitized = events.map(event => Object.assign({}, event, {
+          registrations: (event.registrations || []).map(() => ({}))
+        }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ events: sanitized }));
+      } else {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ events }));
+      }
     } catch (e) {
       console.error('Failed to save to LocalStorage:', e);
     }
@@ -565,6 +567,40 @@
     return d.toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
+  function validateEventTiming(date, startDate, endDate, currentRegistrationCount = 0, maxPeople = 1) {
+    if (!date || !endDate) return '請設定活動日期與報名截止時間';
+    const eventEnd = new Date(`${date}T23:59:59`).getTime();
+    const start = startDate ? new Date(startDate).getTime() : null;
+    const end = new Date(endDate).getTime();
+    if (!Number.isFinite(end) || !Number.isFinite(eventEnd)) return '日期格式不正確';
+    if (start && start >= end) return '報名截止時間必須晚於開放時間';
+    if (end >= eventEnd) return '報名截止時間必須早於活動結束日';
+    if (maxPeople < currentRegistrationCount) return `人數上限不可低於目前 ${currentRegistrationCount} 位報名者`;
+    return '';
+  }
+
+  function safeImageUrl(value) {
+    const raw = String(value || '').trim();
+    if (raw.startsWith('data:image/')) return raw;
+    try {
+      const url = new URL(raw, window.location.href);
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch (_error) {
+      return '';
+    }
+  }
+
+  function safeExternalUrl(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '#';
+    try {
+      const url = new URL(raw, window.location.href);
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : '#';
+    } catch (_error) {
+      return '#';
+    }
+  }
+
   function showToast(message, isError = false) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
@@ -593,6 +629,7 @@
       renderHeroSpotlight();
       renderSidebarWidgets();
       startCountdownTimers();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (viewName === 'admin') {
       if (!isAdminAuthenticated) {
         openModal('modal-admin-auth');
@@ -601,6 +638,7 @@
       document.getElementById('view-admin').classList.remove('hidden');
       if (navAdmin) { navAdmin.classList.add('active'); navAdmin.setAttribute('aria-selected', 'true'); }
       renderAdminDashboard();
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   };
 
@@ -660,7 +698,7 @@
       <button class="pill-btn ${selectedCategory === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">全部</button>
       <button class="pill-btn ${selectedCategory === 'available' ? 'active' : ''}" onclick="filterByCategory('available')">🔥 可報名</button>
       ${uniqueCategories.map(cat => `
-        <button class="pill-btn ${selectedCategory === cat ? 'active' : ''}" onclick="filterByCategory('${escapeHTML(cat)}')">
+        <button class="pill-btn ${selectedCategory === cat ? 'active' : ''}" data-category="${escapeHTML(cat)}" onclick="filterByCategory(this.dataset.category)">
           ${escapeHTML(cat)}
         </button>
       `).join('')}
@@ -726,14 +764,15 @@
     container.innerHTML = filtered.map(ev => {
       const regCount = ev.registrations ? ev.registrations.length : 0;
       const status = getStatus(regCount, ev.maxPeople, ev.startDate, ev.endDate);
-      const pct = Math.min((regCount / ev.maxPeople) * 100, 100).toFixed(0);
+      const maxPeople = Math.max(Number(ev.maxPeople) || 1, 1);
+      const pct = Math.min((regCount / maxPeople) * 100, 100).toFixed(0);
       const categoryTag = ev.category || '活動';
       const customTag = ev.customBadge ? `<span class="sf-badge badge-custom">${escapeHTML(ev.customBadge)}</span>` : '';
       const priceText = ev.priceTier || '免費活動';
 
       return `
-        <article class="event-card" onclick="openEventDetail('${ev.id}')" role="button" tabindex="0">
-          <div class="card-media" style="background-image: url('${ev.image}')">
+        <article class="event-card" data-event-id="${escapeHTML(ev.id)}" onclick="openEventDetail(this.dataset.eventId)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openEventDetail(this.dataset.eventId)}" role="button" tabindex="0" aria-label="查看活動：${escapeHTML(ev.name)}">
+          <div class="card-media" style="background-image: url(&quot;${escapeHTML(safeImageUrl(ev.image))}&quot;)">
             <div class="card-badges">
               <span class="sf-badge badge-status-${status.type}">${status.label}</span>
               <div style="display:flex; gap:4px;">
@@ -749,10 +788,11 @@
             </div>
             <h3 class="card-title">${escapeHTML(ev.name)}</h3>
             <p class="card-description">${escapeHTML(ev.description || '')}</p>
+            <div class="card-location-row"><span aria-hidden="true">⌖</span>${escapeHTML(ev.location || '萬家福五甲店')}</div>
             <div class="progress-block">
               <div class="progress-header">
                 <span class="progress-label">名額進度</span>
-                <span class="progress-value">${regCount} / ${ev.maxPeople} 人 (${pct}%)</span>
+                <span class="progress-value">${regCount} / ${maxPeople} 人 (${pct}%)</span>
               </div>
               <div class="progress-track">
                 <div class="progress-fill" style="width: ${pct}%; background: ${status.color};"></div>
@@ -769,7 +809,11 @@
   window.openModal = function (modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
+      lastFocusedElement = document.activeElement;
       modal.classList.add('active');
+      document.body.classList.add('modal-open');
+      const focusTarget = modal.querySelector('input:not([type="hidden"]), select, textarea, button');
+      if (focusTarget) requestAnimationFrame(() => focusTarget.focus());
     }
   };
 
@@ -777,6 +821,8 @@
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.classList.remove('active');
+      if (!document.querySelector('.sf-modal-backdrop.active')) document.body.classList.remove('modal-open');
+      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
     }
   };
 
@@ -805,11 +851,14 @@
     document.getElementById('edit-event-custom-badge').value = ev.customBadge || '';
     document.getElementById('edit-event-max').value = ev.maxPeople || 50;
     document.getElementById('edit-event-img-url').value = ev.image || '';
+    editBuilderQuestions = JSON.parse(JSON.stringify(ev.customQuestions || []));
+    renderEditQuestionnaireBuilder();
+    updateEditDateFeedback();
 
     openModal('modal-edit-event');
   };
 
-  window.submitEditEvent = function (e) {
+  window.submitEditEvent = async function (e) {
     e.preventDefault();
     if (!isAdminAuthenticated) {
       showToast('權限不足', true);
@@ -836,6 +885,17 @@
       showToast('請填寫完整必填欄位、自訂分類與報名截止時間', true);
       return;
     }
+    const timingError = validateEventTiming(date, startDate, endDate, ev.registrations.length, maxPeople);
+    if (timingError) {
+      showToast(timingError, true);
+      updateEditDateFeedback();
+      return;
+    }
+    const questionError = validateQuestions(editBuilderQuestions);
+    if (questionError) {
+      showToast(questionError, true);
+      return;
+    }
 
     ev.name = name;
     ev.category = category;
@@ -848,26 +908,24 @@
     ev.customBadge = customBadge;
     ev.maxPeople = maxPeople;
     ev.image = image;
+    ev.customQuestions = JSON.parse(JSON.stringify(editBuilderQuestions));
 
-    saveEventsData(events);
-
-    const gasUrl = getGASUrl();
-    if (gasUrl) {
-      fetch(gasUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update_event',
-          passcode: DEFAULT_ADMIN_PASSCODE,
-          event: ev
-        })
-      }).catch(err => console.warn('GAS Sync warning:', err));
+    const submitButton = e.submitter;
+    if (submitButton) submitButton.disabled = true;
+    try {
+      await requestBackend('update_event', { event: ev }, true);
+      saveEventsData(events);
+    } catch (error) {
+      showToast(error.message, true);
+      if (submitButton) submitButton.disabled = false;
+      return;
     }
 
     closeModal('modal-edit-event');
     showToast(`✏️ 已成功更新『${name}』活動設定！`);
     renderAdminDashboard();
     renderEventsGrid();
+    if (submitButton) submitButton.disabled = false;
   };
 
   window.openEventDetail = function (eventId) {
@@ -880,7 +938,7 @@
     const status = getStatus(regCount, ev.maxPeople, ev.startDate, ev.endDate);
     const pct = Math.min((regCount / ev.maxPeople) * 100, 100).toFixed(0);
 
-    document.getElementById('sheet-image-bg').style.backgroundImage = `url('${ev.image}')`;
+    document.getElementById('sheet-image-bg').style.backgroundImage = `url("${safeImageUrl(ev.image)}")`;
     document.getElementById('sheet-title').textContent = ev.name;
     document.getElementById('sheet-desc').textContent = ev.description || '暫無詳細說明';
     document.getElementById('sheet-date').textContent = formatDate(ev.date);
@@ -991,7 +1049,7 @@
   };
 
   // Submit Public Registration
-  window.submitRegistration = function (e) {
+  window.submitRegistration = async function (e) {
     e.preventDefault();
     if (!activeEventId) return;
 
@@ -1017,11 +1075,15 @@
     const proxyEmail = isProxy ? document.getElementById('proxy-email').value.trim() : '';
 
     const attendeeName = document.getElementById('reg-name').value.trim();
-    const attendeePhone = document.getElementById('reg-phone').value.trim();
+    const attendeePhone = document.getElementById('reg-phone').value.replace(/\D/g, '');
     const attendeeEmail = document.getElementById('reg-email').value.trim();
 
     if (!attendeeName || !attendeePhone) {
       showToast('請填寫參加者姓名與聯絡電話', true);
+      return;
+    }
+    if (!/^09\d{8}$/.test(attendeePhone)) {
+      showToast('請輸入有效的台灣手機號碼（09 開頭共 10 碼）', true);
       return;
     }
 
@@ -1030,7 +1092,7 @@
       return;
     }
 
-    const existingIndex = ev.registrations.findIndex(r => r.phone === attendeePhone);
+    const existingIndex = ev.registrations.findIndex(r => String(r.phone || '').replace(/\D/g, '') === attendeePhone);
     if (existingIndex !== -1) {
       showToast(`提示：此電話號碼 (${attendeePhone}) 已報名過本活動`, true);
       return;
@@ -1059,7 +1121,7 @@
       }
     }
 
-    ev.registrations.push({
+    const registration = {
       name: attendeeName,
       email: attendeeEmail,
       phone: attendeePhone,
@@ -1069,36 +1131,36 @@
       answers,
       checkedIn: false,
       registeredAt: Date.now()
-    });
+    };
 
-    saveEventsData(events);
+    const submitButton = document.getElementById('reg-submit-btn');
+    submitButton.disabled = true;
+    submitButton.textContent = '正在確認名額...';
+    try {
+      const result = await requestBackend('register', {
+        eventId: ev.id, attendeeName, attendeePhone, attendeeEmail,
+        isProxy, proxyName, proxyEmail, answers,
+        website: document.getElementById('reg-website').value
+      });
+      if (result.registrationId) registration.id = result.registrationId;
+      ev.registrations.push(registration);
+      saveEventsData(events);
+    } catch (error) {
+      showToast(error.message, true);
+      submitButton.disabled = false;
+      submitButton.textContent = '確認送出報名';
+      return;
+    }
 
     document.getElementById('voucher-event-name').textContent = ev.name;
     document.getElementById('voucher-attendee-info').textContent = `參加者：${attendeeName} ｜ 電話：${attendeePhone}`;
     document.getElementById('voucher-date-location').textContent = `地點：${ev.location || '萬家福五甲店 現場'}`;
 
-    const gasUrl = getGASUrl();
-    if (gasUrl) {
-      fetch(gasUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'register',
-          eventId: ev.id,
-          attendeeName,
-          attendeePhone,
-          attendeeEmail,
-          isProxy,
-          proxyName,
-          proxyEmail,
-          answers
-        })
-      }).catch(err => console.warn('GAS Sync warning:', err));
-    }
-
     closeModal('modal-register-form');
     openModal('modal-success');
     renderEventsGrid();
+    submitButton.disabled = false;
+    submitButton.textContent = '確認送出報名';
   };
 
   // Onsite Rapid Registration
@@ -1116,7 +1178,7 @@
     `).join('');
   }
 
-  window.submitOnsiteRegistration = function (e) {
+  window.submitOnsiteRegistration = async function (e) {
     e.preventDefault();
     if (!isAdminAuthenticated) {
       showToast('權限不足', true);
@@ -1125,19 +1187,28 @@
 
     const eventId = document.getElementById('onsite-event-selector').value;
     const name = document.getElementById('onsite-name').value.trim();
-    const phone = document.getElementById('onsite-phone').value.trim();
+    const phone = document.getElementById('onsite-phone').value.replace(/\D/g, '');
     const autoCheckin = document.getElementById('onsite-auto-checkin').checked;
 
-    if (!eventId || !name || !phone) {
-      showToast('請填寫姓名與電話', true);
+    if (!eventId || !name || !/^09\d{8}$/.test(phone)) {
+      showToast('請填寫姓名與有效的台灣手機號碼', true);
       return;
     }
 
     const events = loadEventsData();
     const ev = events.find(e => e.id === eventId);
     if (!ev) return;
+    const status = getStatus(ev.registrations.length, ev.maxPeople, ev.startDate, ev.endDate);
+    if (!status.allowRegister) {
+      showToast(`無法報名：${status.label}`, true);
+      return;
+    }
+    if (ev.registrations.some(registration => String(registration.phone || '').replace(/\D/g, '') === phone)) {
+      showToast('此電話號碼已報名過本活動', true);
+      return;
+    }
 
-    ev.registrations.push({
+    const registration = {
       name,
       email: '',
       phone,
@@ -1145,9 +1216,22 @@
       answers: {},
       checkedIn: autoCheckin,
       registeredAt: Date.now()
-    });
+    };
 
-    saveEventsData(events);
+    try {
+      const result = await requestBackend('register', {
+        eventId, attendeeName: name, attendeePhone: phone, attendeeEmail: '', answers: {}
+      });
+      if (result.registrationId) registration.id = result.registrationId;
+      if (autoCheckin && result.registrationId) {
+        await requestBackend('set_checkin', { eventId, registrationId: result.registrationId, checkedIn: true }, true);
+      }
+      ev.registrations.push(registration);
+      saveEventsData(events);
+    } catch (error) {
+      showToast(error.message, true);
+      return;
+    }
 
     document.getElementById('onsite-name').value = '';
     document.getElementById('onsite-phone').value = '';
@@ -1163,9 +1247,12 @@
     const ev = events.find(e => e.id === activeEventId);
     if (!ev) return;
 
-    const eventDate = ev.date ? new Date(ev.date) : new Date();
-    const startStr = eventDate.toISOString().replace(/-|:|\.\d\d\d/g, '').substring(0, 15) + 'Z';
-    const endStr = new Date(eventDate.getTime() + 7200000).toISOString().replace(/-|:|\.\d\d\d/g, '').substring(0, 15) + 'Z';
+    const startDate = ev.date || new Date().toISOString().slice(0, 10);
+    const endDate = new Date(`${startDate}T12:00:00+08:00`);
+    endDate.setDate(endDate.getDate() + 1);
+    const startStr = startDate.replace(/-/g, '');
+    const endStr = `${endDate.getFullYear()}${String(endDate.getMonth() + 1).padStart(2, '0')}${String(endDate.getDate()).padStart(2, '0')}`;
+    const escapeICS = value => String(value || '').replace(/\\/g, '\\\\').replace(/([,;])/g, '\\$1').replace(/\r?\n/g, '\\n');
 
     const icsContent = [
       'BEGIN:VCALENDAR',
@@ -1173,23 +1260,25 @@
       'PRODID:-//Apple Native SwiftUI Event System//TW',
       'BEGIN:VEVENT',
       `UID:event-${ev.id}@twwgapp.pages.dev`,
-      `DTSTAMP:${startStr}`,
-      `DTSTART:${startStr}`,
-      `DTEND:${endStr}`,
-      `SUMMARY:${ev.name}`,
-      `DESCRIPTION:${(ev.description || '').replace(/\n/g, ' ')}`,
-      `LOCATION:${ev.location || ''}`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`,
+      `DTSTART;VALUE=DATE:${startStr}`,
+      `DTEND;VALUE=DATE:${endStr}`,
+      `SUMMARY:${escapeICS(ev.name)}`,
+      `DESCRIPTION:${escapeICS(ev.description)}`,
+      `LOCATION:${escapeICS(ev.location)}`,
       'END:VEVENT',
       'END:VCALENDAR'
     ].join('\r\n');
 
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
+    const objectUrl = window.URL.createObjectURL(blob);
+    link.href = objectUrl;
     link.setAttribute('download', `${ev.name.replace(/\s+/g, '_')}.ics`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    window.URL.revokeObjectURL(objectUrl);
     showToast('已匯出 iCal 行事曆檔案！');
   };
 
@@ -1209,6 +1298,17 @@
   window.removeQuestionnaireField = function (index) {
     builderQuestions.splice(index, 1);
     renderQuestionnaireBuilder();
+  };
+
+  window.updateQuestionnaireField = function (index, key, value, editMode = false) {
+    const questions = editMode ? editBuilderQuestions : builderQuestions;
+    if (!questions[index]) return;
+    questions[index][key] = key === 'required' ? Boolean(value) : String(value).trim();
+    if (key === 'type') {
+      if ((value === 'select' || value === 'checkbox') && !questions[index].options) questions[index].options = '選項 A, 選項 B';
+      editMode ? renderEditQuestionnaireBuilder() : renderQuestionnaireBuilder();
+    }
+    updateCreateReadiness();
   };
 
   function renderQuestionnaireBuilder() {
@@ -1234,11 +1334,11 @@
         <div class="form-row-2">
           <div class="field-group">
             <label class="field-label">題目名稱</label>
-            <input type="text" class="sf-input" value="${escapeHTML(q.title)}" placeholder="例如：飲食習慣需求" onchange="builderQuestions[${i}].title=this.value.trim()">
+            <input type="text" class="sf-input" value="${escapeHTML(q.title)}" placeholder="例如：飲食習慣需求" onchange="updateQuestionnaireField(${i},'title',this.value)">
           </div>
           <div class="field-group">
             <label class="field-label">題型</label>
-            <select class="sf-select" onchange="builderQuestions[${i}].type=this.value; renderQuestionnaireBuilder();">
+            <select class="sf-select" onchange="updateQuestionnaireField(${i},'type',this.value)">
               <option value="text" ${q.type === 'text' ? 'selected' : ''}>單行簡答 (Text)</option>
               <option value="textarea" ${q.type === 'textarea' ? 'selected' : ''}>多行長文 (Paragraph)</option>
               <option value="select" ${q.type === 'select' ? 'selected' : ''}>單選下拉選單 (Select)</option>
@@ -1250,16 +1350,62 @@
         ${(q.type === 'select' || q.type === 'checkbox') ? `
           <div class="field-group">
             <label class="field-label">選項內容 (以逗號分隔)</label>
-            <input type="text" class="sf-input" value="${escapeHTML(q.options || '')}" placeholder="例如：葷食, 素食(蛋奶素), 全素" onchange="builderQuestions[${i}].options=this.value.trim()">
+            <input type="text" class="sf-input" value="${escapeHTML(q.options || '')}" placeholder="例如：葷食, 素食(蛋奶素), 全素" onchange="updateQuestionnaireField(${i},'options',this.value)">
           </div>
         ` : ''}
 
         <label class="checkbox-row" style="margin-top:2px;">
-          <input type="checkbox" ${q.required ? 'checked' : ''} onchange="builderQuestions[${i}].required=this.checked">
+          <input type="checkbox" ${q.required ? 'checked' : ''} onchange="updateQuestionnaireField(${i},'required',this.checked)">
           <span>將此題目設為必填 (勾選必填，取消勾選則為選填)</span>
         </label>
       </div>
     `).join('');
+  }
+
+  window.addEditQuestionnaireField = function () {
+    editBuilderQuestions.push({ id: `q_${Date.now().toString(36)}`, title: '', type: 'text', options: '', required: false });
+    renderEditQuestionnaireBuilder();
+  };
+
+  window.removeEditQuestionnaireField = function (index) {
+    editBuilderQuestions.splice(index, 1);
+    renderEditQuestionnaireBuilder();
+  };
+
+  function renderEditQuestionnaireBuilder() {
+    const container = document.getElementById('edit-questionnaire-builder-container');
+    if (!container) return;
+    if (!editBuilderQuestions.length) {
+      container.innerHTML = '<div class="questionnaire-empty">目前沒有自訂題目</div>';
+      return;
+    }
+    container.innerHTML = editBuilderQuestions.map((q, i) => `
+      <div class="question-item-card compact-question-item">
+        <div class="question-item-header"><strong>題目 ${i + 1}</strong><button type="button" class="btn-text-danger" onclick="removeEditQuestionnaireField(${i})">刪除</button></div>
+        <div class="form-row-2">
+          <div class="field-group"><label class="field-label">題目名稱</label><input class="sf-input" value="${escapeHTML(q.title)}" onchange="updateQuestionnaireField(${i},'title',this.value,true)"></div>
+          <div class="field-group"><label class="field-label">題型</label><select class="sf-select" onchange="updateQuestionnaireField(${i},'type',this.value,true)">
+            <option value="text" ${q.type === 'text' ? 'selected' : ''}>單行文字</option>
+            <option value="textarea" ${q.type === 'textarea' ? 'selected' : ''}>多行文字</option>
+            <option value="select" ${q.type === 'select' ? 'selected' : ''}>單選</option>
+            <option value="checkbox" ${q.type === 'checkbox' ? 'selected' : ''}>多選</option>
+          </select></div>
+        </div>
+        ${(q.type === 'select' || q.type === 'checkbox') ? `<div class="field-group"><label class="field-label">選項（以逗號分隔）</label><input class="sf-input" value="${escapeHTML(q.options || '')}" onchange="updateQuestionnaireField(${i},'options',this.value,true)"></div>` : ''}
+        <label class="checkbox-row"><input type="checkbox" ${q.required ? 'checked' : ''} onchange="updateQuestionnaireField(${i},'required',this.checked,true)"><span>必填題目</span></label>
+      </div>
+    `).join('');
+  }
+
+  function validateQuestions(questions) {
+    for (let index = 0; index < questions.length; index += 1) {
+      const question = questions[index];
+      if (!String(question.title || '').trim()) return `請填寫第 ${index + 1} 題的題目名稱`;
+      if ((question.type === 'select' || question.type === 'checkbox') && !String(question.options || '').split(',').some(option => option.trim())) {
+        return `請設定第 ${index + 1} 題的選項`;
+      }
+    }
+    return '';
   }
 
   // Image Upload Method Tabs
@@ -1283,22 +1429,46 @@
     }
   };
 
-  window.handleFileSelect = function (e) {
+  window.handleFileSelect = async function (e) {
     const file = e.target.files[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      filePreviewDataUrl = event.target.result;
+    try {
+      filePreviewDataUrl = await optimizeImageFile(file);
       const preview = document.getElementById('image-preview');
       preview.style.backgroundImage = `url('${filePreviewDataUrl}')`;
       preview.classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      showToast(error.message, true);
+      e.target.value = '';
+    }
   };
 
+  function optimizeImageFile(file) {
+    if (!file.type.startsWith('image/')) return Promise.reject(new Error('請選擇圖片檔案'));
+    if (file.size > 12 * 1024 * 1024) return Promise.reject(new Error('圖片不可超過 12 MB'));
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('圖片讀取失敗'));
+      reader.onload = () => {
+        const image = new Image();
+        image.onerror = () => reject(new Error('圖片格式無法使用'));
+        image.onload = () => {
+          const maxWidth = 1600;
+          const scale = Math.min(1, maxWidth / image.naturalWidth);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.84));
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   // Create New Event
-  window.submitCreateEvent = function (e) {
+  window.submitCreateEvent = async function (e) {
     e.preventDefault();
     if (!isAdminAuthenticated) {
       showToast('權限不足：需要管理員驗證', true);
@@ -1329,6 +1499,17 @@
       showToast('請填寫完整必填欄位、自訂分類與報名截止時間', true);
       return;
     }
+    const timingError = validateEventTiming(date, startDate, endDate, 0, maxPeople);
+    if (timingError) {
+      showToast(timingError, true);
+      updateCreateReadiness();
+      return;
+    }
+    const questionError = validateQuestions(builderQuestions);
+    if (questionError) {
+      showToast(questionError, true);
+      return;
+    }
 
     const events = loadEventsData();
     const newEvent = {
@@ -1350,8 +1531,17 @@
       registrations: []
     };
 
-    events.unshift(newEvent);
-    saveEventsData(events);
+    const submitButton = e.submitter;
+    if (submitButton) submitButton.disabled = true;
+    try {
+      await requestBackend('create_event', { event: newEvent }, true);
+      events.unshift(newEvent);
+      saveEventsData(events);
+    } catch (error) {
+      showToast(error.message, true);
+      if (submitButton) submitButton.disabled = false;
+      return;
+    }
 
     document.getElementById('create-event-form').reset();
     document.getElementById('image-preview').classList.add('hidden');
@@ -1362,7 +1552,47 @@
     showToast('🎉 萬家福五甲店 新活動發布成功！');
     switchAdminSubView('manage');
     renderEventsGrid();
+    updateCreateReadiness();
+    if (submitButton) submitButton.disabled = false;
   };
+
+  function updateCreateReadiness() {
+    const date = document.getElementById('event-date')?.value || '';
+    const start = document.getElementById('event-start-time')?.value || '';
+    const end = document.getElementById('event-end-time')?.value || '';
+    const max = Number(document.getElementById('event-max')?.value || 0);
+    const timingError = validateEventTiming(date, start, end, 0, max || 1);
+    const requiredReady = Boolean(document.getElementById('event-name')?.value.trim() && document.getElementById('event-category')?.value.trim() && max > 0);
+    const questionError = validateQuestions(builderQuestions);
+    const feedback = document.getElementById('create-date-feedback');
+    const readiness = document.getElementById('create-event-readiness');
+    if (feedback) {
+      feedback.textContent = timingError || '報名期間設定正確';
+      feedback.classList.toggle('is-valid', !timingError);
+    }
+    if (readiness) {
+      const ready = requiredReady && !timingError && !questionError;
+      readiness.textContent = ready ? '可以發布' : '尚未完成必填設定';
+      readiness.classList.toggle('is-ready', ready);
+    }
+  }
+
+  function updateEditDateFeedback() {
+    const events = loadEventsData();
+    const event = events.find(item => item.id === activeEventId);
+    const error = validateEventTiming(
+      document.getElementById('edit-event-date')?.value || '',
+      document.getElementById('edit-event-start-time')?.value || '',
+      document.getElementById('edit-event-end-time')?.value || '',
+      event?.registrations?.length || 0,
+      Number(document.getElementById('edit-event-max')?.value || 0)
+    );
+    const feedback = document.getElementById('edit-date-feedback');
+    if (feedback) {
+      feedback.textContent = error || '活動時間與名額設定正確';
+      feedback.classList.toggle('is-valid', !error);
+    }
+  }
 
   // Admin Registrations & Attendance Dashboard
   function renderAdminDashboard() {
@@ -1482,14 +1712,24 @@
     }
   }
 
-  window.toggleCheckInStatus = function (eventId, regIndex) {
+  window.toggleCheckInStatus = async function (eventId, regIndex) {
     if (!isAdminAuthenticated) return;
     const events = loadEventsData();
     const ev = events.find(e => e.id === eventId);
     if (!ev || !ev.registrations[regIndex]) return;
 
-    ev.registrations[regIndex].checkedIn = !ev.registrations[regIndex].checkedIn;
-    saveEventsData(events);
+    const registration = ev.registrations[regIndex];
+    const nextValue = !registration.checkedIn;
+    try {
+      if (registration.id) {
+        await requestBackend('set_checkin', { eventId, registrationId: registration.id, checkedIn: nextValue }, true);
+      }
+      registration.checkedIn = nextValue;
+      saveEventsData(events);
+    } catch (error) {
+      showToast(error.message, true);
+      return;
+    }
 
     const statusStr = ev.registrations[regIndex].checkedIn ? '已成功標記簽到' : '已取消簽到狀態';
     showToast(statusStr);
@@ -1530,16 +1770,18 @@
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    const objectUrl = URL.createObjectURL(blob);
+    link.href = objectUrl;
     link.setAttribute('download', `${ev.name}_報名名單.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
 
     showToast('📊 UTF-8 CSV 報名名單導出成功！');
   };
 
-  window.deleteActiveEvent = function () {
+  window.deleteActiveEvent = async function () {
     if (!isAdminAuthenticated) {
       showToast('權限不足', true);
       return;
@@ -1548,6 +1790,12 @@
     if (!confirm('確定要刪除此活動嗎？刪除後無法復原。')) return;
 
     let events = loadEventsData();
+    try {
+      await requestBackend('delete_event', { eventId: activeEventId }, true);
+    } catch (error) {
+      showToast(error.message, true);
+      return;
+    }
     events = events.filter(e => e.id !== activeEventId);
     saveEventsData(events);
 
@@ -1596,13 +1844,11 @@
     if (!container) return;
 
     const hero = loadHeroConfig();
-    const btnAction = hero.buttonUrl ? `window.open('${escapeHTML(hero.buttonUrl)}', '_blank')` : 'void(0)';
-
     container.innerHTML = `
       <div class="hero-poster-wrapper">
         <!-- Top Poster Box: 100% Pure Image, No Text Overlay, 4:1 Aspect Ratio -->
         <div class="hero-poster-box">
-          <img src="${escapeHTML(hero.bgImage)}" alt="${escapeHTML(hero.title)}" class="hero-poster-img">
+          <img src="${escapeHTML(safeImageUrl(hero.bgImage))}" alt="${escapeHTML(hero.title)}" class="hero-poster-img">
         </div>
 
         <!-- Below-Poster Action Card (Title, Live Countdown Timer, CTA Button) -->
@@ -1627,7 +1873,7 @@
               </div>
             </div>
 
-            <button class="btn-hero-cta" onclick="${btnAction}">
+            <button class="btn-hero-cta" data-url="${escapeHTML(safeExternalUrl(hero.buttonUrl))}" onclick="openHeroLink(this.dataset.url)">
               ${escapeHTML(hero.buttonText || '查看五甲店活動詳情 →')}
             </button>
           </div>
@@ -1635,6 +1881,17 @@
       </div>
     `;
   }
+
+  window.openHeroLink = function (url) {
+    const safeUrl = safeExternalUrl(url);
+    if (safeUrl === '#') return;
+    const parsed = new URL(safeUrl);
+    if (parsed.origin === window.location.origin && parsed.hash) {
+      document.querySelector(parsed.hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    window.open(safeUrl, '_blank', 'noopener');
+  };
 
   // HERO IMAGE UPLOAD HANDLERS
   let heroUploadMethod = 'url';
@@ -1664,26 +1921,22 @@
     }
   };
 
-  window.handleHeroFileSelect = function (e) {
+  window.handleHeroFileSelect = async function (e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 8 * 1024 * 1024) {
-      showToast('❌ 圖片檔案過大，請選擇 8MB 以下的圖片', true);
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function (evt) {
-      heroFilePreviewDataUrl = evt.target.result;
+    try {
+      heroFilePreviewDataUrl = await optimizeImageFile(file);
       const preview = document.getElementById('hero-image-preview');
       if (preview) {
         preview.style.backgroundImage = `url('${heroFilePreviewDataUrl}')`;
         preview.classList.remove('hidden');
       }
       showToast('📸 圖片讀取成功！已設定為 Hero 看板圖');
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      showToast(error.message, true);
+      e.target.value = '';
+    }
   };
 
   window.openHeroConfigModal = function () {
@@ -1715,7 +1968,7 @@
     openModal('modal-edit-hero');
   };
 
-  window.submitEditHeroConfig = function (e) {
+  window.submitEditHeroConfig = async function (e) {
     e.preventDefault();
     if (!isAdminAuthenticated) {
       showToast('權限不足', true);
@@ -1742,7 +1995,13 @@
       buttonUrl: document.getElementById('hero-input-btn-url').value.trim()
     };
 
-    saveHeroConfig(newConfig);
+    try {
+      await requestBackend('update_setting', { key: 'hero', value: newConfig }, true);
+      saveHeroConfig(newConfig);
+    } catch (error) {
+      showToast(error.message, true);
+      return;
+    }
     renderHeroSpotlight();
     startCountdownTimers();
     closeModal('modal-edit-hero');
@@ -1902,8 +2161,8 @@
   }
 
   // Initialize
-  document.addEventListener('DOMContentLoaded', () => {
-    checkAdminSession();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await checkAdminSession();
     loadEventsData();
     renderQuickLinksUI();
     renderEventsGrid();
@@ -1912,6 +2171,48 @@
     renderSidebarWidgets();
     startCountdownTimers();
     setFooterYear();
+    await syncEventsFromBackend();
+
+    ['event-name', 'event-category', 'event-date', 'event-start-time', 'event-end-time', 'event-max']
+      .forEach(id => document.getElementById(id)?.addEventListener('input', updateCreateReadiness));
+    ['edit-event-date', 'edit-event-start-time', 'edit-event-end-time', 'edit-event-max']
+      .forEach(id => document.getElementById(id)?.addEventListener('input', updateEditDateFeedback));
+    updateCreateReadiness();
+    document.querySelectorAll('.sf-modal-backdrop').forEach((modal) => {
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      const title = modal.querySelector('.sheet-title');
+      if (title) {
+        if (!title.id) title.id = `${modal.id}-title`;
+        modal.setAttribute('aria-labelledby', title.id);
+      }
+      modal.querySelectorAll('.btn-icon-circular').forEach(button => {
+        if (!button.getAttribute('aria-label')) button.setAttribute('aria-label', '關閉視窗');
+      });
+    });
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      const activeModal = Array.from(document.querySelectorAll('.sf-modal-backdrop.active')).pop();
+      if (activeModal) closeModal(activeModal.id);
+    }
+    if (event.key === 'Tab') {
+      const activeModal = Array.from(document.querySelectorAll('.sf-modal-backdrop.active')).pop();
+      if (!activeModal) return;
+      const focusable = Array.from(activeModal.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]'))
+        .filter(element => element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
   });
 
 })();
