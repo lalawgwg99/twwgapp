@@ -2035,22 +2035,38 @@ textarea:focus-visible,
 }
 
 .service-announcement-track {
-  display: inline-block;
-  min-width: max-content;
-  padding-left: 100%;
+  display: flex;
+  width: max-content;
   white-space: nowrap;
   font-weight: 650;
   letter-spacing: 0;
   animation: service-announcement-scroll var(--announcement-duration, 24s) linear infinite;
+  will-change: transform;
 }
 
-.service-strip:hover .service-announcement-track {
-  animation-play-state: paused;
+.service-announcement-group {
+  display: flex;
+  flex-shrink: 0;
+  min-width: 100vw;
+  align-items: center;
+  justify-content: space-around;
+  gap: 56px;
+  padding-right: 56px;
+}
+
+.service-announcement-item {
+  flex-shrink: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .service-strip:hover .service-announcement-track {
+    animation-play-state: paused;
+  }
 }
 
 @keyframes service-announcement-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-100%); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
 }
 
 .announcement-setting-preview {
@@ -2530,6 +2546,12 @@ textarea:focus-visible,
 
   .service-announcement-track {
     font-size: 12px;
+    animation-duration: 11s;
+  }
+
+  .service-announcement-group {
+    gap: 40px;
+    padding-right: 40px;
   }
 
   .nav-top-row {

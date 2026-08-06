@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260806_pro5/);
-  assert.match(html, /app\.js\?v=20260806_pro5/);
+  assert.match(html, /styles\.css\?v=20260806_pro6/);
+  assert.match(html, /app\.js\?v=20260806_pro6/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -65,6 +65,9 @@ test('top announcement is editable, hideable and motion-safe', () => {
   assert.match(script, /key: 'announcement'/);
   assert.match(script, /container\.classList\.toggle\('hidden', !text\)/);
   assert.match(css, /@keyframes service-announcement-scroll/);
+  assert.match(css, /translate3d\(-50%, 0, 0\)/);
+  assert.match(css, /@media \(hover: hover\) and \(pointer: fine\)/);
+  assert.match(css, /animation-duration:\s*11s/);
   assert.match(css, /\.service-announcement-track\s*\{[^}]*animation:\s*none !important/s);
 });
 

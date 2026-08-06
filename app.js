@@ -265,7 +265,23 @@
     const text = String(loadAnnouncement().text || '').trim();
     container.classList.toggle('hidden', !text);
     container.setAttribute('aria-hidden', text ? 'false' : 'true');
-    track.textContent = text;
+    container.setAttribute('aria-label', text ? `門市公告：${text}` : '門市公告');
+    track.replaceChildren();
+    if (!text) return;
+
+    const repeatCount = Math.max(3, Math.min(12, Math.ceil(80 / text.length)));
+    for (let groupIndex = 0; groupIndex < 2; groupIndex++) {
+      const group = document.createElement('div');
+      group.className = 'service-announcement-group';
+      group.setAttribute('aria-hidden', 'true');
+      for (let itemIndex = 0; itemIndex < repeatCount; itemIndex++) {
+        const item = document.createElement('span');
+        item.className = 'service-announcement-item';
+        item.textContent = text;
+        group.appendChild(item);
+      }
+      track.appendChild(group);
+    }
     track.style.setProperty('--announcement-duration', `${Math.max(14, Math.min(60, text.length * 0.45))}s`);
   }
 
