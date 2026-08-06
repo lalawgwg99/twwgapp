@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Apple Native (SwiftUI Design System) CSS
+   Apple Native (SwiftUI Design System) CSS - Commercial Pro Edition
    Compliant with Apple Human Interface Guidelines (HIG)
    ========================================================================== */
 
@@ -26,6 +26,8 @@
   --accent-green: #34C759;
   --accent-orange: #FF9500;
   --accent-red: #FF3B30;
+  --accent-purple: #AF52DE;
+  --accent-teal: #30B0C7;
   --accent-gray: #8E8E93;
 
   /* Typography */
@@ -70,6 +72,8 @@
     --accent-green: #30D158;
     --accent-orange: #FF9F0A;
     --accent-red: #FF453A;
+    --accent-purple: #BF5AF2;
+    --accent-teal: #40C8E0;
     --accent-gray: #8E8E93;
   }
 }
@@ -212,12 +216,15 @@ html, body {
   padding: 12px 18px;
   margin-bottom: 16px;
   box-shadow: var(--shadow-subtle);
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .admin-status-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .badge-admin-unlocked {
@@ -228,15 +235,18 @@ html, body {
   padding: 4px 10px;
 }
 
-.admin-hint-text {
-  font-size: 12px;
-  color: var(--label-tertiary);
+.admin-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .admin-sub-nav {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
 .admin-tab-btn {
@@ -250,6 +260,7 @@ html, body {
   cursor: pointer;
   transition: all var(--t-fast) var(--ease-spring);
   font-family: inherit;
+  white-space: nowrap;
 }
 
 .admin-tab-btn.active {
@@ -348,7 +359,7 @@ html, body {
 }
 
 /* ==========================================================================
-   Event Grid - 8 Events Layout
+   Event Grid Layout & Custom Badges
    ========================================================================== */
 .section-header {
   display: flex;
@@ -433,6 +444,7 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 6px;
 }
 
 .sf-badge {
@@ -443,28 +455,29 @@ html, body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .badge-status-open {
-  background: rgba(52, 199, 89, 0.15);
+  background: rgba(52, 199, 89, 0.18);
   color: var(--accent-green);
-  border: 1px solid rgba(52, 199, 89, 0.3);
+  border: 1px solid rgba(52, 199, 89, 0.35);
 }
 
 .badge-status-warning {
-  background: rgba(255, 149, 0, 0.15);
+  background: rgba(255, 149, 0, 0.18);
   color: var(--accent-orange);
-  border: 1px solid rgba(255, 149, 0, 0.3);
+  border: 1px solid rgba(255, 149, 0, 0.35);
 }
 
 .badge-status-full {
-  background: rgba(255, 59, 48, 0.15);
+  background: rgba(255, 59, 48, 0.18);
   color: var(--accent-red);
-  border: 1px solid rgba(255, 59, 48, 0.3);
+  border: 1px solid rgba(255, 59, 48, 0.35);
 }
 
-.badge-category {
-  background: rgba(0, 0, 0, 0.45);
+.badge-custom {
+  background: rgba(0, 122, 255, 0.75);
   color: #FFFFFF;
 }
 
@@ -475,13 +488,25 @@ html, body {
   flex: 1;
 }
 
+.card-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 .card-date {
   font-size: 12px;
   font-weight: 600;
   color: var(--accent-blue);
-  margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+
+.card-price-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-purple);
 }
 
 .card-title {
@@ -574,7 +599,7 @@ html, body {
 }
 
 /* ==========================================================================
-   Forms & Inputs (Apple HIG Grouped Style)
+   Forms & Inset Grouped Sections (Apple HIG Style)
    ========================================================================== */
 .form-card {
   background: var(--surface-primary);
@@ -589,6 +614,23 @@ html, body {
   font-size: 17px;
   font-weight: 600;
   color: var(--label-primary);
+}
+
+.inset-grouped-box {
+  background: var(--surface-secondary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-s);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.inset-grouped-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
 }
 
 .form-grid {
@@ -628,6 +670,11 @@ html, body {
   color: var(--accent-red);
 }
 
+.field-label .opt {
+  color: var(--label-tertiary);
+  font-weight: 400;
+}
+
 .sf-input, .sf-textarea, .sf-select {
   width: 100%;
   padding: 10px 12px;
@@ -649,6 +696,24 @@ html, body {
 .field-help {
   font-size: 12px;
   color: var(--label-tertiary);
+}
+
+/* Questionnaire Question Item Box */
+.question-item-card {
+  background: var(--surface-primary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-s);
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.question-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* Image Upload Tabs Component */
@@ -706,10 +771,10 @@ html, body {
   font-weight: 500;
 }
 
-/* Checkbox Style */
+/* Checkbox & Switch Style */
 .checkbox-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   font-size: 13px;
   color: var(--label-secondary);
@@ -722,7 +787,6 @@ html, body {
   height: 18px;
   accent-color: var(--accent-blue);
   cursor: pointer;
-  margin-top: 1px;
 }
 
 .checkbox-row a {
@@ -775,7 +839,7 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 16px;
+  padding: 9px 16px;
   border-radius: var(--radius-s);
   border: 1px solid var(--separator);
   background: var(--surface-secondary);
@@ -810,6 +874,28 @@ html, body {
 
 .btn-system-danger:hover {
   background: rgba(255, 59, 48, 0.16);
+}
+
+.btn-checkin-status {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.btn-checkin-status.checked {
+  background: rgba(52, 199, 89, 0.18);
+  color: var(--accent-green);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+.btn-checkin-status.unchecked {
+  background: var(--surface-tertiary);
+  color: var(--label-secondary);
+  border: 1px solid var(--separator);
 }
 
 .btn-icon-circular {
@@ -857,7 +943,7 @@ html, body {
 .sf-sheet {
   background: var(--surface-primary);
   border-radius: var(--radius-l);
-  max-width: 520px;
+  max-width: 540px;
   width: 100%;
   max-height: 88vh;
   overflow-y: auto;
@@ -973,13 +1059,17 @@ html, body {
 .sf-table-wrapper {
   border-radius: var(--radius-s);
   border: 1px solid var(--separator);
-  overflow: hidden;
+  overflow-x: auto;
   background: var(--surface-primary);
 }
 
-.sf-table-header {
-  display: grid;
-  grid-template-columns: 1.2fr 1.8fr 1.2fr;
+.sf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.sf-table th {
   padding: 10px 14px;
   background: var(--surface-secondary);
   font-size: 12px;
@@ -987,18 +1077,18 @@ html, body {
   color: var(--label-secondary);
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  text-align: left;
+  border-bottom: 1px solid var(--separator);
+  white-space: nowrap;
 }
 
-.sf-table-row {
-  display: grid;
-  grid-template-columns: 1.2fr 1.8fr 1.2fr;
+.sf-table td {
   padding: 12px 14px;
-  font-size: 13.5px;
   border-top: 1px solid var(--separator);
-  align-items: center;
+  vertical-align: middle;
 }
 
-.sf-table-row:nth-child(even) {
+.sf-table tr:nth-child(even) td {
   background: var(--surface-secondary);
 }
 
