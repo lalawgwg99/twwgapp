@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260806_pro6/);
-  assert.match(html, /app\.js\?v=20260806_pro6/);
+  assert.match(html, /styles\.css\?v=20260806_pro7/);
+  assert.match(html, /app\.js\?v=20260806_pro7/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -69,6 +69,16 @@ test('top announcement is editable, hideable and motion-safe', () => {
   assert.match(css, /@media \(hover: hover\) and \(pointer: fine\)/);
   assert.match(css, /animation-duration:\s*11s/);
   assert.match(css, /\.service-announcement-track\s*\{[^}]*animation:\s*none !important/s);
+  assert.match(script, /requestAnimationFrame\(tick\)/);
+  assert.match(script, /const speed = window\.matchMedia\('\(max-width: 768px\)'\)\.matches \? 48 : 60/);
+  assert.match(css, /\.service-announcement-track\.is-js-controlled\s*\{[^}]*animation:\s*none/s);
+});
+
+test('admins can cancel one registration with confirmation and release its spot', () => {
+  assert.match(script, /requestBackend\('delete_registration'/);
+  assert.match(script, /刪除後會立即釋放名額，且無法復原/);
+  assert.match(script, /class="btn-registration-delete"/);
+  assert.match(script, /registrations\.splice\(regIndex, 1\)/);
 });
 
 test('store description includes hardware, appliances and 3C products', () => {

@@ -40,6 +40,9 @@
   let editBuilderQuestions = [];
   let lastFocusedElement = null;
   let backendMode = 'client_sync';
+  let announcementAnimationFrame = null;
+  let announcementPaused = false;
+  let announcementResizeTimer = null;
 
   // Real Server Authentication State
   let adminSessionToken = null;
@@ -262,6 +265,16 @@
     const track = document.getElementById('service-announcement-track');
     if (!container || !track) return;
 
+    if (announcementAnimationFrame !== null) {
+      cancelAnimationFrame(announcementAnimationFrame);
+      announcementAnimationFrame = null;
+    }
+    announcementPaused = false;
+    container.onmouseenter = null;
+    container.onmouseleave = null;
+    track.classList.remove('is-js-controlled');
+    track.style.removeProperty('transform');
+
     const text = String(loadAnnouncement().text || '').trim();
     container.classList.toggle('hidden', !text);
     container.setAttribute('aria-hidden', text ? 'false' : 'true');
@@ -283,6 +296,34 @@
       track.appendChild(group);
     }
     track.style.setProperty('--announcement-duration', `${Math.max(14, Math.min(60, text.length * 0.45))}s`);
+    startAnnouncementMotion(container, track);
+  }
+
+  function startAnnouncementMotion(container, track) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    track.classList.add('is-js-controlled');
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (canHover) {
+      container.onmouseenter = () => { announcementPaused = true; };
+      container.onmouseleave = () => { announcementPaused = false; };
+    }
+
+    let offset = 0;
+    let previousTime = performance.now();
+    const speed = window.matchMedia('(max-width: 768px)').matches ? 48 : 60;
+    const tick = (currentTime) => {
+      const groupWidth = track.firstElementChild?.getBoundingClientRect().width || 0;
+      const elapsedSeconds = Math.min((currentTime - previousTime) / 1000, 0.05);
+      if (!announcementPaused && groupWidth > 0) {
+        offset = (offset + elapsedSeconds * speed) % groupWidth;
+        track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+      }
+      previousTime = currentTime;
+      announcementAnimationFrame = requestAnimationFrame(tick);
+    };
+
+    announcementAnimationFrame = requestAnimationFrame(tick);
   }
 
   window.openAnnouncementModal = function () {
@@ -1868,6 +1909,7 @@
                 <th>代報模式</th>
                 ${qTitles.map(t => `<th>${escapeHTML(t)}</th>`).join('')}
                 <th>報名日期</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -1891,6 +1933,12 @@
                       <td class="cell-sub">${escapeHTML((r.answers && r.answers[q.id]) || '-')}</td>
                     `).join('')}
                     <td class="cell-sub">${new Date(r.registeredAt).toLocaleDateString('zh-TW')}</td>
+                    <td>
+                      <button class="btn-registration-delete" type="button"
+                        data-event-id="${escapeHTML(ev.id)}" data-registration-index="${i}"
+                        onclick="deleteRegistration(this.dataset.eventId, Number(this.dataset.registrationIndex), this)"
+                        aria-label="取消 ${escapeHTML(r.name)} 的報名">取消報名</button>
+                    </td>
                   </tr>
                 `;
               }).join('')}
@@ -1923,6 +1971,42 @@
     const statusStr = ev.registrations[regIndex].checkedIn ? '已成功標記簽到' : '已取消簽到狀態';
     showToast(statusStr);
     renderAdminRegistrations();
+  };
+
+  window.deleteRegistration = async function (eventId, regIndex, button) {
+    if (!isAdminAuthenticated) {
+      showToast('權限不足', true);
+      return;
+    }
+
+    const events = loadEventsData();
+    const ev = events.find(event => event.id === eventId);
+    const registration = ev?.registrations?.[regIndex];
+    if (!ev || !registration?.id) {
+      showToast('找不到可取消的報名紀錄，請先重新整理名單', true);
+      return;
+    }
+
+    const confirmed = window.confirm(`確定要取消「${registration.name}」的報名嗎？\n刪除後會立即釋放名額，且無法復原。`);
+    if (!confirmed) return;
+
+    if (button) button.disabled = true;
+    try {
+      await requestBackend('delete_registration', {
+        eventId: ev.id,
+        registrationId: registration.id
+      }, true);
+      ev.registrations.splice(regIndex, 1);
+      saveEventsData(events);
+      showToast(`已取消 ${registration.name} 的報名並釋放名額`);
+      renderAdminDashboard();
+      renderEventsGrid();
+      renderSidebarWidgets();
+    } catch (error) {
+      showToast(error.message, true);
+    } finally {
+      if (button?.isConnected) button.disabled = false;
+    }
   };
 
   window.exportRegistrationsCSV = function () {
@@ -2390,6 +2474,10 @@
     await checkAdminSession();
     loadEventsData();
     renderAnnouncement();
+    window.addEventListener('resize', () => {
+      clearTimeout(announcementResizeTimer);
+      announcementResizeTimer = setTimeout(renderAnnouncement, 180);
+    });
     renderQuickLinksUI();
     renderEventsGrid();
     renderQuestionnaireBuilder();

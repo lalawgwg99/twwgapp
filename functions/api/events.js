@@ -56,7 +56,7 @@ export async function onRequestPost({ request, env }) {
       return await registerAttendee(data, env);
     }
 
-    const protectedActions = new Set(["create_event", "update_event", "delete_event", "set_checkin", "update_setting"]);
+    const protectedActions = new Set(["create_event", "update_event", "delete_event", "set_checkin", "delete_registration", "update_setting"]);
     if (protectedActions.has(action)) {
       if (!(await validateAdminToken(suppliedCredential, env))) {
         return jsonResponse({ success: false, error: "管理權限不足或工作階段已失效" }, 401);
@@ -117,6 +117,20 @@ export async function onRequestPost({ request, env }) {
       const result = await env.DB.prepare(
         "UPDATE registrations SET checked_in = ? WHERE id = ? AND event_id = ?"
       ).bind(data.checkedIn ? 1 : 0, String(data.registrationId || ""), String(data.eventId || "")).run();
+      if (!result.meta?.changes) return jsonResponse({ success: false, error: "找不到報名紀錄" }, 404);
+      return jsonResponse({ success: true });
+    }
+
+    if (action === "delete_registration") {
+      const eventId = String(data.eventId || "").trim();
+      const registrationId = String(data.registrationId || "").trim();
+      if (!eventId || !registrationId || eventId.length > 100 || registrationId.length > 100) {
+        return jsonResponse({ success: false, error: "報名紀錄格式不正確" }, 400);
+      }
+      if (!env.DB) return databaseUnavailable();
+      const result = await env.DB.prepare(
+        "DELETE FROM registrations WHERE id = ? AND event_id = ?"
+      ).bind(registrationId, eventId).run();
       if (!result.meta?.changes) return jsonResponse({ success: false, error: "找不到報名紀錄" }, 404);
       return jsonResponse({ success: true });
     }

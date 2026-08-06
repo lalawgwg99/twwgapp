@@ -1448,6 +1448,31 @@ html, body {
   border: 1px solid var(--separator);
 }
 
+.btn-registration-delete {
+  min-height: 32px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 59, 48, 0.35);
+  border-radius: 5px;
+  background: rgba(255, 59, 48, 0.08);
+  color: var(--accent-red);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+
+.btn-registration-delete:hover,
+.btn-registration-delete:focus-visible {
+  background: rgba(255, 59, 48, 0.16);
+}
+
+.btn-registration-delete:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
 .btn-icon-circular {
   width: 32px;
   height: 32px;
@@ -2042,6 +2067,10 @@ textarea:focus-visible,
   letter-spacing: 0;
   animation: service-announcement-scroll var(--announcement-duration, 24s) linear infinite;
   will-change: transform;
+}
+
+.service-announcement-track.is-js-controlled {
+  animation: none;
 }
 
 .service-announcement-group {

@@ -157,6 +157,38 @@ test('check-in keeps text registration ids intact', async () => {
   assert.deepEqual(boundValues, [1, 'reg-uuid', 'event-1']);
 });
 
+test('registration deletion is admin-only and scoped to its event', async () => {
+  const boundValues = [];
+  const env = {
+    ADMIN_PASSCODE: 'private-passcode',
+    ADMIN_TOKEN_SECRET: 'token-secret',
+    DB: {
+      prepare() {
+        return {
+          bind(...values) {
+            boundValues.push(...values);
+            return { run: async () => ({ meta: { changes: 1 } }) };
+          }
+        };
+      }
+    }
+  };
+  const payload = { action: 'delete_registration', eventId: 'event-1', registrationId: 'registration-id' };
+  assert.equal((await post(payload, env)).status, 401);
+
+  const loginData = await (await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env)).json();
+  const response = await onRequestPost({
+    request: new Request('https://example.test/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': loginData.token },
+      body: JSON.stringify(payload)
+    }),
+    env
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(boundValues, ['registration-id', 'event-1']);
+});
+
 test('writes fail explicitly when D1 is unavailable', async () => {
   const env = { ADMIN_PASSCODE: 'private-passcode', ADMIN_TOKEN_SECRET: 'token-secret' };
   const loginData = await (await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env)).json();
