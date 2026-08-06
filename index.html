@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>萬家福五甲店 - 官方活動與數位服務中心</title>
   <meta name="description" content="萬家福五甲店官方活動報名與會員服務中心 (高雄市鳳山區富榮里林森路291號)。">
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <div class="app-viewport">
@@ -29,7 +29,7 @@
     <header class="navigation-bar">
       <div class="nav-top-row">
         <div class="app-title-group">
-          <img src="assets/logo_real.png?v=99" alt="萬家福五甲店 Logo" class="brand-logo-img">
+          <img src="assets/logo_real.png?v=2026" alt="萬家福五甲店 Logo" class="brand-logo-img">
           <div>
             <h1 class="large-title">萬家福五甲店</h1>
             <p class="subtitle">門市專屬活動 ‧ 會員服務 ‧ 長輩友善報名</p>
@@ -49,13 +49,10 @@
         </nav>
       </div>
 
-      <!-- Premium Apple Quick Social & Location Links Card (門市數位媒體中心) -->
+      <!-- Public Quick Social & Location Links Card (一般顧客純瀏覽膠囊列) -->
       <div class="quick-links-card">
         <div class="quick-links-header">
           <span class="quick-links-label">🌐 門市數位媒體與導航中心：</span>
-          <button id="quick-link-edit-btn" class="quick-edit-icon-btn hidden" onclick="openQuickLinksModal()" title="編輯媒體網址">
-            ⚙️ 編輯網址
-          </button>
         </div>
         <div id="quick-links-pills-container" class="pills-container">
           <!-- Dynamically rendered by app.js -->
@@ -90,7 +87,7 @@
       <div id="events-grid" class="event-grid"></div>
     </main>
 
-    <!-- VIEW 2: PROTECTED ADMIN DASHBOARD -->
+    <!-- VIEW 2: PROTECTED ADMIN DASHBOARD (僅受保護後台才有權限按鈕) -->
     <section id="view-admin" class="hidden">
       <!-- Admin Bar Header -->
       <div class="admin-toolbar-card">
@@ -336,7 +333,7 @@
 
   </div>
 
-  <!-- MODAL: EDIT QUICK LINKS URLS SHEET (管理員媒體網址設定) -->
+  <!-- MODAL: EDIT QUICK LINKS URLS SHEET (僅後台有權限開啟) -->
   <div id="modal-edit-quicklinks" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-edit-quicklinks')">
     <div class="sf-sheet" style="max-width:580px;">
       <div class="sheet-handle"></div>
@@ -716,6 +713,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

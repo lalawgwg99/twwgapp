@@ -264,7 +264,8 @@
 
   window.openQuickLinksModal = function () {
     if (!isAdminAuthenticated) {
-      showToast('權限不足：請先進行管理員驗證', true);
+      openModal('modal-admin-auth');
+      showToast('🔒 請先輸入管理員密碼解鎖後台權限！', true);
       return;
     }
 
