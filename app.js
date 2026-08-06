@@ -28,7 +28,7 @@
   let builderQuestions = [];
 
   const DEFAULT_QUICK_LINKS = {
-    mapUrl: 'https://www.google.com/search?q=%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2&rlz=1C5BAPC_enTW1196TW1196&oq=%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIKCAEQABiiBDiJBTIKCAIQABiABBiiBDIKCAMQABiABBiiBDIKCAQQABiABBiiBDIKCAUQABiABBiiBDIGCAYQRRg90gEINTM5OGowajeoAgCwAgA&sourceid=chrome&source=chrome.ob&ie=UTF-8',
+    mapUrl: 'https://www.google.com/maps/search/?api=1&query=830%E9%AB%98%E9%9B%84%E5%B8%82%E9%B3%B6%E5%B1%B1%E5%8D%80%E5%AF%8C%E6%A6%AE%E9%87%8C%E6%9E%97%E6%A3%AE%E8%B7%AF291%E8%99%9F+%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2%E5%BA%97',
     lineUrl: 'https://line.me',
     fbUrl: 'https://facebook.com',
     igUrl: 'https://instagram.com',
