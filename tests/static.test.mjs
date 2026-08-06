@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260806_pro4/);
-  assert.match(html, /app\.js\?v=20260806_pro4/);
+  assert.match(html, /styles\.css\?v=20260806_pro5/);
+  assert.match(html, /app\.js\?v=20260806_pro5/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -57,4 +57,17 @@ test('admin login refreshes private registration data before opening the dashboa
   assert.match(script, /adminSessionToken = token;[\s\S]*?await syncEventsFromBackend\(\);[\s\S]*?switchView\('admin'\)/);
   assert.match(html, /onclick="refreshAdminData\(event\)"/);
   assert.match(script, /完整名單尚未載入/);
+});
+
+test('top announcement is editable, hideable and motion-safe', () => {
+  assert.match(html, /id="announcement-input"[^>]*maxlength="300"/);
+  assert.match(html, /onclick="openAnnouncementModal\(\)"/);
+  assert.match(script, /key: 'announcement'/);
+  assert.match(script, /container\.classList\.toggle\('hidden', !text\)/);
+  assert.match(css, /@keyframes service-announcement-scroll/);
+  assert.match(css, /\.service-announcement-track\s*\{[^}]*animation:\s*none !important/s);
+});
+
+test('store description includes hardware, appliances and 3C products', () => {
+  assert.match(script, /居家五金、家電與 3C 用品/);
 });

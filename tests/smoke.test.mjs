@@ -175,6 +175,33 @@ test('writes fail explicitly when D1 is unavailable', async () => {
   assert.match((await response.json()).error, /停止寫入/);
 });
 
+test('announcement settings accept blank text and reject oversized content', async () => {
+  const DB = {
+    prepare() {
+      const statement = {
+        bind() { return statement; },
+        async run() { return { meta: { changes: 1 } }; }
+      };
+      return statement;
+    }
+  };
+  const env = { ADMIN_PASSCODE: 'private-passcode', ADMIN_TOKEN_SECRET: 'token-secret', DB };
+  const loginData = await (await post({ action: 'verify_admin', passcode: env.ADMIN_PASSCODE }, env)).json();
+  const update = text => onRequestPost({
+    request: new Request('https://example.test/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': loginData.token },
+      body: JSON.stringify({ action: 'update_setting', key: 'announcement', value: { text } })
+    }),
+    env
+  });
+
+  assert.equal((await update('')).status, 200);
+  const oversized = await update('a'.repeat(301));
+  assert.equal(oversized.status, 400);
+  assert.match((await oversized.json()).error, /300 字/);
+});
+
 test('admin login is blocked after five failed attempts from one source', async () => {
   const rows = new Map();
   const DB = {

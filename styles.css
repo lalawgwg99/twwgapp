@@ -2027,25 +2027,42 @@ textarea:focus-visible,
   min-height: 36px;
   margin: 0 -28px 20px;
   padding: 7px max(28px, calc((100vw - 1380px) / 2 + 28px));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  display: block;
+  overflow: hidden;
   color: #fff;
   background: #263a32;
   font-size: 12px;
 }
 
-.service-strip-links {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.service-announcement-track {
+  display: inline-block;
+  min-width: max-content;
+  padding-left: 100%;
+  white-space: nowrap;
+  font-weight: 650;
+  letter-spacing: 0;
+  animation: service-announcement-scroll var(--announcement-duration, 24s) linear infinite;
 }
 
-.service-strip a {
+.service-strip:hover .service-announcement-track {
+  animation-play-state: paused;
+}
+
+@keyframes service-announcement-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+.announcement-setting-preview {
+  min-height: 40px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  overflow: hidden;
   color: #fff;
-  font-weight: 700;
-  text-decoration: none;
+  background: #263a32;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .navigation-bar {
@@ -2511,13 +2528,8 @@ textarea:focus-visible,
     padding: 8px 14px;
   }
 
-  .service-strip > span {
-    display: none;
-  }
-
-  .service-strip-links {
-    width: 100%;
-    justify-content: space-between;
+  .service-announcement-track {
+    font-size: 12px;
   }
 
   .nav-top-row {
@@ -2712,6 +2724,14 @@ textarea:focus-visible,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .service-announcement-track {
+    max-width: 100%;
+    padding-left: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: none !important;
+  }
+
   *,
   *::before,
   *::after {

@@ -15,17 +15,13 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="canonical" href="https://wgapptw.pages.dev/">
-  <link rel="stylesheet" href="styles.css?v=20260806_pro4">
+  <link rel="stylesheet" href="styles.css?v=20260806_pro5">
 </head>
 <body>
   <div class="app-viewport">
 
-    <div class="service-strip" aria-label="門市服務資訊">
-      <span><strong>萬家福五甲店</strong> 活動服務中心</span>
-      <div class="service-strip-links">
-        <span>每日 09:00 - 23:00</span>
-        <a href="tel:077138508">(07) 713-8508</a>
-      </div>
+    <div id="service-announcement" class="service-strip" aria-label="門市公告">
+      <div id="service-announcement-track" class="service-announcement-track"></div>
     </div>
 
     <!-- Toast Capsule Notification -->
@@ -104,6 +100,9 @@
           </button>
           <button class="btn-system-secondary" style="border-color:var(--accent-blue); color:var(--accent-blue); font-weight:600;" onclick="openQuickLinksModal()">
             🌐 設定媒體連結網址
+          </button>
+          <button class="btn-system-secondary" onclick="openAnnouncementModal()">
+            📣 設定頂部跑馬燈
           </button>
           <button class="btn-system-secondary" onclick="lockAdminSession()">
             登出
@@ -469,6 +468,33 @@
     </div>
   </div>
 
+  <!-- MODAL: TOP ANNOUNCEMENT -->
+  <div id="modal-edit-announcement" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-edit-announcement')">
+    <div class="sf-sheet" style="max-width:580px;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body" style="padding:24px 20px;">
+        <div class="sheet-title-row">
+          <h3 class="sheet-title">📣 設定頂部跑馬燈</h3>
+          <button class="btn-icon-circular" onclick="closeModal('modal-edit-announcement')">✕</button>
+        </div>
+        <p class="sheet-description">內容留白並儲存後，首頁頂部綠色跑馬燈會隱藏。</p>
+        <form onsubmit="submitAnnouncementSettings(event)">
+          <div class="field-group">
+            <label class="field-label" for="announcement-input">公告內容 <span class="opt">最多 300 字</span></label>
+            <textarea id="announcement-input" class="sf-textarea" rows="4" maxlength="300" placeholder="輸入門市公告，或留白隱藏" oninput="previewAnnouncementText(event)"></textarea>
+          </div>
+          <div class="announcement-setting-preview" aria-label="跑馬燈預覽">
+            <span id="announcement-preview-text"></span>
+          </div>
+          <div class="sheet-actions" style="margin-top:16px;">
+            <button type="button" class="btn-system-secondary" onclick="closeModal('modal-edit-announcement')">取消</button>
+            <button type="submit" class="btn-system-primary">儲存跑馬燈</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: EDIT QUICK LINKS -->
   <div id="modal-edit-quicklinks" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-edit-quicklinks')">
     <div class="sf-sheet" style="max-width:580px;">
@@ -716,6 +742,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260806_pro4"></script>
+  <script src="app.js?v=20260806_pro5"></script>
 </body>
 </html>

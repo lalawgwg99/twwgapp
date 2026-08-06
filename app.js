@@ -12,6 +12,7 @@
   const LEGACY_GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const QUICK_LINKS_KEY = 'twwgapp_quick_links_v2';
   const HERO_CONFIG_KEY = 'twwgapp_hero_config_v1';
+  const ANNOUNCEMENT_KEY = 'twwgapp_announcement_v1';
 
   const DEFAULT_HERO_CONFIG = {
     title: '萬家福五甲店 每月會員 9 折專屬感恩慶',
@@ -54,6 +55,10 @@
     igUrl: '',
     ytUrl: '',
     siteUrl: 'https://www.prosperity-plaza.com.tw'
+  };
+
+  const DEFAULT_ANNOUNCEMENT = {
+    text: '萬家福五甲店 活動服務中心　｜　每日 09:00 - 23:00　｜　門市電話 (07) 713-8508'
   };
 
   const STORE_IMAGES = [
@@ -234,6 +239,74 @@
     }
   ];
 
+  function loadAnnouncement() {
+    try {
+      const stored = localStorage.getItem(ANNOUNCEMENT_KEY);
+      if (stored) return Object.assign({}, DEFAULT_ANNOUNCEMENT, JSON.parse(stored));
+    } catch (error) {
+      console.warn('LocalStorage announcement read failed:', error);
+    }
+    return DEFAULT_ANNOUNCEMENT;
+  }
+
+  function saveAnnouncement(config) {
+    try {
+      localStorage.setItem(ANNOUNCEMENT_KEY, JSON.stringify(config));
+    } catch (error) {
+      console.error('Failed to save announcement:', error);
+    }
+  }
+
+  function renderAnnouncement() {
+    const container = document.getElementById('service-announcement');
+    const track = document.getElementById('service-announcement-track');
+    if (!container || !track) return;
+
+    const text = String(loadAnnouncement().text || '').trim();
+    container.classList.toggle('hidden', !text);
+    container.setAttribute('aria-hidden', text ? 'false' : 'true');
+    track.textContent = text;
+    track.style.setProperty('--announcement-duration', `${Math.max(14, Math.min(60, text.length * 0.45))}s`);
+  }
+
+  window.openAnnouncementModal = function () {
+    if (!isAdminAuthenticated) {
+      openModal('modal-admin-auth');
+      return;
+    }
+    const text = String(loadAnnouncement().text || '');
+    document.getElementById('announcement-input').value = text;
+    document.getElementById('announcement-preview-text').textContent = text || '留白後將隱藏跑馬燈';
+    openModal('modal-edit-announcement');
+  };
+
+  window.previewAnnouncementText = function (event) {
+    const text = event.target.value.trim();
+    document.getElementById('announcement-preview-text').textContent = text || '留白後將隱藏跑馬燈';
+  };
+
+  window.submitAnnouncementSettings = async function (event) {
+    event.preventDefault();
+    if (!isAdminAuthenticated) {
+      showToast('權限不足', true);
+      return;
+    }
+    const config = { text: document.getElementById('announcement-input').value.trim() };
+    const submitButton = event.submitter;
+    if (submitButton) submitButton.disabled = true;
+    try {
+      await requestBackend('update_setting', { key: 'announcement', value: config }, true);
+      saveAnnouncement(config);
+      renderAnnouncement();
+      closeModal('modal-edit-announcement');
+      showToast(config.text ? '頂部跑馬燈已更新' : '頂部跑馬燈已隱藏');
+    } catch (error) {
+      showToast(error.message, true);
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  };
+
   // Quick Links Helper Functions
   function loadQuickLinks() {
     try {
@@ -360,6 +433,10 @@
       if (data.settings?.quickLinks) {
         saveQuickLinks(Object.assign({}, DEFAULT_QUICK_LINKS, data.settings.quickLinks));
         renderQuickLinksUI();
+      }
+      if (data.settings?.announcement) {
+        saveAnnouncement(Object.assign({}, DEFAULT_ANNOUNCEMENT, data.settings.announcement));
+        renderAnnouncement();
       }
       if (data.settings?.hero) {
         saveHeroConfig(Object.assign({}, DEFAULT_HERO_CONFIG, data.settings.hero));
@@ -2190,8 +2267,8 @@
       <div class="sidebar-widget">
         <h3 class="widget-title">🏬 關於萬家福五甲店</h3>
         <div class="store-about-text">
-          <p>萬家福五甲店位於高雄市鳳山區林森路，深耕在地超過 20 年，提供新鮮生鮮、進口食品、居家用品等一站式購物服務。</p>
-          <p style="margin-top:8px;">我們定期舉辦料理教室、試吃體驗、親子手作等社區活動，歡迎鄰里鄉親踴躍參加。</p>
+          <p>萬家福五甲店座落於高雄市鳳山區林森路，深耕在地逾 20 年，是陪伴社區家庭日常生活的一站式購物據點。店內匯集新鮮生鮮、食品飲料、進口商品、生活百貨、居家五金、家電與 3C 用品，滿足日常採買、居家修繕與生活所需。</p>
+          <p style="margin-top:8px;">除了提供多元完整的商品選擇，我們也持續規劃會員回饋、料理教室、試吃體驗、親子手作及生活主題活動，期待以便利、實用又有溫度的服務，成為鄰里交流與家庭生活的好夥伴。</p>
         </div>
       </div>
     `;
@@ -2296,6 +2373,7 @@
     localStorage.removeItem(LEGACY_GAS_URL_KEY);
     await checkAdminSession();
     loadEventsData();
+    renderAnnouncement();
     renderQuickLinksUI();
     renderEventsGrid();
     renderQuestionnaireBuilder();
