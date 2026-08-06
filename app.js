@@ -1,14 +1,15 @@
 /**
  * Apple Native (SwiftUI Style) Event Registration & Management Platform
- * 萬家福五甲店 (Prosperity Plaza Wujia Branch) Official Store Portal & Event System
+ * 萬家福五甲店 (Prosperity Plaza Wujia Branch) Official Store Portal & Dynamic Quick Links Engine
  */
 
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'twwgapp_wujia_store_events_v8';
+  const STORAGE_KEY = 'twwgapp_wujia_store_events_v9';
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
   const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
+  const QUICK_LINKS_KEY = 'twwgapp_quick_links_v2';
   const DEFAULT_ADMIN_PASSCODE = 'admin888';
 
   let activeView = 'list';
@@ -26,15 +27,24 @@
   // Custom Questionnaire State in Builder
   let builderQuestions = [];
 
+  const DEFAULT_QUICK_LINKS = {
+    mapUrl: 'https://www.google.com/search?q=%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2&rlz=1C5BAPC_enTW1196TW1196&oq=%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIKCAEQABiiBDiJBTIKCAIQABiABBiiBDIKCAMQABiABBiiBDIKCAQQABiABBiiBDIKCAUQABiABBiiBDIGCAYQRRg90gEINTM5OGowajeoAgCwAgA&sourceid=chrome&source=chrome.ob&ie=UTF-8',
+    lineUrl: 'https://line.me',
+    fbUrl: 'https://facebook.com',
+    igUrl: 'https://instagram.com',
+    ytUrl: 'https://youtube.com',
+    siteUrl: 'https://www.prosperity-plaza.com.tw'
+  };
+
   const STORE_IMAGES = [
-    'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&h=450&fit=crop', // 🛒 會員週年慶
-    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&h=450&fit=crop', // 🍷 名酒品鑑
-    'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&h=450&fit=crop', // 🥦 有機料理教室
-    'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=800&h=450&fit=crop', // 🧸 親子手作黏土
-    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=450&fit=crop', // 🧘 晨間頂樓瑜伽
-    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=450&fit=crop', // ☕️ 精品咖啡講座
-    'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&h=450&fit=crop', // ⛺️ 露營裝備體驗
-    'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800&h=450&fit=crop'  // 🍰 法式甜點體驗
+    'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&h=450&fit=crop',
+    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&h=450&fit=crop',
+    'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&h=450&fit=crop',
+    'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=800&h=450&fit=crop',
+    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=450&fit=crop',
+    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=450&fit=crop',
+    'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&h=450&fit=crop',
+    'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800&h=450&fit=crop'
   ];
 
   const DEMO_EVENTS = [
@@ -203,6 +213,93 @@
       registrations: []
     }
   ];
+
+  // Quick Links Helper Functions
+  function loadQuickLinks() {
+    try {
+      const stored = localStorage.getItem(QUICK_LINKS_KEY);
+      if (stored) {
+        return Object.assign({}, DEFAULT_QUICK_LINKS, JSON.parse(stored));
+      }
+    } catch (e) {
+      console.warn('LocalStorage Quick Links read failed:', e);
+    }
+    return DEFAULT_QUICK_LINKS;
+  }
+
+  function saveQuickLinks(links) {
+    try {
+      localStorage.setItem(QUICK_LINKS_KEY, JSON.stringify(links));
+    } catch (e) {
+      console.error('Failed to save quick links:', e);
+    }
+  }
+
+  function renderQuickLinksUI() {
+    const links = loadQuickLinks();
+    const container = document.getElementById('quick-links-pills-container');
+    if (!container) return;
+
+    container.innerHTML = `
+      <a href="${escapeHTML(links.mapUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-map">
+        📍 Google 地圖導航
+      </a>
+      <a href="${escapeHTML(links.lineUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-line">
+        💬 LINE 官方帳號
+      </a>
+      <a href="${escapeHTML(links.fbUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-fb">
+        📘 FB 粉絲專頁
+      </a>
+      <a href="${escapeHTML(links.igUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-ig">
+        📷 Instagram
+      </a>
+      <a href="${escapeHTML(links.ytUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-yt">
+        🎬 YouTube 影音
+      </a>
+      <a href="${escapeHTML(links.siteUrl)}" target="_blank" rel="noopener" class="quick-link-pill pill-site">
+        🌐 萬家福品牌官網
+      </a>
+    `;
+  }
+
+  window.openQuickLinksModal = function () {
+    if (!isAdminAuthenticated) {
+      showToast('權限不足：請先進行管理員驗證', true);
+      return;
+    }
+
+    const links = loadQuickLinks();
+    document.getElementById('link-map').value = links.mapUrl || '';
+    document.getElementById('link-line').value = links.lineUrl || '';
+    document.getElementById('link-fb').value = links.fbUrl || '';
+    document.getElementById('link-ig').value = links.igUrl || '';
+    document.getElementById('link-yt').value = links.ytUrl || '';
+    document.getElementById('link-site').value = links.siteUrl || '';
+
+    openModal('modal-edit-quicklinks');
+  };
+
+  window.submitEditQuickLinks = function (e) {
+    e.preventDefault();
+    if (!isAdminAuthenticated) {
+      showToast('權限不足', true);
+      return;
+    }
+
+    const newLinks = {
+      mapUrl: document.getElementById('link-map').value.trim(),
+      lineUrl: document.getElementById('link-line').value.trim(),
+      fbUrl: document.getElementById('link-fb').value.trim(),
+      igUrl: document.getElementById('link-ig').value.trim(),
+      ytUrl: document.getElementById('link-yt').value.trim(),
+      siteUrl: document.getElementById('link-site').value.trim()
+    };
+
+    saveQuickLinks(newLinks);
+    renderQuickLinksUI();
+    closeModal('modal-edit-quicklinks');
+    showToast('🌐 已成功更新萬家福五甲店 數位媒體與導航網址！');
+  };
 
   function getGASUrl() {
     return localStorage.getItem(GAS_URL_KEY) || '';
@@ -1419,6 +1516,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     checkAdminSession();
     loadEventsData();
+    renderQuickLinksUI();
     renderEventsGrid();
     renderQuestionnaireBuilder();
   });

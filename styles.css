@@ -127,12 +127,15 @@ html, body {
 }
 
 .brand-logo-img {
-  height: 46px;
+  height: 52px;
   width: auto;
   object-fit: contain;
   border-radius: var(--radius-xs);
   flex-shrink: 0;
   box-shadow: var(--shadow-subtle);
+  background: #FFFFFF;
+  padding: 2px 6px;
+  border: 1px solid var(--separator);
 }
 
 .large-title {
@@ -147,6 +150,34 @@ html, body {
   font-size: 13px;
   color: var(--label-secondary);
   font-weight: 500;
+}
+
+/* Store Quick Info Banner */
+.store-info-banner {
+  font-size: 12.5px;
+  color: var(--label-secondary);
+  background: var(--surface-primary);
+  padding: 7px 14px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--separator);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  box-shadow: var(--shadow-subtle);
+}
+
+.store-phone-link {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity var(--t-fast);
+}
+
+.store-phone-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 /* SwiftUI Segmented Control */
@@ -194,13 +225,13 @@ html, body {
   font-weight: 600;
 }
 
-/* Quick Social & Location Links Bar */
+/* Premium Apple Quick Social & Location Links Bar */
 .quick-links-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   overflow-x: auto;
-  padding: 8px 0 4px;
+  padding: 10px 0 4px;
   scrollbar-width: none;
   border-top: 1px solid var(--separator);
 }
@@ -217,63 +248,77 @@ html, body {
   flex-shrink: 0;
 }
 
+.pills-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pills-container::-webkit-scrollbar {
+  display: none;
+}
+
 .quick-link-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5.5px 12px;
+  gap: 6px;
+  padding: 6.5px 14px;
   border-radius: var(--radius-full);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
-  transition: transform var(--t-fast), opacity var(--t-fast);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform var(--t-fast) var(--ease-spring), box-shadow var(--t-fast), background var(--t-fast);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 
 .quick-link-pill:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
 }
 
 .quick-link-pill:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .pill-map {
-  background: rgba(255, 149, 0, 0.14);
+  background: rgba(255, 149, 0, 0.12);
   color: #D97706;
-  border: 1px solid rgba(255, 149, 0, 0.3);
+  border: 1px solid rgba(255, 149, 0, 0.35);
 }
 
 .pill-line {
-  background: rgba(6, 199, 85, 0.14);
+  background: rgba(6, 199, 85, 0.12);
   color: #059669;
-  border: 1px solid rgba(6, 199, 85, 0.3);
+  border: 1px solid rgba(6, 199, 85, 0.35);
 }
 
 .pill-fb {
-  background: rgba(24, 119, 242, 0.14);
+  background: rgba(24, 119, 242, 0.12);
   color: #1D4ED8;
-  border: 1px solid rgba(24, 119, 242, 0.3);
+  border: 1px solid rgba(24, 119, 242, 0.35);
 }
 
 .pill-ig {
-  background: rgba(228, 64, 95, 0.14);
+  background: rgba(228, 64, 95, 0.12);
   color: #DC2626;
-  border: 1px solid rgba(228, 64, 95, 0.3);
+  border: 1px solid rgba(228, 64, 95, 0.35);
 }
 
 .pill-yt {
   background: rgba(255, 0, 0, 0.12);
   color: #DC2626;
-  border: 1px solid rgba(255, 0, 0, 0.3);
+  border: 1px solid rgba(255, 0, 0, 0.35);
 }
 
 .pill-site {
-  background: rgba(0, 122, 255, 0.14);
+  background: rgba(0, 122, 255, 0.12);
   color: var(--accent-blue);
-  border: 1px solid rgba(0, 122, 255, 0.3);
+  border: 1px solid rgba(0, 122, 255, 0.35);
 }
 
 /* Admin Toolbar & Sub Navigation */
@@ -1222,9 +1267,7 @@ html, body {
   display: none !important;
 }
 
-/* ==========================================================================
-   MOBILE RESPONSIVE POLISH (解決手機擠與亂、文字錯位問題)
-   ========================================================================== */
+/* MOBILE RESPONSIVE POLISH */
 @media (max-width: 640px) {
   .app-viewport {
     padding: 14px 12px 40px;
@@ -1248,7 +1291,7 @@ html, body {
   }
 
   .brand-logo-img {
-    height: 42px;
+    height: 44px;
   }
 
   .large-title {
@@ -1260,7 +1303,6 @@ html, body {
     font-size: 12px;
   }
 
-  /* Full-width Segmented Control on Mobile */
   .segmented-control {
     width: 100%;
     display: flex;
