@@ -1599,28 +1599,39 @@
     const btnAction = hero.buttonUrl ? `window.open('${escapeHTML(hero.buttonUrl)}', '_blank')` : 'void(0)';
 
     container.innerHTML = `
-      <div class="hero-bg" style="background-image: url('${escapeHTML(hero.bgImage)}')"></div>
-      <div class="hero-overlay"></div>
-      <div class="hero-content">
-        <div class="hero-badges">
-          <span class="sf-badge badge-status-open">🔥 熱門推薦</span>
-          ${hero.badge ? `<span class="sf-badge badge-custom">${escapeHTML(hero.badge)}</span>` : ''}
+      <div class="hero-poster-wrapper">
+        <!-- Top Poster Box: 100% Pure Image, No Text Overlay, 4:1 Aspect Ratio -->
+        <div class="hero-poster-box">
+          <img src="${escapeHTML(hero.bgImage)}" alt="${escapeHTML(hero.title)}" class="hero-poster-img">
         </div>
-        <h2 class="hero-title">${escapeHTML(hero.title)}</h2>
-        <p class="hero-desc">${escapeHTML(hero.description || '')}</p>
-        <div class="hero-meta">
-          <span>📍 ${escapeHTML(hero.locationText || '萬家福五甲店')}</span>
-          <span>🏷️ ${escapeHTML(hero.priceText || '門市優惠')}</span>
+
+        <!-- Below-Poster Action Card (Title, Live Countdown Timer, CTA Button) -->
+        <div class="hero-action-card">
+          <div class="hero-action-info">
+            <div class="hero-badges">
+              <span class="sf-badge badge-status-open">🔥 門市焦點</span>
+              ${hero.badge ? `<span class="sf-badge badge-custom">${escapeHTML(hero.badge)}</span>` : ''}
+            </div>
+            <h2 class="hero-action-title">${escapeHTML(hero.title)}</h2>
+            ${hero.description ? `<p class="hero-action-desc">${escapeHTML(hero.description)}</p>` : ''}
+          </div>
+
+          <div class="hero-action-right">
+            <div class="hero-countdown-block">
+              <span class="countdown-label-top">⏱ 倒數截止</span>
+              <div class="hero-countdown" id="hero-countdown" data-end="${hero.endDate || ''}">
+                <div class="countdown-unit"><span class="countdown-num" id="hero-days">--</span><span class="countdown-label">天</span></div>
+                <div class="countdown-unit"><span class="countdown-num" id="hero-hours">--</span><span class="countdown-label">時</span></div>
+                <div class="countdown-unit"><span class="countdown-num" id="hero-mins">--</span><span class="countdown-label">分</span></div>
+                <div class="countdown-unit"><span class="countdown-num" id="hero-secs">--</span><span class="countdown-label">秒</span></div>
+              </div>
+            </div>
+
+            <button class="btn-hero-cta" onclick="${btnAction}">
+              ${escapeHTML(hero.buttonText || '查看五甲店活動詳情 →')}
+            </button>
+          </div>
         </div>
-        <div class="hero-countdown" id="hero-countdown" data-end="${hero.endDate || ''}">
-          <div class="countdown-unit"><span class="countdown-num" id="hero-days">--</span><span class="countdown-label">天</span></div>
-          <div class="countdown-unit"><span class="countdown-num" id="hero-hours">--</span><span class="countdown-label">時</span></div>
-          <div class="countdown-unit"><span class="countdown-num" id="hero-mins">--</span><span class="countdown-label">分</span></div>
-          <div class="countdown-unit"><span class="countdown-num" id="hero-secs">--</span><span class="countdown-label">秒</span></div>
-        </div>
-        <button class="btn-hero-cta" onclick="${btnAction}">
-          ${escapeHTML(hero.buttonText || '查看五甲店活動詳情 →')}
-        </button>
       </div>
     `;
   }
