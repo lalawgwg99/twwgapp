@@ -200,6 +200,66 @@ html, body {
 }
 
 /* ==========================================================================
+   Admin Toolbar & Sub Navigation
+   ========================================================================== */
+.admin-toolbar-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-primary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-m);
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-subtle);
+}
+
+.admin-status-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-admin-unlocked {
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.admin-hint-text {
+  font-size: 12px;
+  color: var(--label-tertiary);
+}
+
+.admin-sub-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.admin-tab-btn {
+  border: 1px solid var(--separator);
+  background: var(--surface-primary);
+  color: var(--label-secondary);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease-spring);
+  font-family: inherit;
+}
+
+.admin-tab-btn.active {
+  background: var(--label-primary);
+  color: var(--system-bg);
+  border-color: var(--label-primary);
+  font-weight: 600;
+}
+
+/* ==========================================================================
    Filter Bar & Search Bar (SwiftUI Native Style)
    ========================================================================== */
 .controls-stack {
@@ -293,7 +353,7 @@ html, body {
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 14px;
 }
 
@@ -528,7 +588,6 @@ html, body {
 .form-section-title {
   font-size: 17px;
   font-weight: 600;
-  margin-bottom: 16px;
   color: var(--label-primary);
 }
 

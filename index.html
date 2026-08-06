@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>活動問卷與報名系統 - Apple Native</title>
-  <meta name="description" content="高品質活動問卷與報名平台，支援即時名額追蹤、行事曆匯出與隱私保護。">
+  <title>活動報名與問卷系統 - Apple Native (Admin Auth)</title>
+  <meta name="description" content="高品質活動問卷與報名平台，支援權限控管、即時名額追蹤、行事曆匯出與個資保護。">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -38,15 +38,15 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
             活動列表
           </button>
-          <button id="nav-create" class="segment-btn" onclick="switchView('create')" role="tab" aria-selected="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-            新增活動
+          <button id="nav-admin" class="segment-btn" onclick="handleAdminTabClick()" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span id="admin-nav-label">管理員後台</span>
           </button>
         </nav>
       </div>
     </header>
 
-    <!-- VIEW: EVENT LIST GRID -->
+    <!-- VIEW 1: PUBLIC EVENT LIST GRID -->
     <main id="view-list">
       <!-- Search & Category Filters -->
       <section class="controls-stack">
@@ -79,111 +79,159 @@
       <div id="events-grid" class="event-grid"></div>
     </main>
 
-    <!-- VIEW: CREATE EVENT -->
-    <section id="view-create" class="hidden">
-      <div class="form-card">
-        <div class="section-header">
-          <h2 class="form-section-title">建立新活動</h2>
-          <button class="btn-system-secondary" onclick="switchView('list')">取消</button>
+    <!-- VIEW 2: PROTECTED ADMIN DASHBOARD -->
+    <section id="view-admin" class="hidden">
+      <!-- Admin Bar Header -->
+      <div class="admin-toolbar-card">
+        <div class="admin-status-info">
+          <span class="sf-badge badge-admin-unlocked">🔓 已認證管理員權限</span>
+          <span class="admin-hint-text">預設管理金鑰：admin888</span>
         </div>
+        <button class="btn-system-secondary" onclick="lockAdminSession()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          鎖定並登出後台
+        </button>
+      </div>
 
-        <form id="create-event-form" onsubmit="submitCreateEvent(event)">
-          <div class="form-grid">
-            <div class="field-group">
-              <label class="field-label" for="event-name">活動名稱 <span class="req">*</span></label>
-              <input type="text" id="event-name" class="sf-input" required placeholder="例如：2026 夏季草地音樂節">
-            </div>
+      <!-- Admin Sub Navigation Tabs -->
+      <div class="admin-sub-nav">
+        <button id="admin-tab-manage" class="admin-tab-btn active" onclick="switchAdminSubView('manage')">名單與個資管理</button>
+        <button id="admin-tab-create" class="admin-tab-btn" onclick="switchAdminSubView('create')">發布新活動</button>
+      </div>
 
-            <div class="form-row-2">
+      <!-- SUB-VIEW A: REGISTRANTS MANAGEMENT -->
+      <div id="admin-sub-manage">
+        <div class="form-card">
+          <div class="section-header">
+            <h2 class="form-section-title">選擇管理活動</h2>
+            <select id="admin-event-selector" class="sf-select" style="max-width:320px;" onchange="handleAdminSelectEvent(event)"></select>
+          </div>
+
+          <div id="manage-event-detail" style="margin-bottom:20px;"></div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="font-size:16px; font-weight:600;">報名個資名單（權限保護中）</h3>
+            <button class="btn-system-danger" onclick="deleteActiveEvent()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              刪除本活動
+            </button>
+          </div>
+
+          <div id="manage-registrations-list"></div>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW B: CREATE NEW EVENT -->
+      <div id="admin-sub-create" class="hidden">
+        <div class="form-card">
+          <div class="section-header">
+            <h2 class="form-section-title">發布新活動</h2>
+          </div>
+
+          <form id="create-event-form" onsubmit="submitCreateEvent(event)">
+            <div class="form-grid">
               <div class="field-group">
-                <label class="field-label" for="event-category">活動分類</label>
-                <select id="event-category" class="sf-select">
-                  <option value="音樂">🎵 音樂祭</option>
-                  <option value="體驗">☕️ 體驗工作坊</option>
-                  <option value="戶外">⛰️ 戶外運動</option>
-                  <option value="藝文">🎨 藝文手作</option>
-                  <option value="講座">💡 創業講座</option>
-                  <option value="運動">🧘 健身瑜伽</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="event-date">活動日期 <span class="req">*</span></label>
-                <input type="date" id="event-date" class="sf-input" required>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label" for="event-desc">活動詳情描述</label>
-              <textarea id="event-desc" class="sf-textarea" rows="3" placeholder="清楚說明活動流程、注意事項與集合地點..."></textarea>
-            </div>
-
-            <!-- Image Upload Architecture (R2 / URL / File Preview) -->
-            <div class="field-group">
-              <label class="field-label">活動主視覺圖片</label>
-              <div class="upload-method-selector">
-                <button type="button" class="upload-tab active" id="tab-url" onclick="switchUploadMethod('url')">貼上圖片連結</button>
-                <button type="button" class="upload-tab" id="tab-file" onclick="switchUploadMethod('file')">本地圖片選擇/Cloudflare R2</button>
+                <label class="field-label" for="event-name">活動名稱 <span class="req">*</span></label>
+                <input type="text" id="event-name" class="sf-input" required placeholder="例如：2026 夏季草地音樂節">
               </div>
 
-              <div id="upload-url-input-block">
-                <input type="url" id="event-img-url" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleImageUrlChange(event)">
-                <p class="field-help" style="margin-top:4px;">提供高解析度 Unsplash 或 Imgur 圖檔 URL</p>
-              </div>
-
-              <div id="upload-file-input-block" class="hidden">
-                <input type="file" id="event-img-file" accept="image/*" class="sf-input" onchange="handleFileSelect(event)">
-                <p class="field-help" style="margin-top:4px;">上傳至 Cloudflare R2 儲存桶或產生本地高畫質預覽</p>
-              </div>
-
-              <div id="image-preview" class="image-preview-box hidden" style="margin-top:10px;">
-                <div class="image-preview-overlay">
-                  <span>圖片預覽成功</span>
+              <div class="form-row-2">
+                <div class="field-group">
+                  <label class="field-label" for="event-category">活動分類</label>
+                  <select id="event-category" class="sf-select">
+                    <option value="音樂">🎵 音樂祭</option>
+                    <option value="體驗">☕️ 體驗工作坊</option>
+                    <option value="戶外">⛰️ 戶外運動</option>
+                    <option value="藝文">🎨 藝文手作</option>
+                    <option value="講座">💡 創業講座</option>
+                    <option value="運動">🧘 健身瑜伽</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="event-date">活動日期 <span class="req">*</span></label>
+                  <input type="date" id="event-date" class="sf-input" required>
                 </div>
               </div>
-            </div>
 
-            <div class="form-row-2">
               <div class="field-group">
-                <label class="field-label" for="event-max">名額人數上限 <span class="req">*</span></label>
-                <input type="number" id="event-max" class="sf-input" required min="1" max="9999" placeholder="50">
+                <label class="field-label" for="event-desc">活動詳情描述</label>
+                <textarea id="event-desc" class="sf-textarea" rows="3" placeholder="清楚說明活動流程、注意事項與集合地點..."></textarea>
               </div>
+
+              <!-- Image Upload Architecture (R2 / URL / File Preview) -->
               <div class="field-group">
-                <label class="field-label" for="event-location">活動地點</label>
-                <input type="text" id="event-location" class="sf-input" placeholder="例如：台北市信義區展演館">
+                <label class="field-label">活動主視覺圖片</label>
+                <div class="upload-method-selector">
+                  <button type="button" class="upload-tab active" id="tab-url" onclick="switchUploadMethod('url')">貼上圖片連結</button>
+                  <button type="button" class="upload-tab" id="tab-file" onclick="switchUploadMethod('file')">本地圖片選擇/Cloudflare R2</button>
+                </div>
+
+                <div id="upload-url-input-block">
+                  <input type="url" id="event-img-url" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleImageUrlChange(event)">
+                  <p class="field-help" style="margin-top:4px;">提供高解析度 Unsplash 或 Imgur 圖檔 URL</p>
+                </div>
+
+                <div id="upload-file-input-block" class="hidden">
+                  <input type="file" id="event-img-file" accept="image/*" class="sf-input" onchange="handleFileSelect(event)">
+                  <p class="field-help" style="margin-top:4px;">上傳至 Cloudflare R2 儲存桶或產生本地高畫質預覽</p>
+                </div>
+
+                <div id="image-preview" class="image-preview-box hidden" style="margin-top:10px;">
+                  <div class="image-preview-overlay">
+                    <span>圖片預覽成功</span>
+                  </div>
+                </div>
               </div>
+
+              <div class="form-row-2">
+                <div class="field-group">
+                  <label class="field-label" for="event-max">名額人數上限 <span class="req">*</span></label>
+                  <input type="number" id="event-max" class="sf-input" required min="1" max="9999" placeholder="50">
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="event-location">活動地點</label>
+                  <input type="text" id="event-location" class="sf-input" placeholder="例如：台北市信義區展演館">
+                </div>
+              </div>
+
+              <button type="submit" class="btn-system-primary" style="margin-top:12px;">建立並發布活動</button>
             </div>
-
-            <button type="submit" class="btn-system-primary" style="margin-top:12px;">建立並發布活動</button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- VIEW: EVENT MANAGEMENT (ADMIN) -->
-    <section id="view-manage" class="hidden">
-      <div class="form-card">
-        <div class="section-header">
-          <h2 class="form-section-title">活動與報名資料管理</h2>
-          <button class="btn-system-secondary" onclick="switchView('list')">返回列表</button>
+          </form>
         </div>
-
-        <div id="manage-event-detail" style="margin-bottom:20px;"></div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h3 style="font-size:16px; font-weight:600;">已報名人員名單</h3>
-          <button class="btn-system-danger" onclick="deleteActiveEvent()">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-            刪除本活動
-          </button>
-        </div>
-
-        <div id="manage-registrations-list"></div>
       </div>
     </section>
 
   </div>
 
-  <!-- MODAL 1: EVENT DETAIL & REGISTER SHEET -->
+  <!-- MODAL: ADMIN AUTHENTICATION (PASSWORD PROMPT SHEET) -->
+  <div id="modal-admin-auth" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-admin-auth')">
+    <div class="sf-sheet" style="max-width:400px;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-body" style="padding:24px 20px;">
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="width:52px; height:52px; border-radius:50%; background:rgba(0, 122, 255, 0.12); display:inline-flex; align-items:center; justify-content:center; color:var(--accent-blue); margin-bottom:10px;">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <h3 class="sheet-title" style="font-size:18px;">管理員權限驗證</h3>
+          <p class="sheet-description" style="font-size:13px; margin-bottom:0;">請輸入管理金鑰通行碼解鎖後台個資</p>
+        </div>
+
+        <form onsubmit="verifyAdminPasscode(event)">
+          <div class="field-group" style="margin-bottom:16px;">
+            <label class="field-label" for="admin-passcode-input">管理員密碼</label>
+            <input type="password" id="admin-passcode-input" class="sf-input" placeholder="請輸入密碼 (預設: admin888)" required autocomplete="current-password">
+          </div>
+
+          <div class="sheet-actions">
+            <button type="button" class="btn-system-secondary" onclick="closeModal('modal-admin-auth')">取消</button>
+            <button type="submit" class="btn-system-primary">驗證並解鎖</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1: PUBLIC EVENT DETAIL & REGISTER SHEET -->
   <div id="modal-detail" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-detail')">
     <div class="sf-sheet">
       <div class="sheet-handle"></div>
@@ -289,7 +337,7 @@
           <ul style="padding-left: 20px;">
             <li><strong>利用期間：</strong>自您報名成功日起至活動結束後 30 日內（或依相關法令規定之保存期限）。</li>
             <li><strong>利用地區：</strong>中華民國境內及本平台伺服器/雲端託管服務所在地（Cloudflare 全球節點）。</li>
-            <li><strong>利用對象：</strong>僅限本活動主辦單位及系統維運必要人員。</li>
+            <li><strong>利用對象：</strong>僅限本活動主辦單位授權管理人員。</li>
             <li><strong>利用方式：</strong>以數位檔案或紙本方式進行活動通知、簡訊/Email確認與名單核對。</li>
           </ul>
 
@@ -297,7 +345,7 @@
           <p>您得隨時向主辦單位行使個資法第 3 條規定之權利：(1) 查詢或請求閱覽 (2) 請求製給複製本 (3) 請求補充或更正 (4) 請求停止蒐集、處理或利用 (5) 請求刪除。</p>
 
           <h4>四、資料安全與加密傳輸</h4>
-          <p>本系統全站採用 TLS 1.3/HTTPS 加密傳輸協定，並託管於 Cloudflare 安全架構之下。絕不會將您的個資出售、出租或提供給無關之第三方行銷機構。</p>
+          <p>本系統全站採用 TLS 1.3/HTTPS 加密傳輸協定，並託管於 Cloudflare 安全架構之下。未經授權驗證之公開使用者絕無法調閱任何參加者個人資料。</p>
 
           <h4>五、不提供個資對權益之影響</h4>
           <p>您得自由選擇是否提供個人資料，惟若拒絕提供必填資料，主辦單位將無法完成您的報名程序與後續服務。</p>

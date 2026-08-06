@@ -1,18 +1,24 @@
 /**
  * Apple Native (SwiftUI Style) Event Registration System Logic
  * Compliant with Apple HIG & Taiwan Personal Data Protection Act
+ * Featuring Admin Passcode RBAC Authorization
  */
 
 (function () {
   'use strict';
 
   const STORAGE_KEY = 'twwgapp_events_v3';
+  const ADMIN_SESSION_KEY = 'twwgapp_admin_token';
+  const DEFAULT_ADMIN_PASSCODE = 'admin888';
+
   let activeView = 'list';
+  let activeAdminSubView = 'manage';
   let selectedCategory = 'all';
   let searchQuery = '';
   let activeEventId = null;
   let uploadMethod = 'url';
   let filePreviewDataUrl = null;
+  let isAdminAuthenticated = false;
 
   // 8 High Quality Curated Monthly Events Demo Data
   const DEFAULT_IMAGES = [
@@ -157,6 +163,53 @@
     }
   ];
 
+  // Check Admin Authorization Session
+  function checkAdminSession() {
+    const token = sessionStorage.getItem(ADMIN_SESSION_KEY);
+    isAdminAuthenticated = (token === 'authenticated_admin');
+    updateAdminNavUI();
+  }
+
+  function updateAdminNavUI() {
+    const label = document.getElementById('admin-nav-label');
+    if (label) {
+      label.textContent = isAdminAuthenticated ? '🔓 管理員後台' : '🔑 管理員驗證';
+    }
+  }
+
+  window.handleAdminTabClick = function () {
+    if (isAdminAuthenticated) {
+      switchView('admin');
+    } else {
+      openModal('modal-admin-auth');
+    }
+  };
+
+  window.verifyAdminPasscode = function (e) {
+    e.preventDefault();
+    const passcode = document.getElementById('admin-passcode-input').value.trim();
+
+    if (passcode === DEFAULT_ADMIN_PASSCODE) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, 'authenticated_admin');
+      isAdminAuthenticated = true;
+      closeModal('modal-admin-auth');
+      document.getElementById('admin-passcode-input').value = '';
+      showToast('🔓 管理員身份驗證成功');
+      updateAdminNavUI();
+      switchView('admin');
+    } else {
+      showToast('❌ 管理密碼錯誤！請重新輸入', true);
+    }
+  };
+
+  window.lockAdminSession = function () {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    isAdminAuthenticated = false;
+    updateAdminNavUI();
+    showToast('🔒 管理員後台已鎖定登出');
+    switchView('list');
+  };
+
   // Helper Functions
   function loadEventsData() {
     try {
@@ -212,26 +265,40 @@
   window.switchView = function (viewName) {
     activeView = viewName;
     document.getElementById('view-list').classList.add('hidden');
-    document.getElementById('view-create').classList.add('hidden');
-    document.getElementById('view-manage').classList.add('hidden');
+    document.getElementById('view-admin').classList.add('hidden');
 
     document.getElementById('nav-list').classList.remove('active');
-    document.getElementById('nav-create').classList.remove('active');
+    document.getElementById('nav-admin').classList.remove('active');
     document.getElementById('nav-list').setAttribute('aria-selected', 'false');
-    document.getElementById('nav-create').setAttribute('aria-selected', 'false');
+    document.getElementById('nav-admin').setAttribute('aria-selected', 'false');
 
     if (viewName === 'list') {
       document.getElementById('view-list').classList.remove('hidden');
       document.getElementById('nav-list').classList.add('active');
       document.getElementById('nav-list').setAttribute('aria-selected', 'true');
       renderEventsGrid();
-    } else if (viewName === 'create') {
-      document.getElementById('view-create').classList.remove('hidden');
-      document.getElementById('nav-create').classList.add('active');
-      document.getElementById('nav-create').setAttribute('aria-selected', 'true');
-    } else if (viewName === 'manage') {
-      document.getElementById('view-manage').classList.remove('hidden');
-      renderManageView();
+    } else if (viewName === 'admin') {
+      if (!isAdminAuthenticated) {
+        openModal('modal-admin-auth');
+        return;
+      }
+      document.getElementById('view-admin').classList.remove('hidden');
+      document.getElementById('nav-admin').classList.add('active');
+      document.getElementById('nav-admin').setAttribute('aria-selected', 'true');
+      renderAdminDashboard();
+    }
+  };
+
+  window.switchAdminSubView = function (subView) {
+    activeAdminSubView = subView;
+    document.getElementById('admin-tab-manage').classList.toggle('active', subView === 'manage');
+    document.getElementById('admin-tab-create').classList.toggle('active', subView === 'create');
+
+    document.getElementById('admin-sub-manage').classList.toggle('hidden', subView !== 'manage');
+    document.getElementById('admin-sub-create').classList.toggle('hidden', subView !== 'create');
+
+    if (subView === 'manage') {
+      renderAdminRegistrations();
     }
   };
 
@@ -252,7 +319,7 @@
     renderEventsGrid();
   };
 
-  // Render 8 Events Grid Wall
+  // Render 8 Events Grid Wall (Public view sanitized)
   function renderEventsGrid() {
     const events = loadEventsData();
     const container = document.getElementById('events-grid');
@@ -503,9 +570,13 @@
     reader.readAsDataURL(file);
   };
 
-  // Create New Event
+  // Create New Event (Admin Only)
   window.submitCreateEvent = function (e) {
     e.preventDefault();
+    if (!isAdminAuthenticated) {
+      showToast('存取拒絕：需要管理員權限', true);
+      return;
+    }
 
     const name = document.getElementById('event-name').value.trim();
     const category = document.getElementById('event-category').value;
@@ -550,15 +621,40 @@
     filePreviewDataUrl = null;
 
     showToast('新活動成功發布！');
-    switchView('list');
+    switchAdminSubView('manage');
   };
 
-  // Management View
-  function renderManageView() {
-    if (!activeEventId) {
-      const events = loadEventsData();
-      if (events.length > 0) activeEventId = events[0].id;
+  // Admin Dashboard Render Logic
+  function renderAdminDashboard() {
+    const events = loadEventsData();
+    const selector = document.getElementById('admin-event-selector');
+
+    if (!events || events.length === 0) {
+      selector.innerHTML = '<option value="">尚無活動</option>';
+      renderAdminRegistrations();
+      return;
     }
+
+    selector.innerHTML = events.map(e => `
+      <option value="${e.id}" ${e.id === activeEventId ? 'selected' : ''}>
+        ${escapeHTML(e.name)} (${e.registrations.length}/${e.maxPeople}人)
+      </option>
+    `).join('');
+
+    if (!activeEventId || !events.some(e => e.id === activeEventId)) {
+      activeEventId = events[0].id;
+    }
+
+    renderAdminRegistrations();
+  }
+
+  window.handleAdminSelectEvent = function (e) {
+    activeEventId = e.target.value;
+    renderAdminRegistrations();
+  };
+
+  function renderAdminRegistrations() {
+    if (!isAdminAuthenticated) return;
 
     const events = loadEventsData();
     const ev = events.find(e => e.id === activeEventId);
@@ -609,6 +705,10 @@
   }
 
   window.deleteActiveEvent = function () {
+    if (!isAdminAuthenticated) {
+      showToast('權限不足', true);
+      return;
+    }
     if (!activeEventId) return;
     if (!confirm('確定要刪除此活動嗎？刪除後無法復原。')) return;
 
@@ -616,8 +716,10 @@
     events = events.filter(e => e.id !== activeEventId);
     saveEventsData(events);
 
-    showToast('活動已刪除');
-    switchView('list');
+    activeEventId = events.length > 0 ? events[0].id : null;
+    showToast('活動已成功刪除');
+    renderAdminDashboard();
+    renderEventsGrid();
   };
 
   function escapeHTML(str) {
@@ -635,6 +737,7 @@
 
   // Initialize
   document.addEventListener('DOMContentLoaded', () => {
+    checkAdminSession();
     loadEventsData();
     renderEventsGrid();
   });
