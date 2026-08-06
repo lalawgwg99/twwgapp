@@ -366,33 +366,132 @@ html, body {
 .hero-spotlight {
   position: relative;
   width: 100%;
-  height: 320px;
+  min-height: 320px;
   border-radius: var(--radius-l);
   overflow: hidden;
   margin-bottom: 24px;
   background-color: var(--surface-tertiary);
   display: flex;
   align-items: flex-end;
+  box-shadow: var(--shadow-card);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background-size: cover;
   background-position: center;
+  z-index: 1;
+  transition: transform 400ms var(--ease-spring);
+}
+
+.hero-spotlight:hover .hero-bg {
+  transform: scale(1.02);
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.8));
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.85) 100%);
 }
 
 .hero-content {
   position: relative;
   z-index: 10;
-  padding: 24px 32px;
-  color: #ffffff;
+  padding: 28px 32px;
+  color: #FFFFFF;
   width: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hero-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero-desc {
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  max-width: 750px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.hero-meta {
+  display: flex;
   gap: 16px;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.hero-countdown {
+  display: flex;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+.countdown-unit {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 6px 12px;
+  border-radius: var(--radius-s);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 54px;
+}
+
+.countdown-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-orange);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.countdown-label {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.btn-hero-cta {
+  align-self: flex-start;
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-orange);
+  color: #FFFFFF;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 149, 0, 0.4);
+  transition: all var(--t-fast) var(--ease-spring);
+  font-family: inherit;
+  margin-top: 4px;
+}
+
+.btn-hero-cta:hover {
+  transform: translateY(-2px);
+  background: #E68500;
+  box-shadow: 0 6px 18px rgba(255, 149, 0, 0.5);
 }
 
 .hero-text-block {
