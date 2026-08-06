@@ -1,12 +1,12 @@
 /**
  * Apple Native (SwiftUI Style) Event Registration & Management Platform
- * Senior-Friendly Edition - Phone First, Proxy Registration, Onsite Rapid Check-in & GAS Automated Emailing
+ * Automatic Registration Start & Cutoff Datetime Control Edition
  */
 
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'twwgapp_events_pro_v5';
+  const STORAGE_KEY = 'twwgapp_events_pro_v6';
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
   const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const DEFAULT_ADMIN_PASSCODE = 'admin888';
@@ -47,6 +47,8 @@
       description: '戶外草地音樂盛會，邀請 12 組國內獨立樂團與管弦樂團跨界演出，含現場手作市集與精釀啤酒攤位。',
       maxPeople: 200,
       date: '2026-08-22',
+      startDate: '2026-08-01T09:00',
+      endDate: '2026-08-21T23:59',
       location: '台北市大安森林公園戶外音樂台',
       image: DEFAULT_IMAGES[0],
       phoneRequired: true,
@@ -70,6 +72,8 @@
       description: '資深 Q Grader 咖啡品質鑑定師親自指導，現場沖煮並解析 4 款世界冠軍莊園產區微批次咖啡豆。',
       maxPeople: 16,
       date: '2026-08-25',
+      startDate: '2026-08-01T09:00',
+      endDate: '2026-08-24T18:00',
       location: '台北市大安區永康街咖啡實驗室',
       image: DEFAULT_IMAGES[1],
       phoneRequired: true,
@@ -86,115 +90,41 @@
       id: 'demo-3',
       name: '陽明山七星山主東峰連走健行團',
       category: '戶外',
-      customBadge: '含專屬接駁',
+      customBadge: '已截止範例',
       priceTier: '免費體驗',
       description: '由國家公園專業導覽員帶隊，觀賞地熱火山地形與季風矮林生態。全程提供專屬接駁車與意外保險。',
       maxPeople: 30,
-      date: '2026-08-29',
+      date: '2026-08-05',
+      startDate: '2026-07-01T09:00',
+      endDate: '2026-08-04T23:59', // Past deadline -> Automatic Cutoff Demo
       location: '陽明山小油坑遊客服務中心集合',
       image: DEFAULT_IMAGES[2],
       phoneRequired: true,
       customQuestions: [
-        { id: 'q1', title: '緊急聯絡人姓名與電話', type: 'text', required: true },
-        { id: 'q2', title: '是否需要台北車站接駁車', type: 'select', options: '需要接駁車, 自行前往集合地點', required: true }
+        { id: 'q1', title: '緊急聯絡人姓名與電話', type: 'text', required: true }
       ],
-      createdAt: Date.now() - 86400000 * 3,
+      createdAt: Date.now() - 86400000 * 10,
       registrations: [
-        { name: '吳大仁', email: 'wu@example.com', phone: '0922-888-999', answers: { q1: '吳媽媽 0911-000-000', q2: '需要接駁車' }, checkedIn: true, registeredAt: Date.now() - 5400000 }
+        { name: '吳大仁', email: 'wu@example.com', phone: '0922-888-999', answers: { q1: '吳媽媽 0911-000-000' }, checkedIn: true, registeredAt: Date.now() - 86400000 * 3 }
       ]
     },
     {
       id: 'demo-4',
       name: '療癒系法式植物水彩插畫課',
       category: '藝文',
-      customBadge: '材料包全含',
+      customBadge: '尚未開放範例',
       priceTier: '門票 NT$ 650',
       description: '零基礎也能輕鬆上手！學習水彩渲染與層次堆疊技巧，繪製專屬多肉植物與花卉，材料道具全數提供。',
       maxPeople: 12,
-      date: '2026-08-30',
+      date: '2026-09-30',
+      startDate: '2026-09-01T09:00', // Future start date -> Pending Demo
+      endDate: '2026-09-29T23:59',
       location: '新北市板橋區藝文創客空間',
       image: DEFAULT_IMAGES[3],
       phoneRequired: true,
       customQuestions: [],
       createdAt: Date.now() - 86400000 * 2,
-      registrations: [
-        { name: '許雅婷', email: 'hsu@example.com', phone: '0912-333-444', answers: {}, checkedIn: true, registeredAt: Date.now() - 86400000 },
-        { name: '鄭婷婷', email: 'cheng@example.com', phone: '0987-111-222', answers: {}, checkedIn: false, registeredAt: Date.now() - 7200000 }
-      ]
-    },
-    {
-      id: 'demo-5',
-      name: '新創商業模式與 Pitch 實戰演練講座',
-      category: '講座',
-      customBadge: '創投親臨現場',
-      priceTier: 'VIP 席 NT$ 1,200',
-      description: '邀請知名創投合夥人拆解 Business Model Canvas，指導簡報邏輯與募資技巧，提供精緻交流午餐。',
-      maxPeople: 50,
-      date: '2026-09-02',
-      location: '台北市信義區微風南山 3 樓會議廳',
-      image: DEFAULT_IMAGES[4],
-      phoneRequired: true,
-      customQuestions: [
-        { id: 'q1', title: '公司統編與發票抬頭 (開立發票用)', type: 'text', required: false }
-      ],
-      createdAt: Date.now() - 86400000,
-      registrations: [
-        { name: '韓大偉', email: 'han@example.com', phone: '0912-555-666', answers: { q1: '12345678 智慧科技股份有限公司' }, checkedIn: true, registeredAt: Date.now() - 3600000 }
-      ]
-    },
-    {
-      id: 'demo-6',
-      name: '週六早晨身心舒緩與呼吸法瑜伽',
-      category: '運動',
-      customBadge: '附健康早餐',
-      priceTier: '免費體驗',
-      description: '在沐浴晨光下進行 Hatha 瑜伽引導，釋放一整週的肩頸壓力。課後特別贈送優格早午餐餐盒。',
-      maxPeople: 25,
-      date: '2026-09-05',
-      location: '台北市中山區圓山花博公園大草皮',
-      image: DEFAULT_IMAGES[5],
-      phoneRequired: true,
-      customQuestions: [],
-      createdAt: Date.now() - 43200000,
-      registrations: [
-        { name: '曹小芳', email: 'tsao@example.com', phone: '0933-888-999', answers: {}, checkedIn: true, registeredAt: Date.now() - 7200000 }
-      ]
-    },
-    {
-      id: 'demo-7',
-      name: '合歡山英仙座流星雨夜間星空攝影',
-      category: '戶外',
-      customBadge: '赤道儀追星',
-      priceTier: '早鳥 NT$ 1,500',
-      description: '專業天文攝影導師隨團，提供長曝相機參數設定指導與赤道儀追星示範。適合具備基礎相機操作者。',
-      maxPeople: 15,
-      date: '2026-09-12',
-      location: '南投縣仁愛鄉合歡山昆陽停車場',
-      image: DEFAULT_IMAGES[6],
-      phoneRequired: true,
-      customQuestions: [],
-      createdAt: Date.now() - 21600000,
-      registrations: [
-        { name: '葉怡婷', email: 'yeh@example.com', phone: '0933-111-222', answers: {}, checkedIn: false, registeredAt: Date.now() - 1800000 }
-      ]
-    },
-    {
-      id: 'demo-8',
-      name: '日式陶藝手拉坯與素燒體驗課',
-      category: '藝文',
-      customBadge: '成品高溫柴燒',
-      priceTier: '單人票 NT$ 950',
-      description: '親手在陶藝轉盤上捏塑屬於自己的茶碗或馬克杯，經 1230 度高溫柴燒後寄送到府，留存獨一無二的手作溫暖。',
-      maxPeople: 10,
-      date: '2026-09-15',
-      location: '新北市鶯歌區陶藝老街工作坊',
-      image: DEFAULT_IMAGES[7],
-      phoneRequired: true,
-      customQuestions: [],
-      createdAt: Date.now() - 10800000,
-      registrations: [
-        { name: '白小君', email: 'pai@example.com', phone: '0922-444-555', answers: {}, checkedIn: true, registeredAt: Date.now() - 3600000 }
-      ]
+      registrations: []
     }
   ];
 
@@ -391,20 +321,47 @@
     }
   }
 
-  function getStatus(count, max) {
+  // AUTOMATIC DATETIME CUTOFF & STATUS CALCULATION
+  function getStatus(count, max, startDateStr, endDateStr) {
+    const now = Date.now();
+
+    // Check Start Date
+    if (startDateStr) {
+      const startTime = new Date(startDateStr).getTime();
+      if (!isNaN(startTime) && now < startTime) {
+        return { label: '尚未開放報名', type: 'pending', color: 'var(--accent-blue)', allowRegister: false };
+      }
+    }
+
+    // Check End Date Cutoff
+    if (endDateStr) {
+      const endTime = new Date(endDateStr).getTime();
+      if (!isNaN(endTime) && now > endTime) {
+        return { label: '已截止報名', type: 'closed', color: 'var(--accent-gray)', allowRegister: false };
+      }
+    }
+
+    // Check Capacity Limit
     if (count >= max) {
-      return { label: '已額滿', type: 'full', color: 'var(--accent-red)' };
+      return { label: '已額滿', type: 'full', color: 'var(--accent-red)', allowRegister: false };
     }
     if (count / max >= 0.8) {
-      return { label: '即將額滿', type: 'warning', color: 'var(--accent-orange)' };
+      return { label: '即將額滿', type: 'warning', color: 'var(--accent-orange)', allowRegister: true };
     }
-    return { label: '報名中', type: 'open', color: 'var(--accent-green)' };
+
+    return { label: '報名中', type: 'open', color: 'var(--accent-green)', allowRegister: true };
   }
 
   function formatDate(dateStr) {
     if (!dateStr) return '未定日期';
     const d = new Date(dateStr);
     return d.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+  }
+
+  function formatDateTime(dateTimeStr) {
+    if (!dateTimeStr) return '未設定';
+    const d = new Date(dateTimeStr);
+    return d.toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
   function showToast(message, isError = false) {
@@ -498,7 +455,7 @@
     renderEventsGrid();
   };
 
-  // Render 8 Events Grid Wall
+  // Render Events Grid Wall with Automatic Cutoff Check
   function renderEventsGrid() {
     const events = loadEventsData();
     const container = document.getElementById('events-grid');
@@ -507,7 +464,10 @@
     let filtered = events;
 
     if (selectedCategory === 'available') {
-      filtered = filtered.filter(ev => ev.registrations.length < ev.maxPeople);
+      filtered = filtered.filter(ev => {
+        const st = getStatus(ev.registrations ? ev.registrations.length : 0, ev.maxPeople, ev.startDate, ev.endDate);
+        return st.allowRegister;
+      });
     } else if (selectedCategory !== 'all') {
       filtered = filtered.filter(ev => ev.category === selectedCategory);
     }
@@ -538,7 +498,7 @@
 
     container.innerHTML = filtered.map(ev => {
       const regCount = ev.registrations ? ev.registrations.length : 0;
-      const status = getStatus(regCount, ev.maxPeople);
+      const status = getStatus(regCount, ev.maxPeople, ev.startDate, ev.endDate);
       const pct = Math.min((regCount / ev.maxPeople) * 100, 100).toFixed(0);
       const categoryTag = ev.category || '活動';
       const customTag = ev.customBadge ? `<span class="sf-badge badge-custom">${escapeHTML(ev.customBadge)}</span>` : '';
@@ -599,13 +559,14 @@
 
     activeEventId = eventId;
     const regCount = ev.registrations ? ev.registrations.length : 0;
-    const status = getStatus(regCount, ev.maxPeople);
+    const status = getStatus(regCount, ev.maxPeople, ev.startDate, ev.endDate);
     const pct = Math.min((regCount / ev.maxPeople) * 100, 100).toFixed(0);
 
     document.getElementById('sheet-image-bg').style.backgroundImage = `url('${ev.image}')`;
     document.getElementById('sheet-title').textContent = ev.name;
     document.getElementById('sheet-desc').textContent = ev.description || '暫無詳細說明';
     document.getElementById('sheet-date').textContent = formatDate(ev.date);
+    document.getElementById('sheet-deadline-text').textContent = ev.endDate ? `報名截止時間：${formatDateTime(ev.endDate)}` : '報名截止時間：不限';
     document.getElementById('sheet-location').textContent = ev.location || '線上活動 / 待公布地點';
     document.getElementById('sheet-price').textContent = ev.priceTier || '免費活動';
     document.getElementById('sheet-progress-text').textContent = `名額進度：${regCount} / ${ev.maxPeople} 人 (${pct}%)`;
@@ -619,9 +580,9 @@
     progressBar.style.background = status.color;
 
     const regBtn = document.getElementById('sheet-reg-btn');
-    if (regCount >= ev.maxPeople) {
+    if (!status.allowRegister) {
       regBtn.disabled = true;
-      regBtn.textContent = '已額滿';
+      regBtn.textContent = status.label;
     } else {
       regBtn.disabled = false;
       regBtn.textContent = '立即報名';
@@ -632,19 +593,25 @@
 
   // Dynamic Questionnaire Form Rendering for Public User
   window.proceedToRegisterForm = function () {
-    closeModal('modal-detail');
     const events = loadEventsData();
     const ev = events.find(e => e.id === activeEventId);
     if (!ev) return;
 
+    const regCount = ev.registrations ? ev.registrations.length : 0;
+    const status = getStatus(regCount, ev.maxPeople, ev.startDate, ev.endDate);
+
+    if (!status.allowRegister) {
+      showToast(`無法報名：${status.label}`, true);
+      return;
+    }
+
+    closeModal('modal-detail');
     document.getElementById('reg-form-event-name').textContent = ev.name;
     document.getElementById('active-registration-form').reset();
 
-    // Reset proxy fields
     document.getElementById('reg-is-proxy').checked = false;
     toggleProxyFieldsUI();
 
-    // Render Dynamic Questionnaire Questions
     const container = document.getElementById('dynamic-questions-form-container');
     if (ev.customQuestions && ev.customQuestions.length > 0) {
       container.innerHTML = ev.customQuestions.map(q => {
@@ -705,10 +672,21 @@
     openModal('modal-privacy');
   };
 
-  // Submit Public Registration (Elder-Friendly: Phone Required, Email Optional, Deduplication check by Phone)
+  // Submit Public Registration with Cutoff Validation
   window.submitRegistration = function (e) {
     e.preventDefault();
     if (!activeEventId) return;
+
+    const events = loadEventsData();
+    const ev = events.find(e => e.id === activeEventId);
+    if (!ev) return;
+
+    const status = getStatus(ev.registrations.length, ev.maxPeople, ev.startDate, ev.endDate);
+    if (!status.allowRegister) {
+      showToast(`報名已關閉：${status.label}`, true);
+      closeModal('modal-register-form');
+      return;
+    }
 
     const privacyCheck = document.getElementById('reg-privacy-check');
     if (!privacyCheck.checked) {
@@ -734,18 +712,12 @@
       return;
     }
 
-    const events = loadEventsData();
-    const ev = events.find(e => e.id === activeEventId);
-    if (!ev) return;
-
-    // Deduplication check by Phone Number for Senior-Friendliness
     const existingIndex = ev.registrations.findIndex(r => r.phone === attendeePhone);
     if (existingIndex !== -1) {
       showToast(`提示：此電話號碼 (${attendeePhone}) 已報名過本活動`, true);
       return;
     }
 
-    // Collect custom question answers
     const answers = {};
     if (ev.customQuestions && ev.customQuestions.length > 0) {
       for (const q of ev.customQuestions) {
@@ -769,12 +741,6 @@
       }
     }
 
-    if (ev.registrations.length >= ev.maxPeople) {
-      showToast('抱歉，此活動剛好額滿！', true);
-      closeModal('modal-register-form');
-      return;
-    }
-
     ev.registrations.push({
       name: attendeeName,
       email: attendeeEmail,
@@ -789,12 +755,10 @@
 
     saveEventsData(events);
 
-    // Render Senior Voucher Card for Screenshot saving
     document.getElementById('voucher-event-name').textContent = ev.name;
     document.getElementById('voucher-attendee-info').textContent = `參加者：${attendeeName} ｜ 電話：${attendeePhone}`;
     document.getElementById('voucher-date-location').textContent = `日期：${formatDate(ev.date)} ｜ 地點：${ev.location || '現場活動'}`;
 
-    // Sync to GAS if GAS URL exists (Sends Email via MailApp + Rate Limiting)
     const gasUrl = getGASUrl();
     if (gasUrl) {
       fetch(gasUrl, {
@@ -1015,7 +979,7 @@
     reader.readAsDataURL(file);
   };
 
-  // Create New Event
+  // Create New Event with Datetime Cutoff
   window.submitCreateEvent = function (e) {
     e.preventDefault();
     if (!isAdminAuthenticated) {
@@ -1026,6 +990,8 @@
     const name = document.getElementById('event-name').value.trim();
     const category = document.getElementById('event-category').value;
     const date = document.getElementById('event-date').value;
+    const startDate = document.getElementById('event-start-time').value;
+    const endDate = document.getElementById('event-end-time').value;
     const desc = document.getElementById('event-desc').value.trim();
     const location = document.getElementById('event-location').value.trim();
     const priceTier = document.getElementById('event-price-tier').value.trim();
@@ -1041,8 +1007,8 @@
       image = filePreviewDataUrl;
     }
 
-    if (!name || !date || !maxPeople || maxPeople < 1) {
-      showToast('請填寫完整必填欄位', true);
+    if (!name || !date || !endDate || !maxPeople || maxPeople < 1) {
+      showToast('請填寫完整必填欄位與報名截止時間', true);
       return;
     }
 
@@ -1054,6 +1020,8 @@
       customBadge,
       priceTier,
       date,
+      startDate,
+      endDate,
       description: desc,
       maxPeople,
       location: location || '現場活動',
@@ -1073,7 +1041,7 @@
     builderQuestions = [];
     renderQuestionnaireBuilder();
 
-    showToast('🎉 新活動與自訂問卷成功發布！');
+    showToast('🎉 新活動（包含自動截止時間）成功發布！');
     switchAdminSubView('manage');
     renderEventsGrid();
   };
@@ -1128,12 +1096,14 @@
       statBadge.textContent = `已報到 ${checkedInCount} / ${ev.registrations.length} 人`;
     }
 
+    const deadlineDisplay = ev.endDate ? formatDateTime(ev.endDate) : '不限制';
+
     detailContainer.innerHTML = `
       <div style="background:var(--surface-secondary); padding:14px; border-radius:var(--radius-s); margin-bottom:14px; border:1px solid var(--separator);">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
             <h3 style="font-size:16px; font-weight:600; margin-bottom:4px;">${escapeHTML(ev.name)}</h3>
-            <p style="font-size:13px; color:var(--label-secondary);">日期：${formatDate(ev.date)} ｜ 地點：${escapeHTML(ev.location || '未定')} ｜ 票價：${escapeHTML(ev.priceTier || '免費')}</p>
+            <p style="font-size:13px; color:var(--label-secondary);">活動日期：${formatDate(ev.date)} ｜ 截止報名：<span style="color:var(--accent-orange); font-weight:600;">${deadlineDisplay}</span> ｜ 票價：${escapeHTML(ev.priceTier || '免費')}</p>
           </div>
           <span class="sf-badge badge-category">${escapeHTML(ev.category || '活動')}</span>
         </div>

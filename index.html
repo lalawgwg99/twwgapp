@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>活動報名與問卷系統 - 老人友善與商業專業版</title>
-  <meta name="description" content="長輩友善與專業級活動問卷報名平台，支援電話報名、代報名、現場快速報到與 GAS 試算表自動化。">
+  <title>活動報名與問卷系統 - 支援自動截止與長輩友善版</title>
+  <meta name="description" content="專業級活動問卷報名平台，支援活動開始與截止時間自動防護、長輩電話報名、代報名與現場快速報到。">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
           </div>
           <div>
             <h1 class="large-title">本月活動一覽</h1>
-            <p class="subtitle">長輩友善 ‧ 支援代報名 ‧ 現場快速報到</p>
+            <p class="subtitle">長輩友善 ‧ 時間自動截止 ‧ 現場快速報到</p>
           </div>
         </div>
 
@@ -103,8 +103,8 @@
       <!-- Admin Sub Navigation Tabs -->
       <div class="admin-sub-nav">
         <button id="admin-tab-manage" class="admin-tab-btn active" onclick="switchAdminSubView('manage')">名單與簽到</button>
-        <button id="admin-tab-onsite" class="admin-tab-btn" onclick="switchAdminSubView('onsite')">⚡️ 現場快速報名 (老人專用)</button>
-        <button id="admin-tab-create" class="admin-tab-btn" onclick="switchAdminSubView('create')">發布新活動</button>
+        <button id="admin-tab-onsite" class="admin-tab-btn" onclick="switchAdminSubView('onsite')">⚡️ 現場快速報名</button>
+        <button id="admin-tab-create" class="admin-tab-btn" onclick="switchAdminSubView('create')">發布新活動（自動截止）</button>
       </div>
 
       <!-- SUB-VIEW A: REGISTRANTS & ATTENDANCE MANAGEMENT -->
@@ -141,7 +141,7 @@
         </div>
       </div>
 
-      <!-- SUB-VIEW B: ONSITE RAPID REGISTRATION (SENIOR FRIENDLY ADMIN MODE) -->
+      <!-- SUB-VIEW B: ONSITE RAPID REGISTRATION -->
       <div id="admin-sub-onsite" class="hidden">
         <div class="form-card">
           <div class="section-header">
@@ -180,11 +180,11 @@
         </div>
       </div>
 
-      <!-- SUB-VIEW C: CREATE NEW EVENT -->
+      <!-- SUB-VIEW C: CREATE NEW EVENT WITH AUTOMATIC START & CUTOFF DATE-TIME -->
       <div id="admin-sub-create" class="hidden">
         <div class="form-card">
           <div class="section-header">
-            <h2 class="form-section-title">建立與發布新活動</h2>
+            <h2 class="form-section-title">發布新活動 (支援開始與截止時間自動關閉)</h2>
           </div>
 
           <form id="create-event-form" onsubmit="submitCreateEvent(event)">
@@ -192,7 +192,7 @@
 
               <!-- SECTION 1: BASIC EVENT DETAILS -->
               <div class="inset-grouped-box">
-                <div class="inset-grouped-header">1. 活動基本資訊</div>
+                <div class="inset-grouped-header">1. 活動基本資訊與時間區間</div>
                 <div class="form-grid">
                   <div class="field-group">
                     <label class="field-label" for="event-name">活動名稱 <span class="req">*</span></label>
@@ -212,8 +212,22 @@
                       </select>
                     </div>
                     <div class="field-group">
-                      <label class="field-label" for="event-date">活動日期 <span class="req">*</span></label>
+                      <label class="field-label" for="event-date">活動舉辦日期 <span class="req">*</span></label>
                       <input type="date" id="event-date" class="sf-input" required>
+                    </div>
+                  </div>
+
+                  <!-- AUTOMATIC TIME CUTOFF INPUTS -->
+                  <div class="form-row-2" style="background:var(--surface-primary); padding:12px; border-radius:var(--radius-s); border:1px solid var(--separator);">
+                    <div class="field-group">
+                      <label class="field-label" for="event-start-time">開放報名時間 (選填)</label>
+                      <input type="datetime-local" id="event-start-time" class="sf-input">
+                      <p class="field-help">到達此時間前，按鈕顯示「尚未開放」</p>
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label" for="event-end-time">報名截止時間 <span class="req">* (自動截止)</span></label>
+                      <input type="datetime-local" id="event-end-time" class="sf-input" required>
+                      <p class="field-help">到達此時間後，系統自動關閉顯示「已截止」</p>
                     </div>
                   </div>
 
@@ -271,12 +285,12 @@
 
               <!-- SECTION 3: FIELD REQUIREMENTS & QUESTIONNAIRE BUILDER -->
               <div class="inset-grouped-box">
-                <div class="inset-grouped-header">3. 報名表單欄位與強大自訂問卷 (老人友善電話優先)</div>
+                <div class="inset-grouped-header">3. 報名表單欄位與強大自訂問卷</div>
                 <div class="form-grid">
                   <div class="field-group">
                     <label class="checkbox-row">
                       <input type="checkbox" id="field-phone-required" checked disabled>
-                      <span>「聯絡電話」預設為必填 (老人報名與簡訊通知優先)</span>
+                      <span>「聯絡電話」預設為必填 (長輩報名與簡訊通知優先)</span>
                     </label>
                   </div>
 
@@ -395,6 +409,10 @@
             <span id="sheet-date"></span>
           </div>
           <div class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="sheet-deadline-text" style="color:var(--accent-orange); font-weight:600;"></span>
+          </div>
+          <div class="meta-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span id="sheet-location"></span>
           </div>
@@ -421,7 +439,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: SENIOR FRIENDLY PUBLIC REGISTRATION FORM (PROXY & PHONE FIRST) -->
+  <!-- MODAL 2: SENIOR FRIENDLY PUBLIC REGISTRATION FORM -->
   <div id="modal-register-form" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-register-form')">
     <div class="sf-sheet">
       <div class="sheet-handle"></div>
@@ -443,7 +461,7 @@
               </label>
             </div>
 
-            <!-- Proxy Fields (Visible only when Proxy checked) -->
+            <!-- Proxy Fields -->
             <div id="proxy-fields-box" class="form-grid hidden" style="background:rgba(175, 82, 222, 0.08); padding:12px; border-radius:var(--radius-s); border:1px solid rgba(175, 82, 222, 0.25);">
               <div class="field-group">
                 <label class="field-label" for="proxy-name">代報人姓名 (您的姓名) <span class="req">*</span></label>
@@ -455,7 +473,7 @@
               </div>
             </div>
 
-            <!-- Attendee Fields (Phone is Required, Email is Optional) -->
+            <!-- Attendee Fields -->
             <div class="field-group">
               <label class="field-label" id="attendee-name-label" for="reg-name">實際參加者姓名 <span class="req">*</span></label>
               <input type="text" id="reg-name" class="sf-input" required placeholder="請填寫參加者真實姓名">
@@ -475,7 +493,7 @@
             <!-- Dynamic Custom Questionnaire Fields Container -->
             <div id="dynamic-questions-form-container"></div>
 
-            <!-- Taiwan Personal Data Protection Act Mandatory Agreement -->
+            <!-- Mandatory Privacy Agreement -->
             <div class="field-group" style="margin-top:6px;">
               <label class="checkbox-row">
                 <input type="checkbox" id="reg-privacy-check" required>
