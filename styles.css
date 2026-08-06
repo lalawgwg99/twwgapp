@@ -264,6 +264,12 @@ html, body {
   border: 1px solid rgba(228, 64, 95, 0.3);
 }
 
+.pill-yt {
+  background: rgba(255, 0, 0, 0.12);
+  color: #DC2626;
+  border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
 .pill-site {
   background: rgba(0, 122, 255, 0.14);
   color: var(--accent-blue);

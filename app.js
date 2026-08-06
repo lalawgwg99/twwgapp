@@ -1,12 +1,12 @@
 /**
  * Apple Native (SwiftUI Style) Event Registration & Management Platform
- * Edit Published Events, Automatic Cutoff & Senior Friendly Edition
+ * 萬家福五甲店 (Prosperity Plaza Wujia Branch) Official Store Portal & Event System
  */
 
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'twwgapp_events_pro_v7';
+  const STORAGE_KEY = 'twwgapp_wujia_store_events_v8';
   const ADMIN_TOKEN_KEY = 'twwgapp_server_signed_token';
   const GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const DEFAULT_ADMIN_PASSCODE = 'admin888';
@@ -26,104 +26,180 @@
   // Custom Questionnaire State in Builder
   let builderQuestions = [];
 
-  const DEFAULT_IMAGES = [
-    'https://images.unsplash.com/photo-1459749411177-0473ef716175?w=800&h=450&fit=crop', // 🎵 夏季音樂祭
-    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=450&fit=crop', // ☕️ 手沖咖啡
-    'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&h=450&fit=crop', // ⛰️ 週末登山
-    'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&h=450&fit=crop', // 🎨 水彩插畫
-    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=450&fit=crop', // 💡 創業工作坊
-    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=450&fit=crop', // 🧘 晨間瑜伽
-    'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=800&h=450&fit=crop', // 🌌 星空攝影
-    'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&h=450&fit=crop'  // 🏺 陶藝拉坯
+  const STORE_IMAGES = [
+    'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&h=450&fit=crop', // 🛒 會員週年慶
+    'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&h=450&fit=crop', // 🍷 名酒品鑑
+    'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&h=450&fit=crop', // 🥦 有機料理教室
+    'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?w=800&h=450&fit=crop', // 🧸 親子手作黏土
+    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=450&fit=crop', // 🧘 晨間頂樓瑜伽
+    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=450&fit=crop', // ☕️ 精品咖啡講座
+    'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&h=450&fit=crop', // ⛺️ 露營裝備體驗
+    'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800&h=450&fit=crop'  // 🍰 法式甜點體驗
   ];
 
   const DEMO_EVENTS = [
     {
-      id: 'demo-1',
-      name: '2026 夏季草地音樂祭：搖滾與管弦交響',
-      category: '音樂',
-      customBadge: '長輩友善 7折',
-      priceTier: '早鳥優惠 NT$ 500',
-      description: '戶外草地音樂盛會，邀請 12 組國內獨立樂團與管弦樂團跨界演出，含現場手作市集與精釀啤酒攤位。',
-      maxPeople: 200,
+      id: 'wujia-1',
+      name: '萬家福五甲店 2026 會員週年慶尊榮驚喜抽獎會',
+      category: '體驗',
+      customBadge: '五甲店獨家 7折',
+      priceTier: '憑會員卡免費參加',
+      description: '萬家福五甲店深耕在地 20 週年！現場舉辦頂級食材試吃、好禮抽獎與五甲店限定滿額折扣送，邀請全家大小一同共襄盛舉。',
+      maxPeople: 300,
       date: '2026-08-22',
       startDate: '2026-08-01T09:00',
       endDate: '2026-08-21T23:59',
-      location: '台北市大安森林公園戶外音樂台',
-      image: DEFAULT_IMAGES[0],
+      location: '萬家福五甲店 1樓中央品牌廣場',
+      image: STORE_IMAGES[0],
       phoneRequired: true,
       customQuestions: [
-        { id: 'q1', title: '飲食習慣需求', type: 'select', options: '葷食, 素食(蛋奶素), 全素, 方便素', required: true },
-        { id: 'q2', title: '紀念 T-Shirt 尺寸', type: 'select', options: 'S, M, L, XL, 2XL', required: false }
+        { id: 'q1', title: '萬家福會員卡號 (可填寫或現場核對)', type: 'text', required: false },
+        { id: 'q2', title: '預計到場人數', type: 'select', options: '1人, 2人, 3人, 4人以上家庭', required: true }
       ],
       createdAt: Date.now() - 86400000 * 5,
       registrations: [
-        { name: '陳小明', email: 'chen@example.com', phone: '0912-345-678', answers: { q1: '葷食', q2: 'L' }, checkedIn: true, registeredAt: Date.now() - 86400000 * 2 },
-        { name: '林美玲', email: 'lin@example.com', phone: '0987-654-321', answers: { q1: '素食(蛋奶素)', q2: 'M' }, checkedIn: false, registeredAt: Date.now() - 86400000 },
-        { name: '黃建志', email: 'huang@example.com', phone: '0933-111-222', answers: { q1: '葷食', q2: 'XL' }, checkedIn: true, registeredAt: Date.now() - 3600000 * 4 }
+        { name: '陳小明', email: 'chen@example.com', phone: '0912-345-678', answers: { q1: 'WJ-88991', q2: '2人' }, checkedIn: true, registeredAt: Date.now() - 86400000 * 2 },
+        { name: '林美玲', email: 'lin@example.com', phone: '0987-654-321', answers: { q1: 'WJ-11223', q2: '4人以上家庭' }, checkedIn: false, registeredAt: Date.now() - 86400000 }
       ]
     },
     {
-      id: 'demo-2',
-      name: '精品手沖咖啡與風味品評工作坊',
+      id: 'wujia-2',
+      name: '萬家福五甲店 全球特選名酒與起司品鑑試飲會',
       category: '體驗',
-      customBadge: '大安旗艦店',
-      priceTier: '單人票 NT$ 800',
-      description: '資深 Q Grader 咖啡品質鑑定師親自指導，現場沖煮並解析 4 款世界冠軍莊園產區微批次咖啡豆。',
-      maxPeople: 16,
+      customBadge: '限時尊榮 VIP',
+      priceTier: '會員價 NT$ 399',
+      description: '由萬家福侍酒師帶領品鑑智利、法國頂級莊園紅酒與嚴選熟成起司，現場購買享五甲店獨家 85 折優惠。',
+      maxPeople: 25,
       date: '2026-08-25',
       startDate: '2026-08-01T09:00',
       endDate: '2026-08-24T18:00',
-      location: '台北市大安區永康街咖啡實驗室',
-      image: DEFAULT_IMAGES[1],
+      location: '萬家福五甲店 B1 典藏酒窖區',
+      image: STORE_IMAGES[1],
       phoneRequired: true,
       customQuestions: [
-        { id: 'q1', title: '是否有手沖咖啡經驗', type: 'select', options: '完全零基礎, 居家自沖玩家, 咖啡從業人員', required: false }
+        { id: 'q1', title: '是否已滿 18 歲 (禁止酒駕)', type: 'select', options: '是 (已滿 18 歲)', required: true }
       ],
       createdAt: Date.now() - 86400000 * 4,
       registrations: [
-        { name: '周宗翰', email: 'chou@example.com', phone: '0911-222-333', answers: { q1: '居家自沖玩家' }, checkedIn: true, registeredAt: Date.now() - 7200000 },
-        { name: '張家豪', email: 'chang@example.com', phone: '0955-666-777', answers: { q1: '完全零基礎' }, checkedIn: false, registeredAt: Date.now() - 3600000 }
+        { name: '周宗翰', email: 'chou@example.com', phone: '0911-222-333', answers: { q1: '是 (已滿 18 歲)' }, checkedIn: true, registeredAt: Date.now() - 7200000 }
       ]
     },
     {
-      id: 'demo-3',
-      name: '陽明山七星山主東峰連走健行團',
-      category: '戶外',
-      customBadge: '已截止範例',
+      id: 'wujia-3',
+      name: '有機小農產地直送試吃與夏日輕食料理教室',
+      category: '講座',
+      customBadge: '食材包全送',
       priceTier: '免費體驗',
-      description: '由國家公園專業導覽員帶隊，觀賞地熱火山地形與季風矮林生態。全程提供專屬接駁車與意外保險。',
+      description: '邀請高雄在地有機農夫與知名廚師，指導如何挑選當季安心蔬菜，並現場實作低卡夏日沙拉與主廚特調醬汁。',
       maxPeople: 30,
-      date: '2026-08-05',
-      startDate: '2026-07-01T09:00',
-      endDate: '2026-08-04T23:59',
-      location: '陽明山小油坑遊客服務中心集合',
-      image: DEFAULT_IMAGES[2],
+      date: '2026-08-28',
+      startDate: '2026-08-01T09:00',
+      endDate: '2026-08-27T22:00',
+      location: '萬家福五甲店 2樓料理實驗室',
+      image: STORE_IMAGES[2],
       phoneRequired: true,
       customQuestions: [
-        { id: 'q1', title: '緊急聯絡人姓名與電話', type: 'text', required: true }
+        { id: 'q1', title: '特殊飲食需求', type: 'select', options: '葷食, 全素/蛋奶素, 海鮮過敏', required: true }
       ],
-      createdAt: Date.now() - 86400000 * 10,
+      createdAt: Date.now() - 86400000 * 3,
       registrations: [
-        { name: '吳大仁', email: 'wu@example.com', phone: '0922-888-999', answers: { q1: '吳媽媽 0911-000-000' }, checkedIn: true, registeredAt: Date.now() - 86400000 * 3 }
+        { name: '吳大仁', email: 'wu@example.com', phone: '0922-888-999', answers: { q1: '全素/蛋奶素' }, checkedIn: true, registeredAt: Date.now() - 5400000 }
       ]
     },
     {
-      id: 'demo-4',
-      name: '療癒系法式植物水彩插畫課',
+      id: 'wujia-4',
+      name: '五甲店 暑期親子彩繪與超輕黏土創意樂園',
       category: '藝文',
-      customBadge: '尚未開放範例',
-      priceTier: '門票 NT$ 650',
-      description: '零基礎也能輕鬆上手！學習水彩渲染與層次堆疊技巧，繪製專屬多肉植物與花卉，材料道具全數提供。',
-      maxPeople: 12,
-      date: '2026-09-30',
-      startDate: '2026-09-01T09:00',
-      endDate: '2026-09-29T23:59',
-      location: '新北市板橋區藝文創客空間',
-      image: DEFAULT_IMAGES[3],
+      customBadge: '親子好玩',
+      priceTier: '材料費 NT$ 150',
+      description: '專為爸爸媽媽與小朋友設計的夏日手作課程！老師現場教學捏塑水果公仔與海洋世界，成品可直接帶回家。',
+      maxPeople: 20,
+      date: '2026-08-30',
+      startDate: '2026-08-01T09:00',
+      endDate: '2026-08-29T18:00',
+      location: '萬家福五甲店 3樓親子互動區',
+      image: STORE_IMAGES[3],
+      phoneRequired: true,
+      customQuestions: [
+        { id: 'q1', title: '小朋友年齡與人數', type: 'text', required: true }
+      ],
+      createdAt: Date.now() - 86400000 * 2,
+      registrations: [
+        { name: '許雅婷', email: 'hsu@example.com', phone: '0912-333-444', answers: { q1: '5歲小孩1位' }, checkedIn: true, registeredAt: Date.now() - 86400000 }
+      ]
+    },
+    {
+      id: 'wujia-5',
+      name: '萬家福頂樓空中花園 晨間舒活瑜伽與元氣早餐會',
+      category: '運動',
+      customBadge: '附萬家福鮮採早餐',
+      priceTier: '會員特惠 NT$ 200',
+      description: '在萬家福五甲店空中花園享受清晨陽光，由專業瑜伽導師引導舒展肩頸，課後享用萬家福現烤麵包與有機鮮果汁。',
+      maxPeople: 25,
+      date: '2026-09-05',
+      startDate: '2026-08-10T09:00',
+      endDate: '2026-09-04T18:00',
+      location: '萬家福五甲店 R樓空中花園',
+      image: STORE_IMAGES[4],
       phoneRequired: true,
       customQuestions: [],
-      createdAt: Date.now() - 86400000 * 2,
+      createdAt: Date.now() - 43200000,
+      registrations: [
+        { name: '曹小芳', email: 'tsao@example.com', phone: '0933-888-999', answers: {}, checkedIn: true, registeredAt: Date.now() - 7200000 }
+      ]
+    },
+    {
+      id: 'wujia-6',
+      name: '萬家福精品咖啡豆 手沖風味與居家烘焙巡迴講座',
+      category: '講座',
+      customBadge: '送莊園咖啡豆小樣',
+      priceTier: '免費入場',
+      description: '國際 Q Grader 咖啡品評師現場講解 5 款產區莊園豆風味，學習沖煮金盃法則，參加者每位免費贈送 50g 嚴選豆。',
+      maxPeople: 40,
+      date: '2026-09-12',
+      startDate: '2026-08-15T09:00',
+      endDate: '2026-09-11T22:00',
+      location: '萬家福五甲店 1樓美食咖啡館',
+      image: STORE_IMAGES[5],
+      phoneRequired: true,
+      customQuestions: [],
+      createdAt: Date.now() - 21600000,
+      registrations: []
+    },
+    {
+      id: 'wujia-7',
+      name: '五甲店 戶外露營裝備展示與快速搭帳實作體驗',
+      category: '戶外',
+      customBadge: '露營迷必參加',
+      priceTier: '免費參加',
+      description: '萬家福五甲店戶外運動專區特展！現場展出 2026 最新款一秒速開帳篷、露營焚火台與行動廚房，專人實機教學。',
+      maxPeople: 50,
+      date: '2026-09-19',
+      startDate: '2026-08-15T09:00',
+      endDate: '2026-09-18T20:00',
+      location: '萬家福五甲店 1樓戶外展演廣場',
+      image: STORE_IMAGES[6],
+      phoneRequired: true,
+      customQuestions: [],
+      createdAt: Date.now() - 10800000,
+      registrations: []
+    },
+    {
+      id: 'wujia-8',
+      name: '萬家福五甲店 烘焙坊 法式水果塔與泡芙手作課',
+      category: '藝文',
+      customBadge: '烘焙師親授',
+      priceTier: '材料費 NT$ 350',
+      description: '萬家福金牌烘焙師手把手指導捏塔皮、煮卡士達醬與新鮮水果擺盤，打造屬於您獨一無二的五甲店法式精緻甜點。',
+      maxPeople: 15,
+      date: '2026-09-26',
+      startDate: '2026-08-20T09:00',
+      endDate: '2026-09-25T18:00',
+      location: '萬家福五甲店 2樓手作廚房',
+      image: STORE_IMAGES[7],
+      phoneRequired: true,
+      customQuestions: [],
+      createdAt: Date.now() - 3600000,
       registrations: []
     }
   ];
@@ -183,7 +259,7 @@
   function updateAdminNavUI() {
     const label = document.getElementById('admin-nav-label');
     if (label) {
-      label.textContent = isAdminAuthenticated ? '🔓 管理員後台' : '🔑 管理員驗證';
+      label.textContent = isAdminAuthenticated ? '🔓 五甲店後台' : '🔑 管理員驗證';
     }
   }
 
@@ -223,7 +299,7 @@
 
         closeModal('modal-admin-auth');
         document.getElementById('admin-passcode-input').value = '';
-        showToast('🔓 後端驗證成功！管理員已解鎖');
+        showToast('🔓 萬家福五甲店 後端驗證成功！');
         updateAdminNavUI();
         switchView('admin');
         return;
@@ -240,7 +316,7 @@
 
       closeModal('modal-admin-auth');
       document.getElementById('admin-passcode-input').value = '';
-      showToast('🔓 後端驗證成功！管理員已解鎖');
+      showToast('🔓 萬家福五甲店 後端驗證成功！');
       updateAdminNavUI();
       switchView('admin');
     } else {
@@ -292,7 +368,7 @@
     isAdminAuthenticated = false;
     adminSessionToken = null;
     updateAdminNavUI();
-    showToast('🔒 管理員後台已鎖定登出');
+    showToast('🔒 五甲店管理員後台已鎖定登出');
     switchView('list');
   };
 
@@ -486,7 +562,7 @@
           <div class="empty-state-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           </div>
-          <h3 class="empty-state-title">找不到符合條件的活動</h3>
+          <h3 class="empty-state-title">找不到符合條件的五甲店活動</h3>
           <p class="empty-state-subtitle">請嘗試搜尋其他關鍵字或變更分類標籤</p>
         </div>
       `;
@@ -620,7 +696,6 @@
 
     saveEventsData(events);
 
-    // Sync to GAS if URL configured
     const gasUrl = getGASUrl();
     if (gasUrl) {
       fetch(gasUrl, {
@@ -655,7 +730,7 @@
     document.getElementById('sheet-desc').textContent = ev.description || '暫無詳細說明';
     document.getElementById('sheet-date').textContent = formatDate(ev.date);
     document.getElementById('sheet-deadline-text').textContent = ev.endDate ? `報名截止時間：${formatDateTime(ev.endDate)}` : '報名截止時間：不限';
-    document.getElementById('sheet-location').textContent = ev.location || '線上活動 / 待公布地點';
+    document.getElementById('sheet-location').textContent = ev.location || '萬家福五甲店 現場';
     document.getElementById('sheet-price').textContent = ev.priceTier || '免費活動';
     document.getElementById('sheet-progress-text').textContent = `名額進度：${regCount} / ${ev.maxPeople} 人 (${pct}%)`;
 
@@ -760,7 +835,7 @@
     openModal('modal-privacy');
   };
 
-  // Submit Public Registration with Cutoff Validation
+  // Submit Public Registration
   window.submitRegistration = function (e) {
     e.preventDefault();
     if (!activeEventId) return;
@@ -845,7 +920,7 @@
 
     document.getElementById('voucher-event-name').textContent = ev.name;
     document.getElementById('voucher-attendee-info').textContent = `參加者：${attendeeName} ｜ 電話：${attendeePhone}`;
-    document.getElementById('voucher-date-location').textContent = `日期：${formatDate(ev.date)} ｜ 地點：${ev.location || '現場活動'}`;
+    document.getElementById('voucher-date-location').textContent = `地點：${ev.location || '萬家福五甲店 現場'}`;
 
     const gasUrl = getGASUrl();
     if (gasUrl) {
@@ -1086,7 +1161,7 @@
     const customBadge = document.getElementById('event-custom-badge').value.trim();
     const maxPeople = parseInt(document.getElementById('event-max').value, 10);
 
-    let image = DEFAULT_IMAGES[Math.floor(Math.random() * DEFAULT_IMAGES.length)];
+    let image = STORE_IMAGES[Math.floor(Math.random() * STORE_IMAGES.length)];
 
     if (uploadMethod === 'url') {
       const urlInput = document.getElementById('event-img-url').value.trim();
@@ -1102,7 +1177,7 @@
 
     const events = loadEventsData();
     const newEvent = {
-      id: 'evt-' + Date.now(),
+      id: 'wujia-' + Date.now(),
       name,
       category,
       customBadge,
@@ -1112,7 +1187,7 @@
       endDate,
       description: desc,
       maxPeople,
-      location: location || '現場活動',
+      location: location || '萬家福五甲店 現場',
       image,
       phoneRequired: true,
       customQuestions: [...builderQuestions],
@@ -1129,7 +1204,7 @@
     builderQuestions = [];
     renderQuestionnaireBuilder();
 
-    showToast('🎉 新活動（包含自動截止時間）成功發布！');
+    showToast('🎉 萬家福五甲店 新活動發布成功！');
     switchAdminSubView('manage');
     renderEventsGrid();
   };
