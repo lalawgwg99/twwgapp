@@ -137,11 +137,8 @@ export async function onRequestPost({ request, env }) {
 
     if (action === "update_setting") {
       const key = String(data.key || "");
-      if (!["hero", "quickLinks", "announcement"].includes(key) || !data.value || typeof data.value !== "object") {
+      if (!["hero", "quickLinks"].includes(key) || !data.value || typeof data.value !== "object") {
         return jsonResponse({ success: false, error: "網站設定格式不正確" }, 400);
-      }
-      if (key === "announcement" && (typeof data.value.text !== "string" || data.value.text.length > 300)) {
-        return jsonResponse({ success: false, error: "跑馬燈內容不可超過 300 字" }, 400);
       }
       const serialized = JSON.stringify(data.value);
       if (serialized.length > 1500000) return jsonResponse({ success: false, error: "設定圖片檔案過大" }, 413);

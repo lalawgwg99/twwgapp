@@ -12,7 +12,6 @@
   const LEGACY_GAS_URL_KEY = 'twwgapp_gas_webapp_url';
   const QUICK_LINKS_KEY = 'twwgapp_quick_links_v2';
   const HERO_CONFIG_KEY = 'twwgapp_hero_config_v1';
-  const ANNOUNCEMENT_KEY = 'twwgapp_announcement_v1';
 
   const DEFAULT_HERO_CONFIG = {
     title: '萬家福五甲店 每月會員 9 折專屬感恩慶',
@@ -40,9 +39,6 @@
   let editBuilderQuestions = [];
   let lastFocusedElement = null;
   let backendMode = 'client_sync';
-  let announcementAnimationFrame = null;
-  let announcementPaused = false;
-  let announcementResizeTimer = null;
 
   // Real Server Authentication State
   let adminSessionToken = null;
@@ -58,10 +54,6 @@
     igUrl: '',
     ytUrl: '',
     siteUrl: 'https://www.prosperity-plaza.com.tw'
-  };
-
-  const DEFAULT_ANNOUNCEMENT = {
-    text: '萬家福五甲店 活動服務中心　｜　每日 09:00 - 23:00　｜　門市電話 (07) 713-8508'
   };
 
   const STORE_IMAGES = [
@@ -242,128 +234,6 @@
     }
   ];
 
-  function loadAnnouncement() {
-    try {
-      const stored = localStorage.getItem(ANNOUNCEMENT_KEY);
-      if (stored) return Object.assign({}, DEFAULT_ANNOUNCEMENT, JSON.parse(stored));
-    } catch (error) {
-      console.warn('LocalStorage announcement read failed:', error);
-    }
-    return DEFAULT_ANNOUNCEMENT;
-  }
-
-  function saveAnnouncement(config) {
-    try {
-      localStorage.setItem(ANNOUNCEMENT_KEY, JSON.stringify(config));
-    } catch (error) {
-      console.error('Failed to save announcement:', error);
-    }
-  }
-
-  function renderAnnouncement() {
-    const container = document.getElementById('service-announcement');
-    const track = document.getElementById('service-announcement-track');
-    if (!container || !track) return;
-
-    if (announcementAnimationFrame !== null) {
-      cancelAnimationFrame(announcementAnimationFrame);
-      announcementAnimationFrame = null;
-    }
-    announcementPaused = false;
-    container.onmouseenter = null;
-    container.onmouseleave = null;
-    track.classList.remove('is-js-controlled');
-    track.style.removeProperty('transform');
-
-    const text = String(loadAnnouncement().text || '').trim();
-    container.classList.toggle('hidden', !text);
-    container.setAttribute('aria-hidden', text ? 'false' : 'true');
-    container.setAttribute('aria-label', text ? `門市公告：${text}` : '門市公告');
-    track.replaceChildren();
-    if (!text) return;
-
-    const repeatCount = Math.max(3, Math.min(12, Math.ceil(80 / text.length)));
-    for (let groupIndex = 0; groupIndex < 2; groupIndex++) {
-      const group = document.createElement('div');
-      group.className = 'service-announcement-group';
-      group.setAttribute('aria-hidden', 'true');
-      for (let itemIndex = 0; itemIndex < repeatCount; itemIndex++) {
-        const item = document.createElement('span');
-        item.className = 'service-announcement-item';
-        item.textContent = text;
-        group.appendChild(item);
-      }
-      track.appendChild(group);
-    }
-    track.style.setProperty('--announcement-duration', `${Math.max(14, Math.min(60, text.length * 0.45))}s`);
-    startAnnouncementMotion(container, track);
-  }
-
-  function startAnnouncementMotion(container, track) {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    track.classList.add('is-js-controlled');
-    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    if (canHover) {
-      container.onmouseenter = () => { announcementPaused = true; };
-      container.onmouseleave = () => { announcementPaused = false; };
-    }
-
-    let offset = 0;
-    let previousTime = performance.now();
-    const speed = window.matchMedia('(max-width: 768px)').matches ? 48 : 60;
-    const tick = (currentTime) => {
-      const groupWidth = track.firstElementChild?.getBoundingClientRect().width || 0;
-      const elapsedSeconds = Math.min((currentTime - previousTime) / 1000, 0.05);
-      if (!announcementPaused && groupWidth > 0) {
-        offset = (offset + elapsedSeconds * speed) % groupWidth;
-        track.style.transform = `translate3d(${-offset}px, 0, 0)`;
-      }
-      previousTime = currentTime;
-      announcementAnimationFrame = requestAnimationFrame(tick);
-    };
-
-    announcementAnimationFrame = requestAnimationFrame(tick);
-  }
-
-  window.openAnnouncementModal = function () {
-    if (!isAdminAuthenticated) {
-      openModal('modal-admin-auth');
-      return;
-    }
-    const text = String(loadAnnouncement().text || '');
-    document.getElementById('announcement-input').value = text;
-    document.getElementById('announcement-preview-text').textContent = text || '留白後將隱藏跑馬燈';
-    openModal('modal-edit-announcement');
-  };
-
-  window.previewAnnouncementText = function (event) {
-    const text = event.target.value.trim();
-    document.getElementById('announcement-preview-text').textContent = text || '留白後將隱藏跑馬燈';
-  };
-
-  window.submitAnnouncementSettings = async function (event) {
-    event.preventDefault();
-    if (!isAdminAuthenticated) {
-      showToast('權限不足', true);
-      return;
-    }
-    const config = { text: document.getElementById('announcement-input').value.trim() };
-    const submitButton = event.submitter;
-    if (submitButton) submitButton.disabled = true;
-    try {
-      await requestBackend('update_setting', { key: 'announcement', value: config }, true);
-      saveAnnouncement(config);
-      renderAnnouncement();
-      closeModal('modal-edit-announcement');
-      showToast(config.text ? '頂部跑馬燈已更新' : '頂部跑馬燈已隱藏');
-    } catch (error) {
-      showToast(error.message, true);
-    } finally {
-      if (submitButton) submitButton.disabled = false;
-    }
-  };
-
   // Quick Links Helper Functions
   function loadQuickLinks() {
     try {
@@ -490,10 +360,6 @@
       if (data.settings?.quickLinks) {
         saveQuickLinks(Object.assign({}, DEFAULT_QUICK_LINKS, data.settings.quickLinks));
         renderQuickLinksUI();
-      }
-      if (data.settings?.announcement) {
-        saveAnnouncement(Object.assign({}, DEFAULT_ANNOUNCEMENT, data.settings.announcement));
-        renderAnnouncement();
       }
       if (data.settings?.hero) {
         saveHeroConfig(Object.assign({}, DEFAULT_HERO_CONFIG, data.settings.hero));
@@ -2473,11 +2339,6 @@
     localStorage.removeItem(LEGACY_GAS_URL_KEY);
     await checkAdminSession();
     loadEventsData();
-    renderAnnouncement();
-    window.addEventListener('resize', () => {
-      clearTimeout(announcementResizeTimer);
-      announcementResizeTimer = setTimeout(renderAnnouncement, 180);
-    });
     renderQuickLinksUI();
     renderEventsGrid();
     renderQuestionnaireBuilder();

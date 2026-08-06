@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260806_pro7/);
-  assert.match(html, /app\.js\?v=20260806_pro7/);
+  assert.match(html, /styles\.css\?v=20260806_pro8/);
+  assert.match(html, /app\.js\?v=20260806_pro8/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -59,19 +59,17 @@ test('admin login refreshes private registration data before opening the dashboa
   assert.match(script, /完整名單尚未載入/);
 });
 
-test('top announcement is editable, hideable and motion-safe', () => {
-  assert.match(html, /id="announcement-input"[^>]*maxlength="300"/);
-  assert.match(html, /onclick="openAnnouncementModal\(\)"/);
-  assert.match(script, /key: 'announcement'/);
-  assert.match(script, /container\.classList\.toggle\('hidden', !text\)/);
-  assert.match(css, /@keyframes service-announcement-scroll/);
-  assert.match(css, /translate3d\(-50%, 0, 0\)/);
-  assert.match(css, /@media \(hover: hover\) and \(pointer: fine\)/);
-  assert.match(css, /animation-duration:\s*11s/);
-  assert.match(css, /\.service-announcement-track\s*\{[^}]*animation:\s*none !important/s);
-  assert.match(script, /requestAnimationFrame\(tick\)/);
-  assert.match(script, /const speed = window\.matchMedia\('\(max-width: 768px\)'\)\.matches \? 48 : 60/);
-  assert.match(css, /\.service-announcement-track\.is-js-controlled\s*\{[^}]*animation:\s*none/s);
+test('the top announcement bar and its settings are fully removed', () => {
+  for (const source of [html, script, css]) {
+    assert.doesNotMatch(source, /service-announcement|service-strip|announcement-ticker|跑馬燈/);
+  }
+});
+
+test('frequent public controls provide 44px touch targets', () => {
+  assert.match(css, /\.quick-link-pill\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(css, /\.pill-btn\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(css, /\.footer-section a\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(css, /\.footer-social-links a\s*\{[^}]*width:\s*44px[^}]*height:\s*44px/s);
 });
 
 test('admins can cancel one registration with confirmation and release its spot', () => {
