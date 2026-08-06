@@ -1625,6 +1625,56 @@
     `;
   }
 
+  // HERO IMAGE UPLOAD HANDLERS
+  let heroUploadMethod = 'url';
+  let heroFilePreviewDataUrl = null;
+
+  window.switchHeroUploadMethod = function (method) {
+    heroUploadMethod = method;
+    const tabUrl = document.getElementById('hero-tab-url');
+    const tabFile = document.getElementById('hero-tab-file');
+    const blockUrl = document.getElementById('hero-upload-url-block');
+    const blockFile = document.getElementById('hero-upload-file-block');
+
+    if (tabUrl) tabUrl.classList.toggle('active', method === 'url');
+    if (tabFile) tabFile.classList.toggle('active', method === 'file');
+    if (blockUrl) blockUrl.classList.toggle('hidden', method !== 'url');
+    if (blockFile) blockFile.classList.toggle('hidden', method !== 'file');
+  };
+
+  window.handleHeroImageUrlChange = function (e) {
+    const url = e.target.value.trim();
+    const preview = document.getElementById('hero-image-preview');
+    if (url && preview) {
+      preview.style.backgroundImage = `url('${url}')`;
+      preview.classList.remove('hidden');
+    } else if (preview) {
+      preview.classList.add('hidden');
+    }
+  };
+
+  window.handleHeroFileSelect = function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('❌ 圖片檔案過大，請選擇 8MB 以下的圖片', true);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+      heroFilePreviewDataUrl = evt.target.result;
+      const preview = document.getElementById('hero-image-preview');
+      if (preview) {
+        preview.style.backgroundImage = `url('${heroFilePreviewDataUrl}')`;
+        preview.classList.remove('hidden');
+      }
+      showToast('📸 圖片讀取成功！已設定為 Hero 看板圖');
+    };
+    reader.readAsDataURL(file);
+  };
+
   window.openHeroConfigModal = function () {
     if (!isAdminAuthenticated) {
       openModal('modal-admin-auth');
@@ -1643,6 +1693,14 @@
     document.getElementById('hero-input-btn-text').value = hero.buttonText || '';
     document.getElementById('hero-input-btn-url').value = hero.buttonUrl || '';
 
+    // Show preview if image exists
+    const preview = document.getElementById('hero-image-preview');
+    if (hero.bgImage && preview) {
+      preview.style.backgroundImage = `url('${hero.bgImage}')`;
+      preview.classList.remove('hidden');
+    }
+
+    switchHeroUploadMethod('url');
     openModal('modal-edit-hero');
   };
 
@@ -1653,6 +1711,14 @@
       return;
     }
 
+    let finalBgImage = DEFAULT_HERO_CONFIG.bgImage;
+    if (heroUploadMethod === 'file' && heroFilePreviewDataUrl) {
+      finalBgImage = heroFilePreviewDataUrl;
+    } else {
+      const inputUrl = document.getElementById('hero-input-bg').value.trim();
+      if (inputUrl) finalBgImage = inputUrl;
+    }
+
     const newConfig = {
       title: document.getElementById('hero-input-title').value.trim(),
       description: document.getElementById('hero-input-desc').value.trim(),
@@ -1660,7 +1726,7 @@
       endDate: document.getElementById('hero-input-enddate').value,
       priceText: document.getElementById('hero-input-price').value.trim(),
       locationText: document.getElementById('hero-input-location').value.trim(),
-      bgImage: document.getElementById('hero-input-bg').value.trim() || DEFAULT_HERO_CONFIG.bgImage,
+      bgImage: finalBgImage,
       buttonText: document.getElementById('hero-input-btn-text').value.trim(),
       buttonUrl: document.getElementById('hero-input-btn-url').value.trim()
     };

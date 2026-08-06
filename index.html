@@ -403,8 +403,20 @@
             </div>
 
             <div class="field-group">
-              <label class="field-label" for="hero-input-bg">背景大圖網址 URL</label>
-              <input type="url" id="hero-input-bg" class="sf-input" placeholder="https://images.unsplash.com/photo-...">
+              <label class="field-label">背景宣傳圖片來源 (網址或選擇電腦照片)</label>
+              <div class="upload-method-selector">
+                <button type="button" class="upload-tab active" id="hero-tab-url" onclick="switchHeroUploadMethod('url')">貼上圖片連結</button>
+                <button type="button" class="upload-tab" id="hero-tab-file" onclick="switchHeroUploadMethod('file')">📁 選擇電腦/手機圖片</button>
+              </div>
+              <div id="hero-upload-url-block">
+                <input type="url" id="hero-input-bg" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleHeroImageUrlChange(event)">
+              </div>
+              <div id="hero-upload-file-block" class="hidden">
+                <input type="file" id="hero-input-file" accept="image/*" class="sf-input" onchange="handleHeroFileSelect(event)">
+              </div>
+              <div id="hero-image-preview" class="image-preview-box hidden" style="margin-top:10px;">
+                <div class="image-preview-overlay"><span>看板背景預覽成功</span></div>
+              </div>
             </div>
 
             <div class="form-row-2">
