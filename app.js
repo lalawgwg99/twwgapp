@@ -984,7 +984,11 @@
     const status = getStatus(regCount, ev.maxPeople, ev.startDate, ev.endDate);
     const pct = Math.min((regCount / ev.maxPeople) * 100, 100).toFixed(0);
 
-    document.getElementById('sheet-image-bg').style.backgroundImage = `url("${safeImageUrl(ev.image)}")`;
+    const sheetImage = document.getElementById('sheet-image-bg');
+    const imageUrl = safeImageUrl(ev.image);
+    sheetImage.src = imageUrl;
+    sheetImage.alt = ev.name ? `${ev.name} 活動封面` : '活動封面';
+    sheetImage.style.backgroundImage = '';
     document.getElementById('sheet-title').textContent = ev.name;
     document.getElementById('sheet-desc').textContent = ev.description || '暫無詳細說明';
     document.getElementById('sheet-date').textContent = formatDate(ev.date);

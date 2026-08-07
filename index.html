@@ -15,7 +15,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="canonical" href="https://wgapptw.pages.dev/">
-  <link rel="stylesheet" href="styles.css?v=20260807_blueorange">
+  <link rel="stylesheet" href="styles.css?v=20260807_sheetimg">
 </head>
 <body>
   <div class="app-viewport">
@@ -553,7 +553,9 @@
   <div id="modal-detail" class="sf-modal-backdrop" onclick="if(event.target===this)closeModal('modal-detail')">
     <div class="sf-sheet">
       <div class="sheet-handle"></div>
-      <div id="sheet-image-bg" class="sheet-image"></div>
+      <div class="sheet-image-wrap">
+        <img id="sheet-image-bg" class="sheet-image" alt="活動封面" decoding="async">
+      </div>
       <div class="sheet-body">
         <div class="sheet-title-row">
           <h3 id="sheet-title" class="sheet-title"></h3>
@@ -680,6 +682,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260807_blueorange"></script>
+  <script src="app.js?v=20260807_sheetimg"></script>
 </body>
 </html>

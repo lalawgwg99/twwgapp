@@ -1534,12 +1534,20 @@ html, body {
   margin: 10px auto 4px;
 }
 
-.sheet-image {
+.sheet-image-wrap {
   width: 100%;
-  height: 220px;
-  background-size: cover;
-  background-position: center;
-  position: relative;
+  background: var(--surface-secondary);
+  border-bottom: 1px solid var(--separator);
+}
+
+.sheet-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(52vh, 440px);
+  object-fit: contain;
+  object-position: center top;
+  background: var(--surface-secondary);
 }
 
 .sheet-body {
@@ -2899,8 +2907,14 @@ textarea:focus-visible,
     margin: 10px auto 0;
   }
 
+  .sheet-image-wrap {
+    background: #eef3f8;
+  }
+
   .sheet-image {
-    height: 148px;
+    height: auto;
+    max-height: min(42vh, 320px);
+    object-fit: contain;
   }
 
   .sheet-body {

@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_blueorange/);
-  assert.match(html, /app\.js\?v=20260807_blueorange/);
+  assert.match(html, /styles\.css\?v=20260807_sheetimg/);
+  assert.match(html, /app\.js\?v=20260807_sheetimg/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -89,6 +89,13 @@ test('mobile experience keeps a compact first fold and brand blue-orange palette
   assert.match(css, /\.card-description[\s\S]*?\.progress-block\s*\{\s*display:\s*none/s);
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /sheet-actions-sticky/);
+});
+
+test('event detail sheet shows full cover image without cropping', () => {
+  assert.match(html, /id="sheet-image-bg" class="sheet-image"/);
+  assert.match(script, /sheetImage\.src = imageUrl/);
+  assert.match(css, /\.sheet-image\s*\{[^}]*object-fit:\s*contain/s);
+  assert.doesNotMatch(css, /\.sheet-image\s*\{[^}]*background-size:\s*cover/s);
 });
 
 test('admins can cancel one registration with confirmation and release its spot', () => {
