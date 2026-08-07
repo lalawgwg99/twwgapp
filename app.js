@@ -1037,6 +1037,10 @@
 
     document.getElementById('reg-is-proxy').checked = false;
     toggleProxyFieldsUI();
+    const partySizeInput = document.getElementById('reg-party-size');
+    if (partySizeInput) partySizeInput.value = '1';
+    const notesInput = document.getElementById('reg-notes');
+    if (notesInput) notesInput.value = '';
 
     const container = document.getElementById('dynamic-questions-form-container');
     if (ev.customQuestions && ev.customQuestions.length > 0) {
@@ -1127,6 +1131,8 @@
     const attendeeName = document.getElementById('reg-name').value.trim();
     const attendeePhone = document.getElementById('reg-phone').value.replace(/\D/g, '');
     const attendeeEmail = document.getElementById('reg-email').value.trim();
+    const partySize = Number.parseInt(String(document.getElementById('reg-party-size')?.value || '').trim(), 10);
+    const notes = (document.getElementById('reg-notes')?.value || '').trim();
 
     if (!attendeeName || !attendeePhone) {
       showToast('請填寫參加者姓名與聯絡電話', true);
@@ -1134,6 +1140,14 @@
     }
     if (!/^09\d{8}$/.test(attendeePhone)) {
       showToast('請輸入有效的台灣手機號碼（09 開頭共 10 碼）', true);
+      return;
+    }
+    if (!Number.isInteger(partySize) || partySize < 1 || partySize > 20) {
+      showToast('參加人數請填 1～20 的整數', true);
+      return;
+    }
+    if (notes.length > 500) {
+      showToast('備註最多 500 字', true);
       return;
     }
 
@@ -1175,6 +1189,8 @@
       name: attendeeName,
       email: attendeeEmail,
       phone: attendeePhone,
+      partySize,
+      notes,
       isProxy,
       proxyName,
       proxyEmail,
@@ -1189,6 +1205,7 @@
     try {
       const result = await requestBackend('register', {
         eventId: ev.id, attendeeName, attendeePhone, attendeeEmail,
+        partySize, notes,
         isProxy, proxyName, proxyEmail, answers,
         website: document.getElementById('reg-website').value
       });
@@ -1203,8 +1220,10 @@
     }
 
     document.getElementById('voucher-event-name').textContent = ev.name;
-    document.getElementById('voucher-attendee-info').textContent = `參加者：${attendeeName} ｜ 電話：${attendeePhone}`;
-    document.getElementById('voucher-date-location').textContent = `地點：${ev.location || '萬家福五甲店 現場'}`;
+    document.getElementById('voucher-attendee-info').textContent = `參加者：${attendeeName} ｜ 電話：${attendeePhone} ｜ 人數：${partySize}`;
+    document.getElementById('voucher-date-location').textContent = notes
+      ? `地點：${ev.location || '萬家福五甲店 現場'} ｜ 備註：${notes}`
+      : `地點：${ev.location || '萬家福五甲店 現場'}`;
 
     closeModal('modal-register-form');
     openModal('modal-success');
@@ -1722,6 +1741,8 @@
                 <th>狀態/簽到</th>
                 <th>參加者姓名</th>
                 <th>電話 / Email</th>
+                <th>人數</th>
+                <th>備註</th>
                 <th>代報模式</th>
                 ${qTitles.map(t => `<th>${escapeHTML(t)}</th>`).join('')}
                 <th>報名日期</th>
@@ -1733,6 +1754,7 @@
                 const btnClass = r.checkedIn ? 'btn-checkin-status checked' : 'btn-checkin-status unchecked';
                 const statusText = r.checkedIn ? '✓ 已報到' : '點擊簽到';
                 const proxyText = r.isProxy ? `<span class="cell-sub" style="color:var(--accent-purple);">代報 (${escapeHTML(r.proxyName || '')})</span>` : '親自報名';
+                const partySize = Number.isInteger(Number(r.partySize)) ? Number(r.partySize) : 1;
 
                 return `
                   <tr>
@@ -1744,6 +1766,8 @@
                       <div>${escapeHTML(r.phone || '無電話')}</div>
                       <div class="cell-sub">${escapeHTML(r.email || '無Email')}</div>
                     </td>
+                    <td>${partySize}</td>
+                    <td class="cell-sub">${escapeHTML(r.notes || '-')}</td>
                     <td>${proxyText}</td>
                     ${(ev.customQuestions || []).map(q => `
                       <td class="cell-sub">${escapeHTML((r.answers && r.answers[q.id]) || '-')}</td>
@@ -1842,15 +1866,18 @@
     }
 
     const qList = ev.customQuestions || [];
-    const headers = ['活動名稱', '參加者姓名', '電話', 'Email', '簽到狀態', '代報名狀態', '代報人姓名', '代報人Email', ...qList.map(q => q.title), '報名時間'];
+    const headers = ['活動名稱', '參加者姓名', '電話', 'Email', '參加人數', '備註', '簽到狀態', '代報名狀態', '代報人姓名', '代報人Email', ...qList.map(q => q.title), '報名時間'];
 
     const rows = ev.registrations.map(r => {
       const qAnswers = qList.map(q => (r.answers && r.answers[q.id]) ? r.answers[q.id] : '');
+      const partySize = Number.isInteger(Number(r.partySize)) ? Number(r.partySize) : 1;
       return [
         ev.name,
         r.name,
         r.phone || '',
         r.email || '',
+        partySize,
+        r.notes || '',
         r.checkedIn ? '已報到' : '未報到',
         r.isProxy ? '代報名' : '親自報名',
         r.proxyName || '',

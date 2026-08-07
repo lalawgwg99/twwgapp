@@ -15,7 +15,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="canonical" href="https://wgapptw.pages.dev/">
-  <link rel="stylesheet" href="styles.css?v=20260807_herodesc">
+  <link rel="stylesheet" href="styles.css?v=20260807_partynotes">
 </head>
 <body>
   <div class="app-viewport">
@@ -599,7 +599,21 @@
             </div>
             <div class="field-group"><label class="field-label" id="attendee-name-label" for="reg-name">實際參加者姓名 <span class="req">*</span></label><input type="text" id="reg-name" class="sf-input" required placeholder="請填寫參加者真實姓名"></div>
             <div class="field-group"><label class="field-label" for="reg-phone">聯絡電話 <span class="req">*</span></label><input type="tel" id="reg-phone" class="sf-input" required placeholder="09xx-xxx-xxx" inputmode="numeric" autocomplete="tel"><p class="field-help">作為身分核對與簡訊通知憑證</p></div>
-            <div class="field-group"><label class="field-label" for="reg-email">電子郵件 <span class="opt">(選填)</span></label><input type="email" id="reg-email" class="sf-input" placeholder="有 Email 可填寫 (可不填)"></div>
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="reg-party-size">參加人數 <span class="req">*</span></label>
+                <input type="number" id="reg-party-size" class="sf-input" required min="1" max="20" value="1" inputmode="numeric">
+                <p class="field-help">含報名者本人，最多 20 人</p>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="reg-email">電子郵件 <span class="opt">(選填)</span></label>
+                <input type="email" id="reg-email" class="sf-input" placeholder="有 Email 可填寫 (可不填)">
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="reg-notes">備註 <span class="opt">(選填)</span></label>
+              <textarea id="reg-notes" class="sf-textarea" rows="2" maxlength="500" placeholder="例如：需要兒童椅、同行長輩行動不便等"></textarea>
+            </div>
             <div class="form-honeypot" aria-hidden="true"><label for="reg-website">網站</label><input type="text" id="reg-website" tabindex="-1" autocomplete="off"></div>
             <div id="dynamic-questions-form-container"></div>
             <div class="field-group" style="margin-top:6px;">
@@ -630,7 +644,7 @@
         <div class="privacy-document">
           <p>歡迎使用萬家福五甲店活動報名系統（以下簡稱本平台）。本平台重視您的個人資料與隱私權保護，為保障您的權益，謹依據中華民國《個人資料保護法》第 8 條規定，向您告知下列事項：</p>
           <h4>一、個人資料蒐集之目的與類別</h4>
-          <p>本平台因辦理萬家福五甲店活動報名、身分核對、通知聯繫、保險投保（如適用）及活動品質統計之需要，將蒐集您的識別類個人資料（包括：姓名、電子郵件地址、聯絡電話及自訂問卷回答）。</p>
+          <p>本平台因辦理萬家福五甲店活動報名、身分核對、通知聯繫、保險投保（如適用）及活動品質統計之需要，將蒐集您的識別類個人資料（包括：姓名、電子郵件地址、聯絡電話、參加人數、備註及自訂問卷回答）。</p>
           <h4>二、個人資料利用之期間、地區、對象及方式</h4>
           <ul style="padding-left: 20px;">
             <li><strong>利用期間：</strong>自您報名成功日起至活動結束後 30 日內。</li>
@@ -676,6 +690,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260807_herodesc"></script>
+  <script src="app.js?v=20260807_partynotes"></script>
 </body>
 </html>

@@ -213,6 +213,9 @@ export async function onRequestGet({ request, env }) {
   }
 }
 
+const PARTY_SIZE_KEY = "__partySize";
+const NOTES_KEY = "__notes";
+
 async function registerAttendee(data, env) {
   if (String(data.website || '').trim()) {
     return jsonResponse({ success: true });
@@ -224,10 +227,21 @@ async function registerAttendee(data, env) {
   const isProxy = Boolean(data.isProxy);
   const proxyName = String(data.proxyName || "").trim();
   const proxyEmail = String(data.proxyEmail || "").trim();
-  const serializedAnswers = JSON.stringify(data.answers || {});
+  const partySize = Number.parseInt(String(data.partySize ?? 1), 10);
+  const notes = String(data.notes || "").trim();
+  const answers = Object.assign({}, data.answers || {});
+  answers[PARTY_SIZE_KEY] = partySize;
+  answers[NOTES_KEY] = notes;
+  const serializedAnswers = JSON.stringify(answers);
 
   if (!eventId || !attendeeName || attendeeName.length > 80 || !/^09\d{8}$/.test(attendeePhone)) {
     return jsonResponse({ success: false, error: "請填寫有效的姓名與台灣手機號碼" }, 400);
+  }
+  if (!Number.isInteger(partySize) || partySize < 1 || partySize > 20) {
+    return jsonResponse({ success: false, error: "參加人數請填 1～20 的整數" }, 400);
+  }
+  if (notes.length > 500) {
+    return jsonResponse({ success: false, error: "備註最多 500 字" }, 400);
   }
   if (attendeeEmail && !isEmail(attendeeEmail)) {
     return jsonResponse({ success: false, error: "Email 格式不正確" }, 400);
@@ -313,15 +327,26 @@ function validateEvent(event) {
 }
 
 function normalizeRegistration(row) {
+  const rawAnswers = parseJson(row.answers, {});
+  const partySizeRaw = Number.parseInt(String(rawAnswers[PARTY_SIZE_KEY] ?? 1), 10);
+  const partySize = Number.isInteger(partySizeRaw) && partySizeRaw >= 1 && partySizeRaw <= 20
+    ? partySizeRaw
+    : 1;
+  const notes = String(rawAnswers[NOTES_KEY] || "").trim().slice(0, 500);
+  const answers = Object.assign({}, rawAnswers);
+  delete answers[PARTY_SIZE_KEY];
+  delete answers[NOTES_KEY];
   return {
     id: row.id,
     name: row.name,
     email: row.email,
     phone: row.phone,
+    partySize,
+    notes,
     isProxy: Boolean(row.is_proxy),
     proxyName: row.proxy_name,
     proxyEmail: row.proxy_email,
-    answers: parseJson(row.answers, {}),
+    answers,
     checkedIn: Boolean(row.checked_in),
     registeredAt: row.registered_at
   };
