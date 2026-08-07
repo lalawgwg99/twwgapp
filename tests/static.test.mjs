@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_quotaui/);
-  assert.match(html, /app\.js\?v=20260807_quotaui/);
+  assert.match(html, /styles\.css\?v=20260807_mobilesync/);
+  assert.match(html, /app\.js\?v=20260807_mobilesync/);
 });
 
 test('registration form collects party size and notes', () => {
@@ -55,6 +55,16 @@ test('mobile and desktop event cards both show registration progress', () => {
   assert.match(css, /\.progress-block\s*\{/);
   // Mobile must not hide the quota progress bar that desktop shows
   assert.doesNotMatch(css, /@media[^{]+max-width:\s*768px[^{]*\{[\s\S]*?\.progress-block\s*\{\s*display:\s*none/i);
+});
+
+test('event sync keeps mobile and desktop lists aligned', () => {
+  assert.match(script, /let cachedEvents = null/);
+  assert.match(script, /eventsSyncGeneration/);
+  assert.match(script, /compactEventsForLocalStorage/);
+  assert.match(script, /cache: 'no-store'/);
+  assert.match(script, /resetPublicEventFilters/);
+  assert.match(script, /visibilitychange/);
+  assert.match(script, /await syncEventsFromBackend\(\)/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {

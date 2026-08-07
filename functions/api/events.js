@@ -105,10 +105,9 @@ export async function onRequestPost({ request, env }) {
       const eventId = String(data.eventId || "").trim();
       if (!eventId) return jsonResponse({ success: false, error: "缺少活動編號" }, 400);
       if (!env.DB) return databaseUnavailable();
-      await env.DB.batch([
-        env.DB.prepare("DELETE FROM registrations WHERE event_id = ?").bind(eventId),
-        env.DB.prepare("DELETE FROM events WHERE id = ?").bind(eventId)
-      ]);
+      await env.DB.prepare("DELETE FROM registrations WHERE event_id = ?").bind(eventId).run();
+      const result = await env.DB.prepare("DELETE FROM events WHERE id = ?").bind(eventId).run();
+      if (!result.meta?.changes) return jsonResponse({ success: false, error: "找不到活動" }, 404);
       return jsonResponse({ success: true });
     }
 

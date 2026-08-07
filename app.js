@@ -39,6 +39,8 @@
   let editBuilderQuestions = [];
   let lastFocusedElement = null;
   let backendMode = 'client_sync';
+  let cachedEvents = null;
+  let eventsSyncGeneration = 0;
 
   // Real Server Authentication State
   let adminSessionToken = null;
@@ -366,11 +368,17 @@
   }
 
   async function syncEventsFromBackend() {
+    const syncId = ++eventsSyncGeneration;
     try {
       const headers = adminSessionToken ? { 'X-Admin-Token': adminSessionToken } : {};
-      const response = await fetch('/api/events', { headers });
+      const response = await fetch('/api/events', {
+        headers,
+        cache: 'no-store'
+      });
+      if (syncId !== eventsSyncGeneration) return false;
       if (!(response.headers.get('content-type') || '').includes('application/json')) return false;
       const data = await response.json();
+      if (syncId !== eventsSyncGeneration) return false;
       backendMode = data.mode || backendMode;
       if (isAdminAuthenticated && adminSessionToken && data.mode === 'database' && data.viewer !== 'admin') {
         sessionStorage.removeItem(ADMIN_TOKEN_KEY);
@@ -390,10 +398,12 @@
         startCountdownTimers();
       }
       if (response.ok && Array.isArray(data.events) && (data.mode === 'database' || data.events.length > 0)) {
+        if (syncId !== eventsSyncGeneration) return false;
         saveEventsData(data.events);
         if (!activeEventId || !data.events.some(event => event.id === activeEventId)) {
           activeEventId = data.events[0]?.id || null;
         }
+        ensureValidCategoryFilter(data.events);
         renderEventsGrid();
         renderSidebarWidgets();
         if (isAdminAuthenticated) renderAdminDashboard();
@@ -401,6 +411,7 @@
       }
       return false;
     } catch (error) {
+      if (syncId !== eventsSyncGeneration) return false;
       console.warn('Remote event sync unavailable:', error);
       return false;
     }
@@ -517,43 +528,89 @@
   };
 
   // Helper Data Storage
+  function cloneEvents(events) {
+    return JSON.parse(JSON.stringify(events || []));
+  }
+
+  function compactEventsForLocalStorage(events) {
+    return (events || []).map(event => Object.assign({}, event, {
+      // Drop bulky base64 covers from public cache so mobile quota cannot block updates
+      image: String(event.image || '').startsWith('data:') ? '' : String(event.image || ''),
+      registrations: (event.registrations || []).map(() => ({}))
+    }));
+  }
+
   function loadEventsData() {
     try {
       if (isAdminAuthenticated) {
         const adminStored = sessionStorage.getItem(ADMIN_DATA_KEY);
         if (adminStored) {
           const adminParsed = JSON.parse(adminStored);
-          if (Array.isArray(adminParsed.events)) return adminParsed.events;
+          if (Array.isArray(adminParsed.events)) {
+            cachedEvents = adminParsed.events;
+            return adminParsed.events;
+          }
         }
       }
+      if (Array.isArray(cachedEvents)) return cachedEvents;
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && Array.isArray(parsed.events)) {
+          cachedEvents = parsed.events;
           return parsed.events;
         }
       }
     } catch (e) {
-      console.warn('LocalStorage access failed, using empty fallback:', e);
+      console.warn('LocalStorage access failed, using memory fallback:', e);
+      if (Array.isArray(cachedEvents)) return cachedEvents;
     }
-    saveEventsData([]);
-    return [];
+    return Array.isArray(cachedEvents) ? cachedEvents : [];
   }
 
   function saveEventsData(events) {
+    cachedEvents = cloneEvents(events);
+    let persisted = false;
     try {
       if (backendMode === 'database') {
-        if (isAdminAuthenticated) sessionStorage.setItem(ADMIN_DATA_KEY, JSON.stringify({ events }));
-        const sanitized = events.map(event => Object.assign({}, event, {
-          registrations: (event.registrations || []).map(() => ({}))
-        }));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ events: sanitized }));
+        if (isAdminAuthenticated) {
+          try {
+            sessionStorage.setItem(ADMIN_DATA_KEY, JSON.stringify({ events: cachedEvents }));
+          } catch (adminStoreError) {
+            console.warn('Admin session cache full, keeping memory copy:', adminStoreError);
+          }
+        }
+        const sanitized = compactEventsForLocalStorage(cachedEvents);
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ events: sanitized }));
+          persisted = true;
+        } catch (_quotaError) {
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ events: sanitized }));
+          persisted = true;
+        }
       } else {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ events }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ events: cachedEvents }));
+        persisted = true;
       }
     } catch (e) {
       console.error('Failed to save to LocalStorage:', e);
+      // Memory cache still holds the latest server truth for this session
     }
+    return persisted;
+  }
+
+  function resetPublicEventFilters() {
+    selectedCategory = 'all';
+    searchQuery = '';
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = '';
+  }
+
+  function ensureValidCategoryFilter(events) {
+    if (selectedCategory === 'all' || selectedCategory === 'available') return;
+    const categories = new Set((events || []).map(ev => (ev.category || '').trim()).filter(Boolean));
+    if (!categories.has(selectedCategory)) selectedCategory = 'all';
   }
 
   // AUTOMATIC DATETIME CUTOFF & STATUS CALCULATION
@@ -610,12 +667,13 @@
 
   function safeImageUrl(value) {
     const raw = String(value || '').trim();
+    if (!raw) return STORE_IMAGES[0];
     if (raw.startsWith('data:image/')) return raw;
     try {
       const url = new URL(raw, window.location.href);
-      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : STORE_IMAGES[0];
     } catch (_error) {
-      return '';
+      return STORE_IMAGES[0];
     }
   }
 
@@ -659,6 +717,7 @@
       renderSidebarWidgets();
       startCountdownTimers();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      syncEventsFromBackend();
     } else if (viewName === 'admin') {
       if (!isAdminAuthenticated) {
         openModal('modal-admin-auth');
@@ -747,6 +806,7 @@
     renderCategoryPills();
 
     const events = loadEventsData();
+    ensureValidCategoryFilter(events);
     const container = document.getElementById('events-grid');
     const countLabel = document.getElementById('event-count-label');
 
@@ -943,24 +1003,31 @@
       return;
     }
 
-    ev.name = name;
-    ev.category = category;
-    ev.date = date;
-    ev.startDate = startDate;
-    ev.endDate = endDate;
-    ev.description = desc;
-    ev.location = location;
-    ev.priceTier = priceTier;
-    ev.customBadge = customBadge;
-    ev.maxPeople = maxPeople;
-    ev.image = image;
-    ev.customQuestions = JSON.parse(JSON.stringify(editBuilderQuestions));
+    const updatedEvent = Object.assign({}, ev, {
+      name,
+      category,
+      date,
+      startDate,
+      endDate,
+      description: desc,
+      location,
+      priceTier,
+      customBadge,
+      maxPeople,
+      image,
+      customQuestions: JSON.parse(JSON.stringify(editBuilderQuestions))
+    });
 
     const submitButton = e.submitter;
     if (submitButton) submitButton.disabled = true;
     try {
-      await requestBackend('update_event', { event: ev }, true);
-      saveEventsData(events);
+      await requestBackend('update_event', { event: updatedEvent }, true);
+      resetPublicEventFilters();
+      const synced = await syncEventsFromBackend();
+      if (!synced) {
+        Object.assign(ev, updatedEvent);
+        saveEventsData(events);
+      }
     } catch (error) {
       showToast(error.message, true);
       if (submitButton) submitButton.disabled = false;
@@ -1563,7 +1630,6 @@
       return;
     }
 
-    const events = loadEventsData();
     const newEvent = {
       id: 'wujia-' + Date.now(),
       name,
@@ -1587,8 +1653,14 @@
     if (submitButton) submitButton.disabled = true;
     try {
       await requestBackend('create_event', { event: newEvent }, true);
-      events.unshift(newEvent);
-      saveEventsData(events);
+      activeEventId = newEvent.id;
+      resetPublicEventFilters();
+      const synced = await syncEventsFromBackend();
+      if (!synced) {
+        const latest = loadEventsData();
+        if (!latest.some(item => item.id === newEvent.id)) latest.unshift(newEvent);
+        saveEventsData(latest);
+      }
     } catch (error) {
       showToast(error.message, true);
       if (submitButton) submitButton.disabled = false;
@@ -1602,7 +1674,6 @@
     renderQuestionnaireBuilder();
 
     showToast('🎉 萬家福五甲店 新活動發布成功！');
-    activeEventId = newEvent.id;
     switchAdminSubView('manage');
     renderAdminDashboard();
     renderEventsGrid();
@@ -1655,20 +1726,22 @@
     const selector = document.getElementById('admin-event-selector');
 
     if (!events || events.length === 0) {
+      activeEventId = null;
       selector.innerHTML = '<option value="">尚無活動</option>';
       renderAdminRegistrations();
       return;
     }
 
-    selector.innerHTML = events.map(e => `
-      <option value="${e.id}" ${e.id === activeEventId ? 'selected' : ''}>
-        ${escapeHTML(e.name)} (${e.registrations.length}/${e.maxPeople}人)
-      </option>
-    `).join('');
-
     if (!activeEventId || !events.some(e => e.id === activeEventId)) {
       activeEventId = events[0].id;
     }
+
+    selector.innerHTML = events.map(e => `
+      <option value="${escapeHTML(e.id)}">
+        ${escapeHTML(e.name)} (${(e.registrations || []).length}/${e.maxPeople}人)
+      </option>
+    `).join('');
+    selector.value = activeEventId;
 
     renderAdminRegistrations();
   }
@@ -1915,14 +1988,17 @@
     let events = loadEventsData();
     try {
       await requestBackend('delete_event', { eventId: activeEventId }, true);
+      const synced = await syncEventsFromBackend();
+      if (!synced) {
+        events = events.filter(e => e.id !== activeEventId);
+        saveEventsData(events);
+        activeEventId = events.length > 0 ? events[0].id : null;
+      }
     } catch (error) {
       showToast(error.message, true);
       return;
     }
-    events = events.filter(e => e.id !== activeEventId);
-    saveEventsData(events);
 
-    activeEventId = events.length > 0 ? events[0].id : null;
     showToast('活動已成功刪除');
     renderAdminDashboard();
     renderEventsGrid();
@@ -2327,6 +2403,13 @@
     startCountdownTimers();
     setFooterYear();
     await syncEventsFromBackend();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') syncEventsFromBackend();
+    });
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) syncEventsFromBackend();
+    });
 
     ['event-name', 'event-category', 'event-date', 'event-start-time', 'event-end-time', 'event-max']
       .forEach(id => document.getElementById(id)?.addEventListener('input', updateCreateReadiness));
