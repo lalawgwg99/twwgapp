@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_gthumb/);
-  assert.match(html, /app\.js\?v=20260807_gthumb/);
+  assert.match(html, /styles\.css\?v=20260807_safereg/);
+  assert.match(html, /app\.js\?v=20260807_safereg/);
 });
 
 test('registration form collects party size and notes', () => {
@@ -84,6 +84,13 @@ test('google drive share links are normalized or rejected with guidance', () => 
   assert.match(script, /function normalizePublicImageUrl/);
   assert.match(script, /drive\.google\.com\/thumbnail\?id=/);
   assert.match(html, /Google 雲端／相片分享連結/);
+});
+
+test('admin cache never masks registration personal data', () => {
+  assert.match(script, /function compactEventsForAdminSession/);
+  assert.match(script, /purgePoisonedAdminRegistrationCache/);
+  assert.match(script, /Never replace complete admin registration rows/);
+  assert.doesNotMatch(script, /sessionStorage\.setItem\(ADMIN_DATA_KEY, JSON\.stringify\(\{\s*events: compactEventsForLocalStorage/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {

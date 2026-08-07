@@ -466,11 +466,15 @@
       openModal('modal-admin-auth');
       return;
     }
+    purgePoisonedAdminRegistrationCache();
     const synced = await syncEventsFromBackend();
     if (!synced) {
       showToast('完整報名名單載入失敗，請確認網路後重試', true);
       if (!isAdminAuthenticated) openModal('modal-admin-auth');
       return;
+    }
+    if (!registrationDataLooksComplete(loadEventsData())) {
+      showToast('完整報名名單尚未就緒，請再按一次重新整理', true);
     }
     switchView('admin');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -552,32 +556,78 @@
 
   function compactEventsForLocalStorage(events) {
     return (events || []).map(event => Object.assign({}, event, {
-      // Drop bulky base64 covers from public disk cache only.
-      // Full images stay in memory / eventImageMemory for this session.
+      // Public disk cache only: drop bulky base64 covers and mask private registration fields.
       image: String(event.image || '').startsWith('data:') ? '' : String(event.image || ''),
       registrations: (event.registrations || []).map(() => ({}))
     }));
   }
 
+  function compactEventsForAdminSession(events) {
+    // Admin session MUST keep full registration rows (name/phone/answers).
+    // Only strip bulky data: covers to reduce quota pressure.
+    return (events || []).map(event => Object.assign({}, event, {
+      image: String(event.image || '').startsWith('data:') ? '' : String(event.image || ''),
+      registrations: Array.isArray(event.registrations)
+        ? event.registrations.map(reg => Object.assign({}, reg))
+        : []
+    }));
+  }
+
+  function registrationDataLooksComplete(events) {
+    return (events || []).some(event =>
+      Array.isArray(event.registrations) &&
+      event.registrations.some(reg => reg && reg.id && reg.name && reg.phone)
+    );
+  }
+
+  function purgePoisonedAdminRegistrationCache() {
+    try {
+      const adminStored = sessionStorage.getItem(ADMIN_DATA_KEY);
+      if (!adminStored) return false;
+      const adminParsed = JSON.parse(adminStored);
+      if (!Array.isArray(adminParsed.events)) return false;
+      const hasAnyRows = adminParsed.events.some(event => (event.registrations || []).length > 0);
+      const complete = registrationDataLooksComplete(adminParsed.events);
+      if (hasAnyRows && !complete) {
+        sessionStorage.removeItem(ADMIN_DATA_KEY);
+        return true;
+      }
+    } catch (_error) {
+      try { sessionStorage.removeItem(ADMIN_DATA_KEY); } catch (_ignore) { /* ignore */ }
+      return true;
+    }
+    return false;
+  }
+
   function loadEventsData() {
     try {
       if (isAdminAuthenticated) {
+        // Prefer in-memory admin truth first — never let a stripped cache win.
+        if (Array.isArray(cachedEvents) && registrationDataLooksComplete(cachedEvents)) {
+          return withRememberedImages(cachedEvents);
+        }
         const adminStored = sessionStorage.getItem(ADMIN_DATA_KEY);
         if (adminStored) {
           const adminParsed = JSON.parse(adminStored);
           if (Array.isArray(adminParsed.events)) {
-            cachedEvents = withRememberedImages(adminParsed.events);
-            return cachedEvents;
+            if (registrationDataLooksComplete(adminParsed.events) || !Array.isArray(cachedEvents)) {
+              cachedEvents = withRememberedImages(adminParsed.events);
+              return cachedEvents;
+            }
           }
         }
+        if (Array.isArray(cachedEvents)) return withRememberedImages(cachedEvents);
       }
       if (Array.isArray(cachedEvents)) return withRememberedImages(cachedEvents);
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && Array.isArray(parsed.events)) {
-          cachedEvents = withRememberedImages(parsed.events);
-          return cachedEvents;
+          // Public local cache is masked; only use it when we have nothing better.
+          if (!Array.isArray(cachedEvents) || cachedEvents.length === 0) {
+            cachedEvents = withRememberedImages(parsed.events);
+          }
+          return withRememberedImages(cachedEvents || parsed.events);
         }
       }
     } catch (e) {
@@ -589,18 +639,42 @@
 
   function saveEventsData(events) {
     rememberEventImages(events);
-    cachedEvents = withRememberedImages(cloneEvents(events));
+    const incoming = withRememberedImages(cloneEvents(events));
+    // Never replace complete admin registration rows with masked {} placeholders.
+    if (
+      isAdminAuthenticated &&
+      Array.isArray(cachedEvents) &&
+      registrationDataLooksComplete(cachedEvents) &&
+      !registrationDataLooksComplete(incoming)
+    ) {
+      const byId = new Map(cachedEvents.map(event => [event.id, event]));
+      cachedEvents = incoming.map(event => {
+        const previous = byId.get(event.id);
+        if (!previous) return event;
+        const incomingRegs = event.registrations || [];
+        const looksMasked = incomingRegs.length > 0 && incomingRegs.every(reg => !reg?.name && !reg?.phone);
+        if (looksMasked || (incomingRegs.length === 0 && (previous.registrations || []).length > 0)) {
+          return Object.assign({}, event, { registrations: previous.registrations || [] });
+        }
+        return event;
+      });
+    } else {
+      cachedEvents = incoming;
+    }
+
     let persisted = false;
     try {
       if (backendMode === 'database') {
         if (isAdminAuthenticated) {
           try {
-            // Keep admin session light: store metadata without bulky data: images
             sessionStorage.setItem(ADMIN_DATA_KEY, JSON.stringify({
-              events: compactEventsForLocalStorage(cachedEvents)
+              events: compactEventsForAdminSession(cachedEvents)
             }));
           } catch (adminStoreError) {
             console.warn('Admin session cache full, keeping memory copy:', adminStoreError);
+            try {
+              sessionStorage.removeItem(ADMIN_DATA_KEY);
+            } catch (_ignore) { /* ignore */ }
           }
         }
         const sanitized = compactEventsForLocalStorage(cachedEvents);
@@ -2504,9 +2578,14 @@
   window.refreshAdminData = async function (event) {
     const button = event?.currentTarget;
     if (button) button.disabled = true;
+    purgePoisonedAdminRegistrationCache();
     const synced = await syncEventsFromBackend();
     if (button) button.disabled = false;
-    showToast(synced ? '完整報名名單已更新' : '名單更新失敗，請確認網路後重試', !synced);
+    if (synced && registrationDataLooksComplete(loadEventsData())) {
+      showToast('完整報名名單已更新');
+    } else {
+      showToast(synced ? '名單仍不完整，請再試一次重新整理' : '名單更新失敗，請確認網路後重試', true);
+    }
   };
 
   window.handleFooterAdminClick = function () {
@@ -2527,6 +2606,7 @@
   document.addEventListener('DOMContentLoaded', async () => {
     localStorage.removeItem(LEGACY_GAS_URL_KEY);
     await checkAdminSession();
+    if (isAdminAuthenticated) purgePoisonedAdminRegistrationCache();
     loadEventsData();
     renderQuickLinksUI();
     renderEventsGrid();
@@ -2536,6 +2616,9 @@
     startCountdownTimers();
     setFooterYear();
     await syncEventsFromBackend();
+    if (isAdminAuthenticated && !registrationDataLooksComplete(loadEventsData())) {
+      await syncEventsFromBackend();
+    }
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') syncEventsFromBackend();
