@@ -263,7 +263,7 @@
       facebook: '<svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle fill="#1877F2" cx="12" cy="12" r="11"/><path fill="#FFF" d="M13.35 19.2v-6.55h2.2l.33-2.55h-2.53V8.55c0-.74.2-1.24 1.26-1.24h1.35V5.02A18.3 18.3 0 0013.5 4.8c-2.2 0-3.7 1.34-3.7 3.8v2.1H7.7v2.55h2.1V19.2h3.55z"/></svg>',
       instagram: '<svg class="social-brand-svg social-brand-svg--ig" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="igBrandGrad" x1="2" y1="22" x2="22" y2="2"><stop stop-color="#F58529"/><stop offset=".35" stop-color="#DD2A7B"/><stop offset=".7" stop-color="#8134AF"/><stop offset="1" stop-color="#515BD4"/></linearGradient></defs><rect width="24" height="24" rx="6.5" fill="url(#igBrandGrad)"/><rect x="5.4" y="5.4" width="13.2" height="13.2" rx="3.6" fill="none" stroke="#FFF" stroke-width="1.7"/><circle cx="12" cy="12" r="3.25" fill="none" stroke="#FFF" stroke-width="1.7"/><circle cx="16.55" cy="7.5" r="1.05" fill="#FFF"/></svg>',
       youtube: '<svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="24" height="24" rx="6" fill="#FF0000"/><path fill="#FFF" d="M9.4 7.8v8.4l7.2-4.2-7.2-4.2z"/></svg>',
-      site: '<svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle fill="#B42332" cx="12" cy="12" r="11"/><path fill="none" stroke="#FFF" stroke-width="1.5" stroke-linecap="round" d="M12 3.4c2.4 2.5 2.4 14.7 0 17.2M12 3.4c-2.4 2.5-2.4 14.7 0 17.2M3.6 12h16.8M4.8 7.6h14.4M4.8 16.4h14.4"/></svg>'
+      site: '<img class="social-brand-svg social-brand-logo" src="assets/logo_mark.png?v=20260807" alt="" width="22" height="22" decoding="async">'
     };
     // Unique gradient id per instance to avoid duplicate SVG id clashes
     if (kind === 'instagram') {
@@ -814,6 +814,11 @@
             </div>
             <h3 class="card-title">${escapeHTML(ev.name)}</h3>
             <p class="card-description">${escapeHTML(ev.description || '')}</p>
+            <div class="card-compact-meta">
+              <span>${escapeHTML(ev.location || '萬家福五甲店')}</span>
+              <span class="meta-sep" aria-hidden="true">·</span>
+              <span>剩 ${Math.max(maxPeople - regCount, 0)} 名額</span>
+            </div>
             <div class="card-location-row"><span aria-hidden="true">⌖</span>${escapeHTML(ev.location || '萬家福五甲店')}</div>
             <div class="progress-block">
               <div class="progress-header">

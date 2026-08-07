@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>萬家福五甲店 - 官方活動報名與數位服務中心</title>
   <meta name="description" content="萬家福五甲店官方活動報名平台，提供體驗試吃、親子手作、健康講座等門市專屬活動線上報名服務。地址：830高雄市鳳山區富榮里林森路291號。">
   <meta name="keywords" content="萬家福,五甲店,活動報名,高雄鳳山,體驗試吃,親子手作,會員活動">
@@ -15,7 +15,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="canonical" href="https://wgapptw.pages.dev/">
-  <link rel="stylesheet" href="styles.css?v=20260807_noonsite">
+  <link rel="stylesheet" href="styles.css?v=20260807_blueorange">
 </head>
 <body>
   <div class="app-viewport">
@@ -42,6 +42,12 @@
         </div>
       </div>
     </header>
+
+    <div class="mobile-store-strip" aria-label="門市快捷資訊">
+      <a href="tel:077138508">撥打電話</a>
+      <span>營業 09:00–23:00</span>
+      <a class="store-nav-link" href="https://www.google.com/maps/search/?api=1&query=830%E9%AB%98%E9%9B%84%E5%B8%82%E9%B3%B6%E5%B1%B1%E5%8D%80%E5%AF%8C%E6%A6%AE%E9%87%8C%E6%9E%97%E6%A3%AE%E8%B7%AF291%E8%99%9F+%E8%90%AC%E5%AE%B6%E7%A6%8F%E4%BA%94%E7%94%B2%E5%BA%97" target="_blank" rel="noopener noreferrer">導航</a>
+    </div>
 
     <!-- VIEW 1: PUBLIC EVENT LIST -->
     <main id="view-list">
@@ -551,7 +557,10 @@
       <div class="sheet-body">
         <div class="sheet-title-row">
           <h3 id="sheet-title" class="sheet-title"></h3>
-          <span id="sheet-status-badge" class="sf-badge"></span>
+          <div class="sheet-title-tools">
+            <span id="sheet-status-badge" class="sf-badge"></span>
+            <button type="button" class="btn-icon-circular" aria-label="關閉活動詳情" onclick="closeModal('modal-detail')">✕</button>
+          </div>
         </div>
         <p id="sheet-desc" class="sheet-description"></p>
         <div class="sheet-meta-grid">
@@ -561,11 +570,10 @@
           <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><span id="sheet-price"></span></div>
           <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span id="sheet-progress-text"></span></div>
         </div>
-        <div class="progress-track" style="height:6px; margin-bottom:20px;"><div id="sheet-progress-bar" class="progress-fill"></div></div>
-        <div class="sheet-actions">
-          <button class="btn-system-secondary" onclick="closeModal('modal-detail')">關閉</button>
-          <button class="btn-system-secondary" onclick="exportCurrentEventICS()">匯出行事曆</button>
+        <div class="progress-track" style="height:6px; margin-bottom:12px;"><div id="sheet-progress-bar" class="progress-fill"></div></div>
+        <div class="sheet-actions sheet-actions-sticky">
           <button id="sheet-reg-btn" class="btn-system-primary" onclick="proceedToRegisterForm()">立即報名</button>
+          <button type="button" class="sheet-ics-link" onclick="exportCurrentEventICS()">匯出行事曆</button>
         </div>
       </div>
     </div>
@@ -594,7 +602,7 @@
               <div class="field-group"><label class="field-label" for="proxy-email">代報人 Email <span class="req">*</span></label><input type="email" id="proxy-email" class="sf-input" placeholder="your@email.com"></div>
             </div>
             <div class="field-group"><label class="field-label" id="attendee-name-label" for="reg-name">實際參加者姓名 <span class="req">*</span></label><input type="text" id="reg-name" class="sf-input" required placeholder="請填寫參加者真實姓名"></div>
-            <div class="field-group"><label class="field-label" for="reg-phone">聯絡電話 <span class="req">*</span></label><input type="tel" id="reg-phone" class="sf-input" required placeholder="09xx-xxx-xxx"><p class="field-help">作為身分核對與簡訊通知憑證</p></div>
+            <div class="field-group"><label class="field-label" for="reg-phone">聯絡電話 <span class="req">*</span></label><input type="tel" id="reg-phone" class="sf-input" required placeholder="09xx-xxx-xxx" inputmode="numeric" autocomplete="tel"><p class="field-help">作為身分核對與簡訊通知憑證</p></div>
             <div class="field-group"><label class="field-label" for="reg-email">電子郵件 <span class="opt">(選填)</span></label><input type="email" id="reg-email" class="sf-input" placeholder="有 Email 可填寫 (可不填)"></div>
             <div class="form-honeypot" aria-hidden="true"><label for="reg-website">網站</label><input type="text" id="reg-website" tabindex="-1" autocomplete="off"></div>
             <div id="dynamic-questions-form-container"></div>
@@ -672,6 +680,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260807_noonsite"></script>
+  <script src="app.js?v=20260807_blueorange"></script>
 </body>
 </html>

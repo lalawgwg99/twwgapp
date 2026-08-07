@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_noonsite/);
-  assert.match(html, /app\.js\?v=20260807_noonsite/);
+  assert.match(html, /styles\.css\?v=20260807_blueorange/);
+  assert.match(html, /app\.js\?v=20260807_blueorange/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -77,8 +77,18 @@ test('social quick links use official brand SVG icons instead of emoji', () => {
   assert.match(script, /#06C755/);
   assert.match(script, /#1877F2/);
   assert.match(script, /social-brand-svg/);
+  assert.match(script, /assets\/logo_mark\.png/);
   assert.doesNotMatch(script, /label: '📍 Google 地圖導航'/);
   assert.doesNotMatch(script, /shortLabel: '💬'/);
+});
+
+test('mobile experience keeps a compact first fold and brand blue-orange palette', () => {
+  assert.match(css, /--brand-blue:\s*#2060A8/);
+  assert.match(css, /--brand-orange:\s*#E85000/);
+  assert.match(html, /class="mobile-store-strip"/);
+  assert.match(css, /\.card-description[\s\S]*?\.progress-block\s*\{\s*display:\s*none/s);
+  assert.match(html, /viewport-fit=cover/);
+  assert.match(html, /sheet-actions-sticky/);
 });
 
 test('admins can cancel one registration with confirmation and release its spot', () => {
