@@ -2787,14 +2787,17 @@ textarea:focus-visible,
     font-size: 17px;
   }
 
-  .card-description,
-  .card-location-row,
-  .progress-block {
+  /* Description stays compact on mobile; quota progress matches desktop */
+  .card-description {
     display: none;
   }
 
   .card-compact-meta {
-    display: flex;
+    display: none;
+  }
+
+  .progress-block {
+    margin-top: 8px;
   }
 
   .card-countdown-bar {

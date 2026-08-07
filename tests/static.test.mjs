@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_newevent/);
-  assert.match(html, /app\.js\?v=20260807_newevent/);
+  assert.match(html, /styles\.css\?v=20260807_quotaui/);
+  assert.match(html, /app\.js\?v=20260807_quotaui/);
 });
 
 test('registration form collects party size and notes', () => {
@@ -47,6 +47,14 @@ test('registration form collects party size and notes', () => {
 
 test('creating an event refreshes the admin selector immediately', () => {
   assert.match(script, /activeEventId = newEvent\.id;[\s\S]*?renderAdminDashboard\(\)/);
+});
+
+test('mobile and desktop event cards both show registration progress', () => {
+  assert.match(script, /名額進度/);
+  assert.match(script, /progress-block/);
+  assert.match(css, /\.progress-block\s*\{/);
+  // Mobile must not hide the quota progress bar that desktop shows
+  assert.doesNotMatch(css, /@media[^{]+max-width:\s*768px[^{]*\{[\s\S]*?\.progress-block\s*\{\s*display:\s*none/i);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -102,7 +110,6 @@ test('mobile experience keeps a compact first fold and brand blue-orange palette
   assert.match(css, /--brand-orange:\s*#E85000/);
   assert.doesNotMatch(html, /class="mobile-store-strip"/);
   assert.doesNotMatch(html, /撥打電話/);
-  assert.match(css, /\.card-description[\s\S]*?\.progress-block\s*\{\s*display:\s*none/s);
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /sheet-actions-sticky/);
 });
