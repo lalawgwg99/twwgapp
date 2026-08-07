@@ -1542,8 +1542,8 @@
         };
       }
       return {
-        url: `https://drive.google.com/uc?export=view&id=${encodeURIComponent(driveId)}`,
-        message: '已轉換 Google 雲端連結。若仍空白，請把檔案設成「知道連結的任何人可檢視」，或改上傳檔案',
+        url: `https://drive.google.com/thumbnail?id=${encodeURIComponent(driveId)}&sz=w2000`,
+        message: '已轉換 Google 雲端連結。若仍空白：檔案請設「知道連結的任何人可檢視」，或改上傳檔案最穩',
         converted: true
       };
     }

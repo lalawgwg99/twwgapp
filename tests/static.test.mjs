@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_gdrive/);
-  assert.match(html, /app\.js\?v=20260807_gdrive/);
+  assert.match(html, /styles\.css\?v=20260807_gthumb/);
+  assert.match(html, /app\.js\?v=20260807_gthumb/);
 });
 
 test('registration form collects party size and notes', () => {
@@ -82,7 +82,7 @@ test('image URL fields debounce live preview to avoid input lag', () => {
 
 test('google drive share links are normalized or rejected with guidance', () => {
   assert.match(script, /function normalizePublicImageUrl/);
-  assert.match(script, /drive\.google\.com\/uc\?export=view/);
+  assert.match(script, /drive\.google\.com\/thumbnail\?id=/);
   assert.match(html, /Google 雲端／相片分享連結/);
 });
 
