@@ -680,7 +680,7 @@
     document.getElementById('admin-sub-create').classList.toggle('hidden', subView !== 'create');
 
     if (subView === 'manage') {
-      renderAdminRegistrations();
+      renderAdminDashboard();
     }
   };
 
@@ -1602,8 +1602,11 @@
     renderQuestionnaireBuilder();
 
     showToast('🎉 萬家福五甲店 新活動發布成功！');
+    activeEventId = newEvent.id;
     switchAdminSubView('manage');
+    renderAdminDashboard();
     renderEventsGrid();
+    renderSidebarWidgets();
     updateCreateReadiness();
     if (submitButton) submitButton.disabled = false;
   };

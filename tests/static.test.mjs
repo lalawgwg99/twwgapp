@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_party4/);
-  assert.match(html, /app\.js\?v=20260807_party4/);
+  assert.match(html, /styles\.css\?v=20260807_newevent/);
+  assert.match(html, /app\.js\?v=20260807_newevent/);
 });
 
 test('registration form collects party size and notes', () => {
@@ -43,6 +43,10 @@ test('registration form collects party size and notes', () => {
   assert.match(script, /參加人數請填 1～4/);
   assert.match(script, /備註/);
   assert.doesNotMatch(script, /127\.0\.0\.1:7589/);
+});
+
+test('creating an event refreshes the admin selector immediately', () => {
+  assert.match(script, /activeEventId = newEvent\.id;[\s\S]*?renderAdminDashboard\(\)/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
