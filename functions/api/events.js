@@ -237,8 +237,8 @@ async function registerAttendee(data, env) {
   if (!eventId || !attendeeName || attendeeName.length > 80 || !/^09\d{8}$/.test(attendeePhone)) {
     return jsonResponse({ success: false, error: "請填寫有效的姓名與台灣手機號碼" }, 400);
   }
-  if (!Number.isInteger(partySize) || partySize < 1 || partySize > 20) {
-    return jsonResponse({ success: false, error: "參加人數請填 1～20 的整數" }, 400);
+  if (!Number.isInteger(partySize) || partySize < 1 || partySize > 4) {
+    return jsonResponse({ success: false, error: "參加人數請填 1～4 的整數" }, 400);
   }
   if (notes.length > 500) {
     return jsonResponse({ success: false, error: "備註最多 500 字" }, 400);
@@ -329,7 +329,7 @@ function validateEvent(event) {
 function normalizeRegistration(row) {
   const rawAnswers = parseJson(row.answers, {});
   const partySizeRaw = Number.parseInt(String(rawAnswers[PARTY_SIZE_KEY] ?? 1), 10);
-  const partySize = Number.isInteger(partySizeRaw) && partySizeRaw >= 1 && partySizeRaw <= 20
+  const partySize = Number.isInteger(partySizeRaw) && partySizeRaw >= 1 && partySizeRaw <= 4
     ? partySizeRaw
     : 1;
   const notes = String(rawAnswers[NOTES_KEY] || "").trim().slice(0, 500);

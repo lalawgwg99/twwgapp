@@ -1142,8 +1142,8 @@
       showToast('請輸入有效的台灣手機號碼（09 開頭共 10 碼）', true);
       return;
     }
-    if (!Number.isInteger(partySize) || partySize < 1 || partySize > 20) {
-      showToast('參加人數請填 1～20 的整數', true);
+    if (!Number.isInteger(partySize) || partySize < 1 || partySize > 4) {
+      showToast('參加人數請填 1～4 的整數', true);
       return;
     }
     if (notes.length > 500) {

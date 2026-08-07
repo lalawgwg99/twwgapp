@@ -30,16 +30,17 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_partynotes/);
-  assert.match(html, /app\.js\?v=20260807_partynotes/);
+  assert.match(html, /styles\.css\?v=20260807_party4/);
+  assert.match(html, /app\.js\?v=20260807_party4/);
 });
 
 test('registration form collects party size and notes', () => {
-  assert.match(html, /id="reg-party-size"/);
+  assert.match(html, /id="reg-party-size"[^>]*max="4"/);
+  assert.match(html, /最多 4 人/);
   assert.match(html, /id="reg-notes"/);
   assert.match(script, /partySize/);
   assert.match(script, /notes/);
-  assert.match(script, /參加人數/);
+  assert.match(script, /參加人數請填 1～4/);
   assert.match(script, /備註/);
   assert.doesNotMatch(script, /127\.0\.0\.1:7589/);
 });
