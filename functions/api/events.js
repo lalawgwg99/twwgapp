@@ -84,9 +84,18 @@ export async function onRequestPost({ request, env }) {
 
     if (action === "update_event") {
       const event = normalizeEvent(data.event);
+      if (!env.DB) return databaseUnavailable();
+
+      // Never wipe an existing cover when the client sends a blank image
+      // (common after localStorage stripped bulky data: URLs).
+      if (!event.image) {
+        const existing = await env.DB.prepare("SELECT image_url FROM events WHERE id = ?")
+          .bind(event.id).first();
+        if (existing?.image_url) event.image = existing.image_url;
+      }
+
       const error = validateEvent(event);
       if (error) return jsonResponse({ success: false, error }, 400);
-      if (!env.DB) return databaseUnavailable();
 
       const result = await env.DB.prepare(
         `UPDATE events SET name = ?, category = ?, custom_badge = ?, price_tier = ?,

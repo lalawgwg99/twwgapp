@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_mobilesync/);
-  assert.match(html, /app\.js\?v=20260807_mobilesync/);
+  assert.match(html, /styles\.css\?v=20260807_keepimg/);
+  assert.match(html, /app\.js\?v=20260807_keepimg/);
 });
 
 test('registration form collects party size and notes', () => {
@@ -65,6 +65,13 @@ test('event sync keeps mobile and desktop lists aligned', () => {
   assert.match(script, /resetPublicEventFilters/);
   assert.match(script, /visibilitychange/);
   assert.match(script, /await syncEventsFromBackend\(\)/);
+});
+
+test('editing an event never wipes the existing cover image', () => {
+  assert.match(script, /eventImageMemory/);
+  assert.match(script, /withRememberedImages/);
+  assert.match(script, /Empty URL field means "keep current cover"/);
+  assert.match(script, /await syncEventsFromBackend\(\);/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {

@@ -41,6 +41,7 @@
   let backendMode = 'client_sync';
   let cachedEvents = null;
   let eventsSyncGeneration = 0;
+  const eventImageMemory = new Map();
 
   // Real Server Authentication State
   let adminSessionToken = null;
@@ -532,9 +533,27 @@
     return JSON.parse(JSON.stringify(events || []));
   }
 
+  function rememberEventImages(events) {
+    (events || []).forEach(event => {
+      if (event?.id && event.image) eventImageMemory.set(event.id, event.image);
+    });
+  }
+
+  function withRememberedImages(events) {
+    return (events || []).map(event => {
+      if (event?.image) {
+        eventImageMemory.set(event.id, event.image);
+        return event;
+      }
+      const remembered = eventImageMemory.get(event.id);
+      return remembered ? Object.assign({}, event, { image: remembered }) : event;
+    });
+  }
+
   function compactEventsForLocalStorage(events) {
     return (events || []).map(event => Object.assign({}, event, {
-      // Drop bulky base64 covers from public cache so mobile quota cannot block updates
+      // Drop bulky base64 covers from public disk cache only.
+      // Full images stay in memory / eventImageMemory for this session.
       image: String(event.image || '').startsWith('data:') ? '' : String(event.image || ''),
       registrations: (event.registrations || []).map(() => ({}))
     }));
@@ -547,35 +566,39 @@
         if (adminStored) {
           const adminParsed = JSON.parse(adminStored);
           if (Array.isArray(adminParsed.events)) {
-            cachedEvents = adminParsed.events;
-            return adminParsed.events;
+            cachedEvents = withRememberedImages(adminParsed.events);
+            return cachedEvents;
           }
         }
       }
-      if (Array.isArray(cachedEvents)) return cachedEvents;
+      if (Array.isArray(cachedEvents)) return withRememberedImages(cachedEvents);
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && Array.isArray(parsed.events)) {
-          cachedEvents = parsed.events;
-          return parsed.events;
+          cachedEvents = withRememberedImages(parsed.events);
+          return cachedEvents;
         }
       }
     } catch (e) {
       console.warn('LocalStorage access failed, using memory fallback:', e);
-      if (Array.isArray(cachedEvents)) return cachedEvents;
+      if (Array.isArray(cachedEvents)) return withRememberedImages(cachedEvents);
     }
-    return Array.isArray(cachedEvents) ? cachedEvents : [];
+    return Array.isArray(cachedEvents) ? withRememberedImages(cachedEvents) : [];
   }
 
   function saveEventsData(events) {
-    cachedEvents = cloneEvents(events);
+    rememberEventImages(events);
+    cachedEvents = withRememberedImages(cloneEvents(events));
     let persisted = false;
     try {
       if (backendMode === 'database') {
         if (isAdminAuthenticated) {
           try {
-            sessionStorage.setItem(ADMIN_DATA_KEY, JSON.stringify({ events: cachedEvents }));
+            // Keep admin session light: store metadata without bulky data: images
+            sessionStorage.setItem(ADMIN_DATA_KEY, JSON.stringify({
+              events: compactEventsForLocalStorage(cachedEvents)
+            }));
           } catch (adminStoreError) {
             console.warn('Admin session cache full, keeping memory copy:', adminStoreError);
           }
@@ -595,7 +618,6 @@
       }
     } catch (e) {
       console.error('Failed to save to LocalStorage:', e);
-      // Memory cache still holds the latest server truth for this session
     }
     return persisted;
   }
@@ -918,11 +940,13 @@
   };
 
   // EDIT PUBLISHED EVENT LOGIC
-  window.openEditEventModal = function () {
+  window.openEditEventModal = async function () {
     if (!isAdminAuthenticated) {
       showToast('權限不足', true);
       return;
     }
+
+    await syncEventsFromBackend();
 
     const events = loadEventsData();
     const ev = events.find(e => e.id === activeEventId);
@@ -941,10 +965,14 @@
     document.getElementById('edit-event-price-tier').value = ev.priceTier || '';
     document.getElementById('edit-event-custom-badge').value = ev.customBadge || '';
     document.getElementById('edit-event-max').value = ev.maxPeople || 50;
-    document.getElementById('edit-event-img-url').value = ev.image || '';
+    document.getElementById('edit-event-img-url').value = String(ev.image || '').startsWith('data:') ? '' : (ev.image || '');
     document.getElementById('edit-event-img-file').value = '';
     editEventFilePreviewDataUrl = null;
-    switchEditEventUploadMethod('url');
+    // Keep current cover unless admin uploads a new file or pastes a new HTTPS URL
+    switchEditEventUploadMethod(String(ev.image || '').startsWith('data:') ? 'file' : 'url');
+    if (String(ev.image || '').startsWith('data:')) {
+      editEventFilePreviewDataUrl = ev.image;
+    }
     const imagePreview = document.getElementById('edit-event-image-preview');
     if (ev.image) {
       imagePreview.style.backgroundImage = `url('${ev.image}')`;
@@ -980,12 +1008,16 @@
     const priceTier = document.getElementById('edit-event-price-tier').value.trim();
     const customBadge = document.getElementById('edit-event-custom-badge').value.trim();
     const maxPeople = parseInt(document.getElementById('edit-event-max').value, 10);
-    let image = ev.image;
+    const existingImage = ev.image || eventImageMemory.get(ev.id) || '';
+    let image = existingImage;
     if (editEventUploadMethod === 'file' && editEventFilePreviewDataUrl) {
       image = editEventFilePreviewDataUrl;
     } else if (editEventUploadMethod === 'url') {
-      image = document.getElementById('edit-event-img-url').value.trim() || ev.image;
+      const urlInput = document.getElementById('edit-event-img-url').value.trim();
+      // Empty URL field means "keep current cover", never wipe
+      image = urlInput || existingImage;
     }
+    if (!image) image = existingImage;
 
     if (!name || !category || !date || !endDate || !maxPeople || maxPeople < 1) {
       showToast('請填寫完整必填欄位、自訂分類與報名截止時間', true);
