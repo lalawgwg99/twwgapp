@@ -2718,7 +2718,11 @@ textarea:focus-visible,
   }
 
   .hero-action-desc {
-    display: none;
+    display: block;
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #4b5d73;
   }
 
   .hero-countdown-block {

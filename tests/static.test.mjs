@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260807_nostrip/);
-  assert.match(html, /app\.js\?v=20260807_nostrip/);
+  assert.match(html, /styles\.css\?v=20260807_herodesc/);
+  assert.match(html, /app\.js\?v=20260807_herodesc/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
