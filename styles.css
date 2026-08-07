@@ -2584,10 +2584,6 @@ textarea:focus-visible,
   background: #12324f;
 }
 
-.mobile-store-strip {
-  display: none;
-}
-
 .sheet-title-tools {
   display: flex;
   align-items: center;
@@ -2667,54 +2663,6 @@ textarea:focus-visible,
   .subtitle {
     max-width: 100%;
     font-size: 13px;
-  }
-
-  /* Mobile store strip replaces hidden sidebar contact info */
-  .mobile-store-strip {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 12px;
-    padding: 10px 12px;
-    border: 1px solid #d5dee8;
-    border-radius: 10px;
-    background: linear-gradient(90deg, rgba(32, 96, 168, 0.08), rgba(232, 80, 0, 0.08));
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .mobile-store-strip::-webkit-scrollbar {
-    display: none;
-  }
-
-  .mobile-store-strip a,
-  .mobile-store-strip span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    padding: 0 10px;
-    border-radius: 8px;
-    white-space: nowrap;
-    font-size: 13px;
-    font-weight: 650;
-    text-decoration: none;
-    color: #14233a;
-    background: #fff;
-    border: 1px solid #d5dee8;
-  }
-
-  .mobile-store-strip a[href^="tel"] {
-    color: #fff;
-    background: var(--brand-blue);
-    border-color: var(--brand-blue);
-  }
-
-  .mobile-store-strip a.store-nav-link {
-    color: #fff;
-    background: var(--brand-orange);
-    border-color: var(--brand-orange);
   }
 
   /* Compact social pills: icon + short label */
