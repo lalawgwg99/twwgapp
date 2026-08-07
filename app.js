@@ -1498,6 +1498,26 @@
     return '';
   }
 
+  const imageUrlPreviewTimers = {};
+
+  function scheduleImageUrlPreview(previewId, rawUrl, timerKey) {
+    if (imageUrlPreviewTimers[timerKey]) clearTimeout(imageUrlPreviewTimers[timerKey]);
+    imageUrlPreviewTimers[timerKey] = setTimeout(() => {
+      const preview = document.getElementById(previewId);
+      if (!preview) return;
+      const url = String(rawUrl || '').trim();
+      // Don't live-preview data: URLs or incomplete strings — that freezes the UI
+      const canPreview = /^https:\/\/\S+/i.test(url) && !url.startsWith('data:');
+      if (canPreview) {
+        preview.style.backgroundImage = `url(${JSON.stringify(url)})`;
+        preview.classList.remove('hidden');
+      } else if (!url) {
+        preview.style.backgroundImage = '';
+        preview.classList.add('hidden');
+      }
+    }, 450);
+  }
+
   // Image Upload Method Tabs
   window.switchUploadMethod = function (method) {
     uploadMethod = method;
@@ -1509,14 +1529,7 @@
   };
 
   window.handleImageUrlChange = function (e) {
-    const url = e.target.value.trim();
-    const preview = document.getElementById('image-preview');
-    if (url) {
-      preview.style.backgroundImage = `url('${url}')`;
-      preview.classList.remove('hidden');
-    } else {
-      preview.classList.add('hidden');
-    }
+    scheduleImageUrlPreview('image-preview', e.target.value, 'create');
   };
 
   window.handleFileSelect = async function (e) {
@@ -1525,7 +1538,7 @@
     try {
       filePreviewDataUrl = await optimizeImageFile(file);
       const preview = document.getElementById('image-preview');
-      preview.style.backgroundImage = `url('${filePreviewDataUrl}')`;
+      preview.style.backgroundImage = `url(${JSON.stringify(filePreviewDataUrl)})`;
       preview.classList.remove('hidden');
     } catch (error) {
       showToast(error.message, true);
@@ -1542,14 +1555,7 @@
   };
 
   window.handleEditEventImageUrlChange = function (e) {
-    const url = e.target.value.trim();
-    const preview = document.getElementById('edit-event-image-preview');
-    if (url) {
-      preview.style.backgroundImage = `url('${url}')`;
-      preview.classList.remove('hidden');
-    } else {
-      preview.classList.add('hidden');
-    }
+    scheduleImageUrlPreview('edit-event-image-preview', e.target.value, 'edit');
   };
 
   window.handleEditEventFileSelect = async function (e) {
@@ -1558,7 +1564,7 @@
     try {
       editEventFilePreviewDataUrl = await optimizeImageFile(file);
       const preview = document.getElementById('edit-event-image-preview');
-      preview.style.backgroundImage = `url('${editEventFilePreviewDataUrl}')`;
+      preview.style.backgroundImage = `url(${JSON.stringify(editEventFilePreviewDataUrl)})`;
       preview.classList.remove('hidden');
       showToast('圖片讀取成功，儲存後將更新活動封面');
     } catch (error) {
@@ -2144,14 +2150,7 @@
   };
 
   window.handleHeroImageUrlChange = function (e) {
-    const url = e.target.value.trim();
-    const preview = document.getElementById('hero-image-preview');
-    if (url && preview) {
-      preview.style.backgroundImage = `url('${url}')`;
-      preview.classList.remove('hidden');
-    } else if (preview) {
-      preview.classList.add('hidden');
-    }
+    scheduleImageUrlPreview('hero-image-preview', e.target.value, 'hero');
   };
 
   window.handleHeroFileSelect = async function (e) {
@@ -2162,7 +2161,7 @@
       heroFilePreviewDataUrl = await optimizeImageFile(file);
       const preview = document.getElementById('hero-image-preview');
       if (preview) {
-        preview.style.backgroundImage = `url('${heroFilePreviewDataUrl}')`;
+        preview.style.backgroundImage = `url(${JSON.stringify(heroFilePreviewDataUrl)})`;
         preview.classList.remove('hidden');
       }
       showToast('📸 圖片讀取成功！已設定為 Hero 看板圖');
