@@ -255,29 +255,52 @@
     }
   }
 
+  /** Official-style brand marks (inline SVG) for social / map / site links */
+  function getSocialBrandIcon(kind) {
+    const icons = {
+      map: '<svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#EA4335" d="M12 2.5c-3.6 0-6.5 2.85-6.5 6.35C5.5 13.9 12 21.5 12 21.5s6.5-7.6 6.5-12.65C18.5 5.35 15.6 2.5 12 2.5z"/><circle fill="#FFF" cx="12" cy="8.85" r="2.55"/><circle fill="#4285F4" cx="12" cy="8.85" r="1.15"/></svg>',
+      line: '<svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#06C755" d="M20 9.05C20 5.25 16.42 2.2 12 2.2S4 5.25 4 9.05c0 3.4 3.02 6.25 7.1 6.78.28.06.65.19.74.43.08.22.05.56 0 .77l-.23.97c-.07.29-.31 1.12 1.03.61C16.95 16.5 20 13.28 20 9.05z"/><path fill="#FFF" d="M8.05 11.7H6.85a.38.38 0 01-.38-.38V8.2c0-.21.17-.38.38-.38h1.2c.21 0 .38.17.38.38v3.12c0 .21-.17.38-.38.38zm2.45 0h-.4a.38.38 0 01-.38-.38V8.2c0-.21.17-.38.38-.38h.4c.21 0 .38.17.38.38v3.12c0 .21-.17.38-.38.38zm3.7.02c0 .2-.16.36-.36.36h-1.62a.38.38 0 01-.38-.38V8.2c0-.21.17-.38.38-.38h1.62c.2 0 .36.16.36.36v.36a.36.36 0 01-.36.36h-.88v.48h.88c.2 0 .36.16.36.36v.36a.36.36 0 01-.36.36h-.88v.5h.88c.2 0 .36.16.36.36v.4zm3.15-.02h-.4a.38.38 0 01-.37-.33l-.7-2.28-.7 2.28a.38.38 0 01-.37.33h-.4a.38.38 0 01-.36-.49l1.12-3.2c.07-.22.28-.37.5-.37h.37c.22 0 .43.15.5.37l1.12 3.2c.08.25-.1.49-.35.49z"/></svg>',
+      facebook: '<svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle fill="#1877F2" cx="12" cy="12" r="11"/><path fill="#FFF" d="M13.35 19.2v-6.55h2.2l.33-2.55h-2.53V8.55c0-.74.2-1.24 1.26-1.24h1.35V5.02A18.3 18.3 0 0013.5 4.8c-2.2 0-3.7 1.34-3.7 3.8v2.1H7.7v2.55h2.1V19.2h3.55z"/></svg>',
+      instagram: '<svg class="social-brand-svg social-brand-svg--ig" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="igBrandGrad" x1="2" y1="22" x2="22" y2="2"><stop stop-color="#F58529"/><stop offset=".35" stop-color="#DD2A7B"/><stop offset=".7" stop-color="#8134AF"/><stop offset="1" stop-color="#515BD4"/></linearGradient></defs><rect width="24" height="24" rx="6.5" fill="url(#igBrandGrad)"/><rect x="5.4" y="5.4" width="13.2" height="13.2" rx="3.6" fill="none" stroke="#FFF" stroke-width="1.7"/><circle cx="12" cy="12" r="3.25" fill="none" stroke="#FFF" stroke-width="1.7"/><circle cx="16.55" cy="7.5" r="1.05" fill="#FFF"/></svg>',
+      youtube: '<svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="24" height="24" rx="6" fill="#FF0000"/><path fill="#FFF" d="M9.4 7.8v8.4l7.2-4.2-7.2-4.2z"/></svg>',
+      site: '<svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle fill="#B42332" cx="12" cy="12" r="11"/><path fill="none" stroke="#FFF" stroke-width="1.5" stroke-linecap="round" d="M12 3.4c2.4 2.5 2.4 14.7 0 17.2M12 3.4c-2.4 2.5-2.4 14.7 0 17.2M3.6 12h16.8M4.8 7.6h14.4M4.8 16.4h14.4"/></svg>'
+    };
+    // Unique gradient id per instance to avoid duplicate SVG id clashes
+    if (kind === 'instagram') {
+      const gradId = `igBrandGrad-${Math.random().toString(36).slice(2, 9)}`;
+      return icons.instagram.replace(/igBrandGrad/g, gradId);
+    }
+    return icons[kind] || '';
+  }
+
   function renderQuickLinksUI() {
     const links = loadQuickLinks();
     const container = document.getElementById('quick-links-pills-container');
     if (!container) return;
 
     const linkDefinitions = [
-      { key: 'mapUrl', label: '📍 Google 地圖導航', shortLabel: '📍', css: 'pill-map', title: 'Google Maps' },
-      { key: 'lineUrl', label: '💬 LINE 官方帳號', shortLabel: '💬', css: 'pill-line', title: 'LINE' },
-      { key: 'fbUrl', label: '📘 FB 粉絲專頁', shortLabel: '📘', css: 'pill-fb', title: 'Facebook' },
-      { key: 'igUrl', label: '📷 Instagram', shortLabel: '📷', css: 'pill-ig', title: 'Instagram' },
-      { key: 'ytUrl', label: '🎬 YouTube 影音', shortLabel: '🎬', css: 'pill-yt', title: 'YouTube' },
-      { key: 'siteUrl', label: '🌐 萬家福品牌官網', shortLabel: '🌐', css: 'pill-site', title: '萬家福官網' }
+      { key: 'mapUrl', label: 'Google 地圖', icon: 'map', css: 'pill-map', title: 'Google Maps 導航' },
+      { key: 'lineUrl', label: 'LINE', icon: 'line', css: 'pill-line', title: 'LINE 官方帳號' },
+      { key: 'fbUrl', label: 'Facebook', icon: 'facebook', css: 'pill-fb', title: 'Facebook 粉絲專頁' },
+      { key: 'igUrl', label: 'Instagram', icon: 'instagram', css: 'pill-ig', title: 'Instagram' },
+      { key: 'ytUrl', label: 'YouTube', icon: 'youtube', css: 'pill-yt', title: 'YouTube 影音頻道' },
+      { key: 'siteUrl', label: '品牌官網', icon: 'site', css: 'pill-site', title: '萬家福品牌官網' }
     ].filter(item => safeExternalUrl(links[item.key]) !== '#');
 
     container.innerHTML = linkDefinitions.map(item => `
-      <a href="${escapeHTML(safeExternalUrl(links[item.key]))}" target="_blank" rel="noopener" class="quick-link-pill ${item.css}">${item.label}</a>
+      <a href="${escapeHTML(safeExternalUrl(links[item.key]))}" target="_blank" rel="noopener noreferrer" class="quick-link-pill ${item.css}" title="${escapeHTML(item.title)}" aria-label="${escapeHTML(item.title)}">
+        <span class="social-icon-wrap">${getSocialBrandIcon(item.icon)}</span>
+        <span class="social-pill-label">${escapeHTML(item.label)}</span>
+      </a>
     `).join('');
 
     // Also render footer social links
     const footerSocial = document.getElementById('footer-social-links');
     if (footerSocial) {
       footerSocial.innerHTML = linkDefinitions.map(item => `
-        <a href="${escapeHTML(safeExternalUrl(links[item.key]))}" target="_blank" rel="noopener" class="footer-social-icon" title="${item.title}">${item.shortLabel}</a>
+        <a href="${escapeHTML(safeExternalUrl(links[item.key]))}" target="_blank" rel="noopener noreferrer" class="footer-social-icon footer-social-${escapeHTML(item.icon)}" title="${escapeHTML(item.title)}" aria-label="${escapeHTML(item.title)}">
+          ${getSocialBrandIcon(item.icon)}
+        </a>
       `).join('');
     }
   }
@@ -651,17 +674,13 @@
   window.switchAdminSubView = function (subView) {
     activeAdminSubView = subView;
     document.getElementById('admin-tab-manage').classList.toggle('active', subView === 'manage');
-    document.getElementById('admin-tab-onsite').classList.toggle('active', subView === 'onsite');
     document.getElementById('admin-tab-create').classList.toggle('active', subView === 'create');
 
     document.getElementById('admin-sub-manage').classList.toggle('hidden', subView !== 'manage');
-    document.getElementById('admin-sub-onsite').classList.toggle('hidden', subView !== 'onsite');
     document.getElementById('admin-sub-create').classList.toggle('hidden', subView !== 'create');
 
     if (subView === 'manage') {
       renderAdminRegistrations();
-    } else if (subView === 'onsite') {
-      renderOnsiteEventSelector();
     }
   };
 
@@ -1183,84 +1202,6 @@
     renderEventsGrid();
     submitButton.disabled = false;
     submitButton.textContent = '確認送出報名';
-  };
-
-  // Onsite Rapid Registration
-  function renderOnsiteEventSelector() {
-    const events = loadEventsData();
-    const selector = document.getElementById('onsite-event-selector');
-    if (!events || events.length === 0) {
-      selector.innerHTML = '<option value="">尚無活動</option>';
-      return;
-    }
-    selector.innerHTML = events.map(e => `
-      <option value="${e.id}" ${e.id === activeEventId ? 'selected' : ''}>
-        ${escapeHTML(e.name)} (${e.registrations.length}/${e.maxPeople}人)
-      </option>
-    `).join('');
-  }
-
-  window.submitOnsiteRegistration = async function (e) {
-    e.preventDefault();
-    if (!isAdminAuthenticated) {
-      showToast('權限不足', true);
-      return;
-    }
-
-    const eventId = document.getElementById('onsite-event-selector').value;
-    const name = document.getElementById('onsite-name').value.trim();
-    const phone = document.getElementById('onsite-phone').value.replace(/\D/g, '');
-    const autoCheckin = document.getElementById('onsite-auto-checkin').checked;
-
-    if (!eventId || !name || !/^09\d{8}$/.test(phone)) {
-      showToast('請填寫姓名與有效的台灣手機號碼', true);
-      return;
-    }
-
-    const events = loadEventsData();
-    const ev = events.find(e => e.id === eventId);
-    if (!ev) return;
-    const status = getStatus(ev.registrations.length, ev.maxPeople, ev.startDate, ev.endDate);
-    if (!status.allowRegister) {
-      showToast(`無法報名：${status.label}`, true);
-      return;
-    }
-    if (ev.registrations.some(registration => String(registration.phone || '').replace(/\D/g, '') === phone)) {
-      showToast('此電話號碼已報名過本活動', true);
-      return;
-    }
-
-    const registration = {
-      name,
-      email: '',
-      phone,
-      isProxy: false,
-      answers: {},
-      checkedIn: autoCheckin,
-      registeredAt: Date.now()
-    };
-
-    try {
-      const result = await requestBackend('register', {
-        eventId, attendeeName: name, attendeePhone: phone, attendeeEmail: '', answers: {}
-      });
-      if (result.registrationId) registration.id = result.registrationId;
-      if (autoCheckin && result.registrationId) {
-        await requestBackend('set_checkin', { eventId, registrationId: result.registrationId, checkedIn: true }, true);
-      }
-      ev.registrations.push(registration);
-      saveEventsData(events);
-    } catch (error) {
-      showToast(error.message, true);
-      return;
-    }
-
-    document.getElementById('onsite-name').value = '';
-    document.getElementById('onsite-phone').value = '';
-
-    showToast(`⚡️ 已完成『${name}』現場快速報名與報到！`);
-    renderAdminDashboard();
-    renderEventsGrid();
   };
 
   // Export iCal (.ics)

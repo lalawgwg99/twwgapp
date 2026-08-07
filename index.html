@@ -15,7 +15,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="canonical" href="https://wgapptw.pages.dev/">
-  <link rel="stylesheet" href="styles.css?v=20260806_pro8">
+  <link rel="stylesheet" href="styles.css?v=20260807_noonsite">
 </head>
 <body>
   <div class="app-viewport">
@@ -105,7 +105,6 @@
 
       <div class="admin-sub-nav">
         <button id="admin-tab-manage" class="admin-tab-btn active" onclick="switchAdminSubView('manage')">名單與簽到</button>
-        <button id="admin-tab-onsite" class="admin-tab-btn" onclick="switchAdminSubView('onsite')">⚡️ 五甲店現場報名</button>
         <button id="admin-tab-create" class="admin-tab-btn" onclick="switchAdminSubView('create')">發布新活動</button>
       </div>
 
@@ -136,42 +135,7 @@
         </div>
       </div>
 
-      <!-- SUB-VIEW B: ONSITE RAPID REGISTRATION -->
-      <div id="admin-sub-onsite" class="hidden">
-        <div class="form-card">
-          <div class="section-header">
-            <h2 class="form-section-title">⚡️ 萬家福五甲店 現場快速報名</h2>
-          </div>
-          <p class="field-help" style="margin-bottom:16px;">顧客於五甲店現場到場時，服務人員直接於平板/手機為顧客快速完成報名並自動標記為「已報到」。</p>
-          <form id="onsite-registration-form" onsubmit="submitOnsiteRegistration(event)">
-            <div class="form-grid">
-              <div class="field-group">
-                <label class="field-label" for="onsite-event-selector">選擇報名活動 <span class="req">*</span></label>
-                <select id="onsite-event-selector" class="sf-select" required></select>
-              </div>
-              <div class="form-row-2">
-                <div class="field-group">
-                  <label class="field-label" for="onsite-name">參加顧客姓名 <span class="req">*</span></label>
-                  <input type="text" id="onsite-name" class="sf-input" required placeholder="請輸入顧客真實姓名">
-                </div>
-                <div class="field-group">
-                  <label class="field-label" for="onsite-phone">聯絡電話 <span class="req">*</span></label>
-                  <input type="tel" id="onsite-phone" class="sf-input" required placeholder="09xx-xxx-xxx">
-                </div>
-              </div>
-              <div class="field-group">
-                <label class="checkbox-row">
-                  <input type="checkbox" id="onsite-auto-checkin" checked>
-                  <span>現場完成報名並同時直接標記「✓ 已完成報到」</span>
-                </label>
-              </div>
-              <button type="submit" class="btn-system-primary" style="margin-top:10px;">送出現場報名並完成簽到</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- SUB-VIEW C: CREATE NEW EVENT -->
+      <!-- SUB-VIEW B: CREATE NEW EVENT -->
       <div id="admin-sub-create" class="hidden">
         <div class="form-card">
           <div class="settings-page-header">
@@ -343,7 +307,7 @@
 
         <!-- Column 4: Social Media -->
         <div class="footer-section">
-          <h4 class="footer-heading">🌐 社群媒體</h4>
+          <h4 class="footer-heading">社群媒體</h4>
           <div class="footer-social-links" id="footer-social-links">
             <!-- Dynamically rendered by app.js -->
           </div>
@@ -473,12 +437,12 @@
         <p class="sheet-description" style="font-size:13px; margin-bottom:16px;">自訂首頁膠囊連結對應的網址</p>
         <form id="edit-quicklinks-form" onsubmit="submitEditQuickLinks(event)">
           <div class="form-grid">
-            <div class="field-group"><label class="field-label" for="link-map">📍 Google 地圖導航</label><input type="url" id="link-map" class="sf-input" required></div>
-            <div class="field-group"><label class="field-label" for="link-line">💬 LINE 官方帳號 <span class="opt">(選填)</span></label><input type="url" id="link-line" class="sf-input"></div>
-            <div class="field-group"><label class="field-label" for="link-fb">📘 Facebook 粉絲專頁 <span class="opt">(選填)</span></label><input type="url" id="link-fb" class="sf-input"></div>
-            <div class="field-group"><label class="field-label" for="link-ig">📷 Instagram 官方帳號 <span class="opt">(選填)</span></label><input type="url" id="link-ig" class="sf-input"></div>
-            <div class="field-group"><label class="field-label" for="link-yt">🎬 YouTube 影音頻道 <span class="opt">(選填)</span></label><input type="url" id="link-yt" class="sf-input"></div>
-            <div class="field-group"><label class="field-label" for="link-site">🌐 萬家福品牌官網</label><input type="url" id="link-site" class="sf-input" required></div>
+            <div class="field-group"><label class="field-label" for="link-map">Google 地圖導航</label><input type="url" id="link-map" class="sf-input" required></div>
+            <div class="field-group"><label class="field-label" for="link-line">LINE 官方帳號 <span class="opt">(選填)</span></label><input type="url" id="link-line" class="sf-input"></div>
+            <div class="field-group"><label class="field-label" for="link-fb">Facebook 粉絲專頁 <span class="opt">(選填)</span></label><input type="url" id="link-fb" class="sf-input"></div>
+            <div class="field-group"><label class="field-label" for="link-ig">Instagram 官方帳號 <span class="opt">(選填)</span></label><input type="url" id="link-ig" class="sf-input"></div>
+            <div class="field-group"><label class="field-label" for="link-yt">YouTube 影音頻道 <span class="opt">(選填)</span></label><input type="url" id="link-yt" class="sf-input"></div>
+            <div class="field-group"><label class="field-label" for="link-site">萬家福品牌官網</label><input type="url" id="link-site" class="sf-input" required></div>
             <div class="sheet-actions" style="margin-top:14px;">
               <button type="button" class="btn-system-secondary" onclick="closeModal('modal-edit-quicklinks')">取消</button>
               <button type="submit" class="btn-system-primary">儲存網址設定</button>
@@ -708,6 +672,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260806_pro8"></script>
+  <script src="app.js?v=20260807_noonsite"></script>
 </body>
 </html>

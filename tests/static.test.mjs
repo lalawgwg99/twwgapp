@@ -30,8 +30,8 @@ test('CSS delimiters remain balanced', () => {
 
 test('the public page permits browser zoom and uses versioned assets', () => {
   assert.doesNotMatch(html, /user-scalable\s*=\s*no|maximum-scale\s*=\s*1/);
-  assert.match(html, /styles\.css\?v=20260806_pro8/);
-  assert.match(html, /app\.js\?v=20260806_pro8/);
+  assert.match(html, /styles\.css\?v=20260807_noonsite/);
+  assert.match(html, /app\.js\?v=20260807_noonsite/);
 });
 
 test('production frontend uses only the same-origin Cloudflare API', () => {
@@ -69,7 +69,16 @@ test('frequent public controls provide 44px touch targets', () => {
   assert.match(css, /\.quick-link-pill\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.pill-btn\s*\{[^}]*min-height:\s*44px/s);
   assert.match(css, /\.footer-section a\s*\{[^}]*min-height:\s*44px/s);
-  assert.match(css, /\.footer-social-links a\s*\{[^}]*width:\s*44px[^}]*height:\s*44px/s);
+  assert.match(css, /\.footer-social-links a(?:,\s*\.footer-social-icon)?\s*\{[^}]*width:\s*44px[^}]*height:\s*44px/s);
+});
+
+test('social quick links use official brand SVG icons instead of emoji', () => {
+  assert.match(script, /function getSocialBrandIcon\(/);
+  assert.match(script, /#06C755/);
+  assert.match(script, /#1877F2/);
+  assert.match(script, /social-brand-svg/);
+  assert.doesNotMatch(script, /label: '📍 Google 地圖導航'/);
+  assert.doesNotMatch(script, /shortLabel: '💬'/);
 });
 
 test('admins can cancel one registration with confirmation and release its spot', () => {

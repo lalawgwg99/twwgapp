@@ -288,8 +288,8 @@ html, body {
 .quick-link-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 15px;
+  gap: 8px;
+  padding: 7px 14px 7px 8px;
   border-radius: var(--radius-full);
   font-size: 13px;
   font-weight: 600;
@@ -297,7 +297,7 @@ html, body {
   white-space: nowrap;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: transform var(--t-fast) var(--ease-spring), box-shadow var(--t-fast), background var(--t-fast);
+  transition: transform var(--t-fast) var(--ease-spring), box-shadow var(--t-fast), background var(--t-fast), border-color var(--t-fast);
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 
@@ -310,40 +310,62 @@ html, body {
   transform: scale(0.96);
 }
 
+.social-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.social-brand-svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.social-pill-label {
+  letter-spacing: 0.01em;
+}
+
 .pill-map {
-  background: rgba(255, 149, 0, 0.12);
-  color: #D97706;
-  border: 1px solid rgba(255, 149, 0, 0.35);
+  background: rgba(66, 133, 244, 0.08);
+  color: #1a73e8;
+  border: 1px solid rgba(66, 133, 244, 0.28);
 }
 
 .pill-line {
-  background: rgba(6, 199, 85, 0.12);
-  color: #059669;
-  border: 1px solid rgba(6, 199, 85, 0.35);
+  background: rgba(6, 199, 85, 0.1);
+  color: #06C755;
+  border: 1px solid rgba(6, 199, 85, 0.32);
 }
 
 .pill-fb {
-  background: rgba(24, 119, 242, 0.12);
-  color: #1D4ED8;
-  border: 1px solid rgba(24, 119, 242, 0.35);
+  background: rgba(24, 119, 242, 0.1);
+  color: #1877F2;
+  border: 1px solid rgba(24, 119, 242, 0.3);
 }
 
 .pill-ig {
-  background: rgba(228, 64, 95, 0.12);
-  color: #DC2626;
-  border: 1px solid rgba(228, 64, 95, 0.35);
+  background: linear-gradient(135deg, rgba(245, 133, 41, 0.1), rgba(221, 42, 123, 0.1), rgba(81, 91, 212, 0.1));
+  color: #C13584;
+  border: 1px solid rgba(221, 42, 123, 0.28);
 }
 
 .pill-yt {
-  background: rgba(255, 0, 0, 0.12);
-  color: #DC2626;
-  border: 1px solid rgba(255, 0, 0, 0.35);
+  background: rgba(255, 0, 0, 0.08);
+  color: #FF0000;
+  border: 1px solid rgba(255, 0, 0, 0.28);
 }
 
 .pill-site {
-  background: rgba(0, 122, 255, 0.12);
-  color: var(--accent-blue);
-  border: 1px solid rgba(0, 122, 255, 0.35);
+  background: rgba(180, 35, 50, 0.08);
+  color: #B42332;
+  border: 1px solid rgba(180, 35, 50, 0.28);
 }
 
 /* Hero Section - Pure Poster Banner (4:1 Aspect Ratio) */
@@ -1741,19 +1763,40 @@ html, body {
 
 .footer-social-links {
   display: flex;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.footer-social-links a {
+.footer-social-links a,
+.footer-social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 44px;
   height: 44px;
-  justify-content: center;
-  color: rgba(255,255,255,0.6);
-  transition: color var(--t-fast);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  transition: transform var(--t-fast) var(--ease-spring), background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
 }
 
-.footer-social-links a:hover {
-  color: var(--system-bg);
+.footer-social-links a:hover,
+.footer-social-icon:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
+.footer-social-links a:active,
+.footer-social-icon:active {
+  transform: scale(0.96);
+}
+
+.footer-social-icon .social-brand-svg {
+  width: 24px;
+  height: 24px;
 }
 
 .footer-admin-link {
@@ -2067,21 +2110,41 @@ textarea:focus-visible,
 
 .quick-link-pill {
   min-height: 44px;
-  padding: 7px 11px;
-  border-radius: 6px;
+  padding: 6px 12px 6px 7px;
+  border-radius: 10px;
   box-shadow: none;
   background: #fff;
-  color: #344a41;
+  color: #24352e;
   border: 1px solid #d4ddda;
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 650;
+  gap: 8px;
 }
 
 .quick-link-pill:hover {
-  transform: none;
-  border-color: #82958d;
-  background: #f4f7f6;
-  box-shadow: none;
+  transform: translateY(-1px);
+  border-color: #b7c5bf;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(24, 42, 34, 0.08);
 }
+
+.quick-link-pill .social-icon-wrap {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+}
+
+.quick-link-pill .social-brand-svg {
+  width: 22px;
+  height: 22px;
+}
+
+.pill-map { border-color: rgba(66, 133, 244, 0.35); }
+.pill-line { border-color: rgba(6, 199, 85, 0.4); }
+.pill-fb { border-color: rgba(24, 119, 242, 0.35); }
+.pill-ig { border-color: rgba(221, 42, 123, 0.35); }
+.pill-yt { border-color: rgba(255, 0, 0, 0.32); }
+.pill-site { border-color: rgba(180, 35, 50, 0.35); }
 
 .hero-poster-wrapper {
   gap: 0;
