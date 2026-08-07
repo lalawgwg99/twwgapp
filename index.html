@@ -15,7 +15,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <link rel="canonical" href="https://wgapptw.pages.dev/">
-  <link rel="stylesheet" href="styles.css?v=20260807_urllag">
+  <link rel="stylesheet" href="styles.css?v=20260807_gdrive">
 </head>
 <body>
   <div class="app-viewport">
@@ -210,13 +210,13 @@
                   </div>
                   <div class="field-group">
                     <label class="field-label">圖片上傳與來源</label>
-                    <p class="field-help">建議尺寸：1200 × 675 px（16:9），單檔上限 12 MB。系統會自動壓縮；其他比例可能置中裁切。</p>
+                    <p class="field-help">請貼「可直接開啟的圖片網址」（https，建議 .jpg/.png）。Google 雲端／相片分享連結通常無法顯示，請改上傳檔案。建議尺寸：1200 × 675 px（16:9），單檔上限 12 MB。</p>
                     <div class="upload-method-selector">
                       <button type="button" class="upload-tab active" id="tab-url" onclick="switchUploadMethod('url')">貼上圖片連結</button>
                       <button type="button" class="upload-tab" id="tab-file" onclick="switchUploadMethod('file')">📁 選擇電腦/手機圖片</button>
                     </div>
                     <div id="upload-url-input-block">
-                      <input type="url" id="event-img-url" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleImageUrlChange(event)">
+                      <input type="url" id="event-img-url" class="sf-input" placeholder="https://範例.com/cover.jpg" oninput="handleImageUrlChange(event)">
                     </div>
                     <div id="upload-file-input-block" class="hidden">
                       <input type="file" id="event-img-file" accept="image/*" class="sf-input" onchange="handleFileSelect(event)">
@@ -388,13 +388,13 @@
 
             <div class="field-group">
               <label class="field-label">背景宣傳圖片來源 (網址或選擇電腦照片)</label>
-              <p class="field-help">建議尺寸：1600 × 400 px（4:1），單檔上限 12 MB。重要文字或人物請置中，避免手機與不同螢幕裁切。</p>
+              <p class="field-help">請用可直接開啟的圖片網址；Google 雲端／相片分享連結請改上傳。建議尺寸：1600 × 400 px（4:1），單檔上限 12 MB。</p>
               <div class="upload-method-selector">
                 <button type="button" class="upload-tab active" id="hero-tab-url" onclick="switchHeroUploadMethod('url')">貼上圖片連結</button>
                 <button type="button" class="upload-tab" id="hero-tab-file" onclick="switchHeroUploadMethod('file')">📁 選擇電腦/手機圖片</button>
               </div>
               <div id="hero-upload-url-block">
-                <input type="url" id="hero-input-bg" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleHeroImageUrlChange(event)">
+                <input type="url" id="hero-input-bg" class="sf-input" placeholder="https://範例.com/banner.jpg" oninput="handleHeroImageUrlChange(event)">
               </div>
               <div id="hero-upload-file-block" class="hidden">
                 <input type="file" id="hero-input-file" accept="image/*" class="sf-input" onchange="handleHeroFileSelect(event)">
@@ -484,13 +484,13 @@
             </div>
             <div class="field-group">
               <label class="field-label">活動封面圖片</label>
-              <p class="field-help">建議尺寸：1200 × 675 px（16:9），單檔上限 12 MB。系統會自動壓縮；其他比例可能置中裁切。</p>
+              <p class="field-help">請用可直接開啟的圖片網址；Google 雲端／相片分享連結請改上傳。建議尺寸：1200 × 675 px（16:9），單檔上限 12 MB。</p>
               <div class="upload-method-selector">
                 <button type="button" class="upload-tab active" id="edit-event-tab-url" onclick="switchEditEventUploadMethod('url')">貼上圖片連結</button>
                 <button type="button" class="upload-tab" id="edit-event-tab-file" onclick="switchEditEventUploadMethod('file')">📁 選擇電腦/手機圖片</button>
               </div>
               <div id="edit-event-upload-url-block">
-                <input type="url" id="edit-event-img-url" class="sf-input" placeholder="https://images.unsplash.com/photo-..." oninput="handleEditEventImageUrlChange(event)">
+                <input type="url" id="edit-event-img-url" class="sf-input" placeholder="https://範例.com/cover.jpg" oninput="handleEditEventImageUrlChange(event)">
               </div>
               <div id="edit-event-upload-file-block" class="hidden">
                 <input type="file" id="edit-event-img-file" accept="image/*" class="sf-input" onchange="handleEditEventFileSelect(event)">
@@ -690,6 +690,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=20260807_urllag"></script>
+  <script src="app.js?v=20260807_gdrive"></script>
 </body>
 </html>

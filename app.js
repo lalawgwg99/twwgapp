@@ -1015,7 +1015,17 @@
     } else if (editEventUploadMethod === 'url') {
       const urlInput = document.getElementById('edit-event-img-url').value.trim();
       // Empty URL field means "keep current cover", never wipe
-      image = urlInput || existingImage;
+      if (urlInput) {
+        const normalized = normalizePublicImageUrl(urlInput);
+        if (!normalized.url) {
+          showToast(normalized.message || '圖片網址無法使用', true);
+          return;
+        }
+        document.getElementById('edit-event-img-url').value = normalized.url;
+        image = normalized.url;
+      } else {
+        image = existingImage;
+      }
     }
     if (!image) image = existingImage;
 
@@ -1499,22 +1509,98 @@
   }
 
   const imageUrlPreviewTimers = {};
+  const imageUrlPreviewTesters = {};
 
-  function scheduleImageUrlPreview(previewId, rawUrl, timerKey) {
+  function extractGoogleDriveFileId(url) {
+    const text = String(url || '').trim();
+    const fileMatch = text.match(/\/file\/d\/([^/?#]+)/i);
+    if (fileMatch) return fileMatch[1];
+    const idMatch = text.match(/[?&]id=([^&#]+)/i);
+    return idMatch ? decodeURIComponent(idMatch[1]) : '';
+  }
+
+  function normalizePublicImageUrl(rawUrl) {
+    const url = String(rawUrl || '').trim();
+    if (!url) return { url: '', message: '', converted: false };
+    if (url.startsWith('data:image/')) return { url, message: '', converted: false };
+
+    if (/photos\.google\.com|photos\.app\.goo\.gl/i.test(url)) {
+      return {
+        url: '',
+        message: 'Google 相片分享連結無法直接當封面，請改「選擇電腦/手機圖片」上傳',
+        converted: false
+      };
+    }
+
+    const driveId = extractGoogleDriveFileId(url);
+    if (/drive\.google\.com|docs\.google\.com/i.test(url)) {
+      if (!driveId) {
+        return {
+          url: '',
+          message: '無法辨識此 Google 雲端連結，請改上傳圖片檔案',
+          converted: false
+        };
+      }
+      return {
+        url: `https://drive.google.com/uc?export=view&id=${encodeURIComponent(driveId)}`,
+        message: '已轉換 Google 雲端連結。若仍空白，請把檔案設成「知道連結的任何人可檢視」，或改上傳檔案',
+        converted: true
+      };
+    }
+
+    if (!/^https:\/\//i.test(url)) {
+      return { url: '', message: '請使用 https:// 開頭的圖片網址', converted: false };
+    }
+
+    return { url, message: '', converted: false };
+  }
+
+  function scheduleImageUrlPreview(previewId, inputEl, timerKey) {
     if (imageUrlPreviewTimers[timerKey]) clearTimeout(imageUrlPreviewTimers[timerKey]);
     imageUrlPreviewTimers[timerKey] = setTimeout(() => {
       const preview = document.getElementById(previewId);
       if (!preview) return;
-      const url = String(rawUrl || '').trim();
-      // Don't live-preview data: URLs or incomplete strings — that freezes the UI
-      const canPreview = /^https:\/\/\S+/i.test(url) && !url.startsWith('data:');
-      if (canPreview) {
-        preview.style.backgroundImage = `url(${JSON.stringify(url)})`;
-        preview.classList.remove('hidden');
-      } else if (!url) {
+      const raw = String(inputEl?.value || '').trim();
+      if (!raw) {
         preview.style.backgroundImage = '';
         preview.classList.add('hidden');
+        return;
       }
+
+      const normalized = normalizePublicImageUrl(raw);
+      if (!normalized.url) {
+        preview.style.backgroundImage = '';
+        preview.classList.add('hidden');
+        if (normalized.message) showToast(normalized.message, true);
+        return;
+      }
+
+      if (normalized.converted && inputEl && inputEl.value.trim() !== normalized.url) {
+        inputEl.value = normalized.url;
+        showToast(normalized.message);
+      }
+
+      // Don't live-preview data: URLs — that freezes the UI
+      if (normalized.url.startsWith('data:')) return;
+
+      if (imageUrlPreviewTesters[timerKey]) {
+        imageUrlPreviewTesters[timerKey].onload = null;
+        imageUrlPreviewTesters[timerKey].onerror = null;
+      }
+      const tester = new Image();
+      imageUrlPreviewTesters[timerKey] = tester;
+      tester.onload = () => {
+        if (imageUrlPreviewTesters[timerKey] !== tester) return;
+        preview.style.backgroundImage = `url(${JSON.stringify(normalized.url)})`;
+        preview.classList.remove('hidden');
+      };
+      tester.onerror = () => {
+        if (imageUrlPreviewTesters[timerKey] !== tester) return;
+        preview.style.backgroundImage = '';
+        preview.classList.add('hidden');
+        showToast('此網址無法直接顯示圖片。Google 雲端請改上傳檔案，或使用可直接開啟的 .jpg/.png 連結', true);
+      };
+      tester.src = normalized.url;
     }, 450);
   }
 
@@ -1529,7 +1615,7 @@
   };
 
   window.handleImageUrlChange = function (e) {
-    scheduleImageUrlPreview('image-preview', e.target.value, 'create');
+    scheduleImageUrlPreview('image-preview', e.target, 'create');
   };
 
   window.handleFileSelect = async function (e) {
@@ -1555,7 +1641,7 @@
   };
 
   window.handleEditEventImageUrlChange = function (e) {
-    scheduleImageUrlPreview('edit-event-image-preview', e.target.value, 'edit');
+    scheduleImageUrlPreview('edit-event-image-preview', e.target, 'edit');
   };
 
   window.handleEditEventFileSelect = async function (e) {
@@ -1647,7 +1733,15 @@
 
     if (uploadMethod === 'url') {
       const urlInput = document.getElementById('event-img-url').value.trim();
-      if (urlInput) image = urlInput;
+      if (urlInput) {
+        const normalized = normalizePublicImageUrl(urlInput);
+        if (!normalized.url) {
+          showToast(normalized.message || '圖片網址無法使用', true);
+          return;
+        }
+        document.getElementById('event-img-url').value = normalized.url;
+        image = normalized.url;
+      }
     } else if (uploadMethod === 'file' && filePreviewDataUrl) {
       image = filePreviewDataUrl;
     }
@@ -2150,7 +2244,7 @@
   };
 
   window.handleHeroImageUrlChange = function (e) {
-    scheduleImageUrlPreview('hero-image-preview', e.target.value, 'hero');
+    scheduleImageUrlPreview('hero-image-preview', e.target, 'hero');
   };
 
   window.handleHeroFileSelect = async function (e) {
@@ -2216,7 +2310,15 @@
       finalBgImage = heroFilePreviewDataUrl;
     } else {
       const inputUrl = document.getElementById('hero-input-bg').value.trim();
-      if (inputUrl) finalBgImage = inputUrl;
+      if (inputUrl) {
+        const normalized = normalizePublicImageUrl(inputUrl);
+        if (!normalized.url) {
+          showToast(normalized.message || '圖片網址無法使用', true);
+          return;
+        }
+        document.getElementById('hero-input-bg').value = normalized.url;
+        finalBgImage = normalized.url;
+      }
     }
 
     const startDate = document.getElementById('hero-input-startdate').value;
